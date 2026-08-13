@@ -31,6 +31,11 @@
                     <a class="nav-link" data-nav-link="final-cta" href="#final-cta">Contact</a>
                 </li>
                 <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                    <a class="btn btn-outline-light fw-semibold w-100" href="{{ url('/login') }}">
+                        <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Login
+                    </a>
+                </li>
+                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                     <a class="btn btn-outline-light fw-semibold w-100" href="#final-cta">Start Free Trial</a>
                 </li>
                 <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
