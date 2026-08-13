@@ -28,6 +28,48 @@
 
 </style><script>
 var t=document.querySelectorAll(`[data-nav-link]`),n=[...document.querySelectorAll(`section[id]`)];if(`IntersectionObserver`in window&&t.length&&n.length){let e=new IntersectionObserver(e=>{for(let n of e)if(n.isIntersecting){let e=n.target.id;t.forEach(t=>{let n=t.getAttribute(`data-nav-link`)===e;t.classList.toggle(`active`,n),n?t.setAttribute(`aria-current`,`page`):t.removeAttribute(`aria-current`)})}},{rootMargin:`-40% 0px -55% 0px`,threshold:0});n.forEach(t=>e.observe(t))}document.querySelectorAll(`.navbar-collapse .nav-link`).forEach(t=>{t.addEventListener(`click`,()=>{let t=document.getElementById(`mainNav`);t&&t.classList.contains(`show`)&&t.classList.remove(`show`)})});
+// === Vanilla navbar-toggler handler ========================================
+// Replaces Bootstrap's Collapse data-API for the one navbar on this page.
+//   - Click the toggler to expand/collapse #mainNav.
+//   - Sync `aria-expanded` so screen readers + the visual hamburger
+//     stay in sync.
+//   - On click of any nav-link inside the open menu, close the menu
+//     (already handled by the inlined landing JS above).
+//   - When the viewport crosses the lg breakpoint (992px) and the menu
+//     was left open on mobile, close it so we don't strand a stuck-open
+//     dropdown at desktop sizes.
+// ==========================================================================
+(function () {
+    'use strict';
+    var breakpoint = 992; // Bootstrap `lg`
+    var toggler = document.querySelector('.navbar-toggler');
+    var target = document.querySelector('#mainNav');
+    if (!toggler || !target) return;
+
+    toggler.addEventListener('click', function () {
+        var expanded = toggler.getAttribute('aria-expanded') === 'true';
+        toggler.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        target.classList.toggle('show');
+    });
+
+    // Aria-controls is wired by the HTML — nothing to do there.
+    // Auto-close when crossing the breakpoint so a mobile-open menu
+    // doesn't stay visually stacked over the desktop layout.
+    var mq = window.matchMedia('(min-width: ' + breakpoint + 'px)');
+    var syncOnResize = function (e) {
+        if (e.matches && target.classList.contains('show')) {
+            target.classList.remove('show');
+            toggler.setAttribute('aria-expanded', 'false');
+        }
+    };
+    if (mq.addEventListener) {
+        mq.addEventListener('change', syncOnResize);
+    } else if (mq.addListener) {
+        // Safari < 14 fallback.
+        mq.addListener(syncOnResize);
+    }
+})();
+
 </script></head>
 <body class="bg-light text-body">
 
@@ -65,12 +107,8 @@ var t=document.querySelectorAll(`[data-nav-link]`),n=[...document.querySelectorA
                 <li class="nav-item">
                     <a class="nav-link" data-nav-link="final-cta" href="#final-cta">Contact</a>
                 </li>
+                <li class="nav-item ms-lg-3 mt-2 mt-lg-0"><a class="btn btn-outline-light fw-semibold w-100" href="mailto:hello@madlogstore.test?subject=Madlog%20Store%20login%20request"><i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Login</a></li>
                 <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
-                    <a class="btn btn-outline-light fw-semibold w-100" href="mailto:hello@madlogstore.test?subject=Madlog%20Store%20login%20request">
-                        <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Login
-                    </a>
-                </li>
-                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
                     <a class="btn btn-outline-light fw-semibold w-100" href="#final-cta">Start Free Trial</a>
                 </li>
                 <li class="nav-item ms-lg-2 mt-2 mt-lg-0">

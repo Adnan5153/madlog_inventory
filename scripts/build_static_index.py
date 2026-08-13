@@ -41,6 +41,17 @@ What this script does
 Result: a single HTML file. No external files. No PHP. No server.
 Works on GitHub Pages, S3, Netlify, opening the file directly via
 file://, etc.
+
+Run with:
+
+    git show e930ace:index.html > index.original.html   # one-time
+    python scripts/build_static_index.py
+
+The script reads `index.original.html` (the pristine Livewire
+snapshot, kept under git so this rebuild is reproducible) and writes
+the self-contained result to `index.html`. Don't run it on the
+already-built `index.html` — it's idempotent but cleaner to always
+start from the snapshot.
 """
 from __future__ import annotations
 
@@ -50,6 +61,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "index.html"
+# The pristine Livewire snapshot, never modified by this script.
+# Re-extracted from the very first commit when this script was added
+# so the build always starts from a known-good input.
+ORIGINAL = ROOT / "index.original.html"
 BUILD_DIR = ROOT / "public" / "build" / "assets"
 
 
@@ -97,7 +112,9 @@ def inline_bootstrap_icons_fonts(css: str) -> str:
 def replace_google_fonts_in_head(html: str) -> str:
     """Replace the Instrument Sans @font-face block + preload tags with
     a Google Fonts CDN link. Drop the inline @font-face and preloads
-    since the Google Fonts CSS handles all that for us.
+    since the Google Fonts CSS handles all that for us. Idempotent:
+    running on a previously-built file is a no-op for the Google Fonts
+    insertion.
     """
     # 1. Drop the entire <style>…</style> block containing the Instrument Sans
     #    @font-face rules (we keep its `--font-instrument-sans` variable).
@@ -128,14 +145,17 @@ def replace_google_fonts_in_head(html: str) -> str:
 
     # 3. Insert a Google Fonts <link> right after <title>…</title>.
     #    We use the canonical CSS variable name from the site.
-    html = html.replace(
-        "</title>",
-        '</title>\n'
-        '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
-        '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
-        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">',
-        1,
-    )
+    #    Idempotent: if the link is already there (e.g. we're rebuilding
+    #    on top of a previously-built file), skip the insertion.
+    if "fonts.googleapis.com/css2?family=Instrument+Sans" not in html:
+        html = html.replace(
+            "</title>",
+            '</title>\n'
+            '<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+            '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+            '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&display=swap">',
+            1,
+        )
     return html
 
 
@@ -194,7 +214,57 @@ def inline_landing_js(html: str) -> str:
     for pattern, replacement in rewrites:
         landing_js = re.sub(pattern, replacement, landing_js)
 
-    inline = f"<script>\n{landing_js}\n</script>"
+    # Vanilla navbar-toggler handler. Without Bootstrap's JS bundle the
+    # data-bs-toggle attribute does nothing, so the hamburger button
+    # silently fails on mobile. We attach click + resize handlers that
+    # mirror the bits of Collapse.data-api this page actually needs.
+    # `992px` mirrors Bootstrap's `lg` breakpoint; the navbar carries
+    # `navbar-expand-lg`, so the menu collapses below that width.
+    navbar_js = """\
+// === Vanilla navbar-toggler handler ========================================
+// Replaces Bootstrap's Collapse data-API for the one navbar on this page.
+//   - Click the toggler to expand/collapse #mainNav.
+//   - Sync `aria-expanded` so screen readers + the visual hamburger
+//     stay in sync.
+//   - On click of any nav-link inside the open menu, close the menu
+//     (already handled by the inlined landing JS above).
+//   - When the viewport crosses the lg breakpoint (992px) and the menu
+//     was left open on mobile, close it so we don't strand a stuck-open
+//     dropdown at desktop sizes.
+// ==========================================================================
+(function () {
+    'use strict';
+    var breakpoint = 992; // Bootstrap `lg`
+    var toggler = document.querySelector('.navbar-toggler');
+    var target = document.querySelector('#mainNav');
+    if (!toggler || !target) return;
+
+    toggler.addEventListener('click', function () {
+        var expanded = toggler.getAttribute('aria-expanded') === 'true';
+        toggler.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        target.classList.toggle('show');
+    });
+
+    // Aria-controls is wired by the HTML — nothing to do there.
+    // Auto-close when crossing the breakpoint so a mobile-open menu
+    // doesn't stay visually stacked over the desktop layout.
+    var mq = window.matchMedia('(min-width: ' + breakpoint + 'px)');
+    var syncOnResize = function (e) {
+        if (e.matches && target.classList.contains('show')) {
+            target.classList.remove('show');
+            toggler.setAttribute('aria-expanded', 'false');
+        }
+    };
+    if (mq.addEventListener) {
+        mq.addEventListener('change', syncOnResize);
+    } else if (mq.addListener) {
+        // Safari < 14 fallback.
+        mq.addListener(syncOnResize);
+    }
+})();
+"""
+
+    inline = f"<script>\n{landing_js}\n{navbar_js}\n</script>"
     return re.sub(
         r'<script type="module" src="http://127\.0\.0\.1:8000/build/assets/landing-[^"]+\.js"[^>]*></script>',
         inline,
@@ -203,16 +273,40 @@ def inline_landing_js(html: str) -> str:
     )
 
 
-def rewrite_login_link(html: str) -> str:
-    """Point the navbar Login button at a friendly mailto. The actual
-    /login lives on the Laravel server and isn't reachable from a
-    static page.
+def insert_login_button(html: str) -> str:
+    """Insert the navbar Login button into the static page.
+
+    The original snapshot from the first commit doesn't have one — the
+    Login button was added later in the Blade template. To keep the
+    static page in sync, this step injects the same `<li>` markup the
+    Blade partial renders, pointing at `mailto:` since the live auth
+    flow lives on the Laravel server, not the static page.
+
+    Idempotent: if the Login button is already present (rebuild on top
+    of a previously-built file), it's not duplicated. The detector
+    looks for the button's text content (`>Login</a>`); checking just
+    for `bi-box-arrow-in-right` would also match the inlined icon
+    font's CSS rule defining the glyph.
     """
-    return html.replace(
-        'href="http://127.0.0.1:8000/login"',
-        'href="mailto:hello@madlogstore.test?subject=Madlog%20Store%20login%20request"',
-        1,
+    if re.search(r">\s*Login\s*</a>", html):
+        return html
+
+    login_li = (
+        '<li class="nav-item ms-lg-3 mt-2 mt-lg-0">'
+        '<a class="btn btn-outline-light fw-semibold w-100" '
+        'href="mailto:hello@madlogstore.test?subject=Madlog%20Store%20login%20request">'
+        '<i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i> Login'
+        '</a>'
+        '</li>\n                '
     )
+
+    # Insert immediately before the "Start Free Trial" <li>.
+    pattern = (
+        r'(<li class="nav-item ms-lg-3 mt-2 mt-lg-0">\s*'
+        r'<a class="btn btn-outline-light fw-semibold w-100" href="#final-cta">Start Free Trial</a>\s*'
+        r'</li>)'
+    )
+    return re.sub(pattern, login_li + r'\1', html, count=1)
 
 
 def drop_livewire_attrs(html: str) -> str:
@@ -247,6 +341,10 @@ def inline_favicon(html: str) -> str:
         r'<link rel="apple-touch-icon" href="/apple-touch-icon\.png">\s*',
     ]:
         html = re.sub(pattern, "", html)
+    # Idempotent: if the inline SVG favicon is already in place, don't
+    # insert another.
+    if "rel=\"icon\" type=\"image/svg+xml\" href=\"data:image/svg+xml" in html:
+        return html
     return html.replace(
         '<meta name="description"',
         f'{inline}\n<meta name="description"',
@@ -255,13 +353,19 @@ def inline_favicon(html: str) -> str:
 
 
 def main() -> None:
-    html = read_text(SOURCE)
+    if not ORIGINAL.exists():
+        raise SystemExit(
+            f"Missing {ORIGINAL.name}. Restore it with: "
+            f"git show e930ace:index.html > {ORIGINAL}"
+        )
+
+    html = read_text(ORIGINAL)
     css = read_text(find_asset("landing-*.css"))
 
     html = replace_google_fonts_in_head(html)
     html = inline_landing_css(html, css)
     html = inline_landing_js(html)
-    html = rewrite_login_link(html)
+    html = insert_login_button(html)
     html = drop_livewire_attrs(html)
     html = inline_favicon(html)
 

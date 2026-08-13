@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+<title>
+    Madlog Store
+</title>
+
+<meta name="description" content="Madlog Store — Inventory Management for Mechanical Workshops. Track every part, tool, and stock movement from the storeroom to the job card." />
+<meta name="theme-color" content="#0f172a" />
+
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<link rel="preload" as="font" href="http://127.0.0.1:8000/build/assets/instrument-sans-400-normal-DRC__1Mx.woff2" type="font/woff2" crossorigin="anonymous" />
+<link rel="preload" as="font" href="http://127.0.0.1:8000/build/assets/instrument-sans-500-normal-Dk9ku72i.woff2" type="font/woff2" crossorigin="anonymous" />
+<link rel="preload" as="font" href="http://127.0.0.1:8000/build/assets/instrument-sans-600-normal-B7fBEWYG.woff2" type="font/woff2" crossorigin="anonymous" />
+<style>
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/build/assets/instrument-sans-400-normal-DRC__1Mx.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/build/assets/instrument-sans-400-normal-D1W7dsQl.woff") format("woff");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/build/assets/instrument-sans-500-normal-Dk9ku72i.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/build/assets/instrument-sans-500-normal-Z6ESRlEs.woff") format("woff");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/build/assets/instrument-sans-600-normal-B7fBEWYG.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/build/assets/instrument-sans-600-normal-B9e8oLYv.woff") format("woff");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
+:root {
+  --font-instrument-sans: "Instrument Sans";
+}
+
+.font-instrument-sans {
+  font-family: var(--font-instrument-sans);
+}
+</style>
+<link rel="preload" as="style" href="http://127.0.0.1:8000/build/assets/landing-QkMo1tV-.css" /><link rel="modulepreload" as="script" href="http://127.0.0.1:8000/build/assets/landing-Dz7yFBMq.js" /><link rel="modulepreload" as="script" href="http://127.0.0.1:8000/build/assets/bootstrap-Dwrb7W26.js" /><link rel="stylesheet" href="http://127.0.0.1:8000/build/assets/landing-QkMo1tV-.css" data-navigate-track="reload" /><script type="module" src="http://127.0.0.1:8000/build/assets/landing-Dz7yFBMq.js" data-navigate-track="reload"></script></head>
+<body class="bg-light text-body">
+
+    <a href="#main" class="skip-link">Skip to main content</a>
+
+    <nav class="navbar navbar-expand-lg sticky-top bg-dark" data-bs-theme="dark" aria-label="Primary">
+    <div class="container">
+        <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="#top">
+            <i class="bi-tools text-warning" aria-hidden="true"></i>
+            <span>Madlog</span>
+            <span class="text-warning">Store</span>
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false"
+                aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
+                <li class="nav-item">
+                    <a class="nav-link" data-nav-link="features" href="#features">Product</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-nav-link="workflow" href="#workflow">Workflow</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-nav-link="pricing" href="#pricing">Pricing</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-nav-link="faq" href="#faq">FAQ</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-nav-link="final-cta" href="#final-cta">Contact</a>
+                </li>
+                <li class="nav-item ms-lg-3 mt-2 mt-lg-0">
+                    <a class="btn btn-outline-light fw-semibold w-100" href="#final-cta">Start Free Trial</a>
+                </li>
+                <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                    <a class="btn btn-warning fw-semibold w-100" href="#final-cta">Request Demo</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+    <main id="main" tabindex="-1">
+        <section id="top" class="hero section">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <p class="eyebrow hero__eyebrow mb-3">BUILT FOR MECHANICAL WORKSHOPS</p>
+                <h1 class="display-3 fw-bold lh-1 mb-3 text-balance">Stop Losing Parts. Stop Losing Time.</h1>
+                <p class="lead hero__lead mb-4">
+                    Madlog Store gives workshop owners and storekeepers a single place to track every part, every tool, and every issue — so the right stock is always on the bench when the job needs it.
+                </p>
+
+                <div class="d-flex flex-wrap hero__cta-row">
+                    <a class="btn btn-warning btn-lg fw-semibold" href="#final-cta">
+                        <i class="bi-calendar-check me-2" aria-hidden="true"></i>Request Live Demo
+                    </a>
+                    <a class="btn btn-outline-light btn-lg" href="#final-cta">
+                        <i class="bi-play-circle me-2" aria-hidden="true"></i>Start Free Trial
+                    </a>
+                </div>
+
+                <p class="small text-light opacity-50 mb-0 mt-3">
+                    <i class="bi-shield-check me-1" aria-hidden="true"></i> No credit card. 14-day trial. Cancel any time.
+                </p>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="mockup-frame mockup-frame--hero"
+     role="img"
+     aria-label="Sample inventory dashboard showing workshop stock levels with low-stock indicators.">
+    <div class="mockup-frame__bar" aria-hidden="true">
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+        <span class="mockup-url">app.madlogstore.test/inventory</span>
+    </div>
+
+    <div class="mockup-table-head" aria-hidden="true">
+        <span>Part</span>
+        <span>Bin</span>
+        <span>Stock</span>
+        <span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Brake Pad — Front (Toyota)</span>
+        <span class="mockup-stock-row__bin">A-12</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--low">4</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-danger-subtle text-danger-emphasis">LOW</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Engine Oil 5W-30 — 1L</span>
+        <span class="mockup-stock-row__bin">B-04</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">47</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Air Filter — Compact</span>
+        <span class="mockup-stock-row__bin">C-07</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">12</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Spark Plug — NGK Standard</span>
+        <span class="mockup-stock-row__bin">A-03</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">118</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Coolant — 1L Concentrate</span>
+        <span class="mockup-stock-row__bin">D-02</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">6</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-warning-subtle text-warning-emphasis">NEAR MIN</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Timing Belt — 1.6L Petrol</span>
+        <span class="mockup-stock-row__bin">E-11</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--low">2</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-danger-subtle text-danger-emphasis">LOW</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Brake Fluid DOT-4 — 1L</span>
+        <span class="mockup-stock-row__bin">B-09</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">33</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Wiper Blade 22"</span>
+        <span class="mockup-stock-row__bin">F-01</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--low">0</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-danger-subtle text-danger-emphasis">OUT</span></span>
+    </div>
+
+    <p class="mockup-footer mb-0">Sample data — for demonstration only.</p>
+</div>            </div>
+        </div>
+    </div>
+</section>        <section class="section-tight bg-white border-bottom" aria-labelledby="social-proof-heading">
+    <div class="container">
+        <h2 id="social-proof-heading" class="eyebrow text-center mb-4">TRUSTED WORKSHOPS MANAGE PARTS ACROSS</h2>
+        <ul class="list-unstyled d-flex flex-wrap justify-content-center gap-3 gap-md-5 mb-0">
+            <li class="d-flex align-items-center gap-2 text-secondary fw-medium">
+                <i class="bi-car-front-fill text-warning fs-5" aria-hidden="true"></i>
+                Auto Service Centers
+            </li>
+            <li class="d-flex align-items-center gap-2 text-secondary fw-medium">
+                <i class="bi-truck-front-fill text-warning fs-5" aria-hidden="true"></i>
+                Fleet Maintenance
+            </li>
+            <li class="d-flex align-items-center gap-2 text-secondary fw-medium">
+                <i class="bi-gear-wide-connected text-warning fs-5" aria-hidden="true"></i>
+                Industrial Plants
+            </li>
+            <li class="d-flex align-items-center gap-2 text-secondary fw-medium">
+                <i class="bi-bicycle text-warning fs-5" aria-hidden="true"></i>
+                Two-Wheeler Workshops
+            </li>
+            <li class="d-flex align-items-center gap-2 text-secondary fw-medium">
+                <i class="bi-tools text-warning fs-5" aria-hidden="true"></i>
+                Heavy Equipment Repair
+            </li>
+        </ul>
+    </div>
+</section>        <section id="why" class="section bg-light">
+    <div class="container">
+        <div class="text-center mx-auto" style="max-width: 720px;">
+            <h2 class="display-5 fw-bold mb-3 text-balance">The Old Way vs The Madlog Way</h2>
+            <p class="lead text-secondary mb-5">
+                Workshops lose hours every week to manual stock checks, misplaced parts, and rushed reorders. Madlog replaces that chaos with a single source of truth.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-md-6">
+                <article class="card h-100 border-0 shadow-sm ps-card">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi-x-octagon-fill text-danger fs-3 me-2" aria-hidden="true"></i>
+                            <h3 class="h5 fw-semibold mb-0">The Old Way</h3>
+                        </div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-3 ps-list">
+                            <li class="d-flex gap-3"><i class="bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i><span>Spreadsheets that nobody updates until something is missing.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i><span>Walk-ins to the storeroom just to confirm a part exists.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i><span>Last-minute emergency orders that eat margins.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i><span>Job cards with no link to the parts consumed.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i><span>Stock variance discovered at month-end, not in time to act.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-x-circle text-danger mt-1 flex-shrink-0" aria-hidden="true"></i><span>Zero visibility for owners managing more than one bay.</span></li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+
+            
+            <div class="col-md-6">
+                <article class="card h-100 border-0 shadow-sm ps-card ps-card--highlight">
+                    <div class="card-body p-4 p-lg-5">
+                        <div class="d-flex align-items-center mb-4">
+                            <i class="bi-check-circle-fill text-success fs-3 me-2" aria-hidden="true"></i>
+                            <h3 class="h5 fw-semibold mb-0">The Madlog Way</h3>
+                        </div>
+                        <ul class="list-unstyled mb-0 d-flex flex-column gap-3 ps-list">
+                            <li class="d-flex gap-3"><i class="bi-check-circle text-success mt-1 flex-shrink-0" aria-hidden="true"></i><span>Live stock counts that update with every receipt and issue.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-check-circle text-success mt-1 flex-shrink-0" aria-hidden="true"></i><span>Bin-level locations so storekeepers walk straight to the part.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-check-circle text-success mt-1 flex-shrink-0" aria-hidden="true"></i><span>Automatic reorder thresholds with suggested purchase orders.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-check-circle text-success mt-1 flex-shrink-0" aria-hidden="true"></i><span>Every job card tied to the exact parts and quantities used.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-check-circle text-success mt-1 flex-shrink-0" aria-hidden="true"></i><span>Daily variance report so problems surface within 24 hours.</span></li>
+                            <li class="d-flex gap-3"><i class="bi-check-circle text-success mt-1 flex-shrink-0" aria-hidden="true"></i><span>Multi-bay dashboard with one consolidated view for owners.</span></li>
+                        </ul>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>        <section id="features" class="section bg-white">
+    <div class="container">
+        <div class="text-center mx-auto" style="max-width: 720px;">
+            <p class="eyebrow mb-2">FEATURES</p>
+            <h2 class="display-5 fw-bold mb-3 text-balance">Everything a Workshop Store Needs</h2>
+            <p class="lead text-secondary">
+                Built around how a real workshop storeroom actually operates — not a generic ERP with the workshop label bolted on.
+            </p>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-md-6 col-lg-4">
+                <article class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="icon-tile mb-3"><i class="bi-box-seam fs-3" aria-hidden="true"></i></div>
+                        <h3 class="h5 fw-semibold mb-2">Bin-Level Inventory</h3>
+                        <p class="text-secondary mb-0">Assign every part to a specific bin. Storekeepers find parts in seconds instead of searching shelves.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <article class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="icon-tile mb-3"><i class="bi-arrow-left-right fs-3" aria-hidden="true"></i></div>
+                        <h3 class="h5 fw-semibold mb-2">Issue to Job Card</h3>
+                        <p class="text-secondary mb-0">Tie every part issued to a vehicle, a job, and a mechanic. Margins stay visible per repair.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <article class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="icon-tile mb-3"><i class="bi-exclamation-triangle fs-3" aria-hidden="true"></i></div>
+                        <h3 class="h5 fw-semibold mb-2">Low-Stock Thresholds</h3>
+                        <p class="text-secondary mb-0">Set minimums per part. Get alerted the moment stock crosses the line — not after the job stalls.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <article class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="icon-tile mb-3"><i class="bi-truck fs-3" aria-hidden="true"></i></div>
+                        <h3 class="h5 fw-semibold mb-2">Purchase Orders</h3>
+                        <p class="text-secondary mb-0">Generate suggested POs from low-stock and reorder rules. Email suppliers in one click.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <article class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="icon-tile mb-3"><i class="bi-bar-chart-line fs-3" aria-hidden="true"></i></div>
+                        <h3 class="h5 fw-semibold mb-2">Daily Variance Report</h3>
+                        <p class="text-secondary mb-0">Compare physical counts to system counts every day. Catch shrinkage before month-end.</p>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <article class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body p-4">
+                        <div class="icon-tile mb-3"><i class="bi-people fs-3" aria-hidden="true"></i></div>
+                        <h3 class="h5 fw-semibold mb-2">Role-Based Access</h3>
+                        <p class="text-secondary mb-0">Owners, managers, storekeepers, mechanics — each role sees exactly the screens and data they need.</p>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </div>
+</section>        <section id="workflow" class="section bg-light">
+    <div class="container">
+        <div class="text-center mx-auto" style="max-width: 720px;">
+            <p class="eyebrow mb-2">HOW IT FITS YOUR DAY</p>
+            <h2 class="display-5 fw-bold mb-3 text-balance">From Receiving to Reorder</h2>
+            <p class="lead text-secondary">Five steps that match the rhythm of a working storeroom — without paper ledgers or clipboards.</p>
+        </div>
+
+        <ol class="list-unstyled row g-4 mt-2" role="list">
+            <li class="col-md-6 col-lg workflow-step">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <span class="badge bg-warning text-dark workflow-step__number mb-3">01</span>
+                        <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
+                            <i class="bi-arrow-down-circle text-warning" aria-hidden="true"></i> Receive
+                        </h3>
+                        <p class="text-secondary mb-0">Record deliveries against a purchase order. Quantities and costs update instantly.</p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="col-md-6 col-lg workflow-step">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <span class="badge bg-warning text-dark workflow-step__number mb-3">02</span>
+                        <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
+                            <i class="bi-geo-alt text-warning" aria-hidden="true"></i> Store
+                        </h3>
+                        <p class="text-secondary mb-0">Bin locations and quantities are locked in. Search by part number, name, or bin code.</p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="col-md-6 col-lg workflow-step">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <span class="badge bg-warning text-dark workflow-step__number mb-3">03</span>
+                        <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
+                            <i class="bi-upc-scan text-warning" aria-hidden="true"></i> Issue
+                        </h3>
+                        <p class="text-secondary mb-0">Issue parts to a job card in two clicks. The job card shows live cost and margin.</p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="col-md-6 col-lg workflow-step">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <span class="badge bg-warning text-dark workflow-step__number mb-3">04</span>
+                        <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
+                            <i class="bi-tools text-warning" aria-hidden="true"></i> Use
+                        </h3>
+                        <p class="text-secondary mb-0">Mechanics see what was used and what remains. Nothing is silently pulled from stock.</p>
+                    </div>
+                </div>
+            </li>
+
+            <li class="col-md-6 col-lg workflow-step">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <span class="badge bg-warning text-dark workflow-step__number mb-3">05</span>
+                        <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
+                            <i class="bi-cart-check text-warning" aria-hidden="true"></i> Reorder
+                        </h3>
+                        <p class="text-secondary mb-0">Low-stock alerts trigger suggested POs. Approve, send, done — before the part runs out.</p>
+                    </div>
+                </div>
+            </li>
+        </ol>
+    </div>
+</section>        <section id="showcase" class="section bg-dark text-light">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 720px;">
+            <p class="eyebrow text-warning mb-2">THE PRODUCT</p>
+            <h2 class="display-5 fw-bold mb-3 text-balance">One Dashboard. Every Bay.</h2>
+            <p class="lead opacity-75">
+                See live inventory, low-stock alerts, and job-card consumption from a single screen — built for the realities of a working storeroom.
+            </p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="mockup-frame "
+     role="img"
+     aria-label="Sample inventory dashboard showing workshop stock levels with low-stock indicators.">
+    <div class="mockup-frame__bar" aria-hidden="true">
+        <span class="dot r"></span>
+        <span class="dot y"></span>
+        <span class="dot g"></span>
+        <span class="mockup-url">app.madlogstore.test/inventory</span>
+    </div>
+
+    <div class="mockup-table-head" aria-hidden="true">
+        <span>Part</span>
+        <span>Bin</span>
+        <span>Stock</span>
+        <span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Brake Pad — Front (Toyota)</span>
+        <span class="mockup-stock-row__bin">A-12</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--low">4</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-danger-subtle text-danger-emphasis">LOW</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Engine Oil 5W-30 — 1L</span>
+        <span class="mockup-stock-row__bin">B-04</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">47</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Air Filter — Compact</span>
+        <span class="mockup-stock-row__bin">C-07</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">12</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Spark Plug — NGK Standard</span>
+        <span class="mockup-stock-row__bin">A-03</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">118</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Coolant — 1L Concentrate</span>
+        <span class="mockup-stock-row__bin">D-02</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">6</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-warning-subtle text-warning-emphasis">NEAR MIN</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Timing Belt — 1.6L Petrol</span>
+        <span class="mockup-stock-row__bin">E-11</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--low">2</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-danger-subtle text-danger-emphasis">LOW</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Brake Fluid DOT-4 — 1L</span>
+        <span class="mockup-stock-row__bin">B-09</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">33</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-success-subtle text-success-emphasis">OK</span></span>
+    </div>
+
+    <div class="mockup-stock-row">
+        <span class="fw-medium">Wiper Blade 22"</span>
+        <span class="mockup-stock-row__bin">F-01</span>
+        <span class="mockup-stock-row__qty mockup-stock-row__qty--low">0</span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-danger-subtle text-danger-emphasis">OUT</span></span>
+    </div>
+
+    <p class="mockup-footer mb-0">Sample data — for demonstration only.</p>
+</div>            </div>
+        </div>
+
+        <div class="row g-3 mt-4">
+            <div class="col-md-4">
+                <div class="mockup-stat-tile d-flex align-items-center gap-3 h-100">
+                    <i class="bi-graph-up mockup-stat-tile__icon" aria-hidden="true"></i>
+                    <div>
+                        <div class="mockup-stat-tile__label">Stock movement</div>
+                        <div class="small opacity-75 mb-0">Sample visualisation — wires to your live data.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mockup-stat-tile d-flex align-items-center gap-3 h-100">
+                    <i class="bi-exclamation-triangle mockup-stat-tile__icon" aria-hidden="true"></i>
+                    <div>
+                        <div class="mockup-stat-tile__label">Reorder alerts</div>
+                        <div class="small opacity-75 mb-0">Threshold-driven, not after-the-fact.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="mockup-stat-tile d-flex align-items-center gap-3 h-100">
+                    <i class="bi-clipboard-data mockup-stat-tile__icon" aria-hidden="true"></i>
+                    <div>
+                        <div class="mockup-stat-tile__label">Job card activity</div>
+                        <div class="small opacity-75 mb-0">Parts consumed per repair, visible live.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>        <section id="pricing" class="section bg-white">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 720px;">
+            <p class="eyebrow mb-2">PRICING</p>
+            <h2 class="display-5 fw-bold mb-3 text-balance">Plans That Scale With Your Workshop</h2>
+            <p class="lead text-secondary">
+                Start with one bay, scale to a multi-site fleet. Every plan includes the core inventory engine.
+            </p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            
+            <div class="col-lg-4">
+                <article class="card h-100 border-0 shadow-sm pricing-card">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <h3 class="h4 fw-semibold mb-1">Single Workshop</h3>
+                        <p class="text-secondary mb-3">For independent service centers</p>
+                        <div class="display-4 fw-bold mb-1">
+                            $49<span class="fs-6 text-secondary fw-normal"> / mo</span>
+                        </div>
+                        <p class="small text-secondary mb-4">Per location, billed annually</p>
+
+                        <ul class="list-unstyled mt-2 mb-4 d-flex flex-column gap-2">
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>1 workshop location</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Up to 5 staff accounts</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Bin-level inventory</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Job card linking</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Email support</span></li>
+                        </ul>
+
+                        <a class="btn btn-outline-dark fw-semibold mt-auto" href="#final-cta">Start Free Trial</a>
+                    </div>
+                </article>
+            </div>
+
+            
+            <div class="col-lg-4">
+                <article class="card h-100 border-0 shadow-sm pricing-card pricing-card--featured">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <span class="badge bg-warning text-dark fw-semibold align-self-start mb-3">Most Popular</span>
+                        <h3 class="h4 fw-semibold mb-1">Multi-Bay Store</h3>
+                        <p class="text-secondary mb-3">For growing workshops with larger inventories</p>
+                        <div class="display-4 fw-bold mb-1">
+                            $129<span class="fs-6 text-secondary fw-normal"> / mo</span>
+                        </div>
+                        <p class="small text-secondary mb-4">Per location, billed annually</p>
+
+                        <ul class="list-unstyled mt-2 mb-4 d-flex flex-column gap-2">
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Up to 3 locations</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Up to 25 staff accounts</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Everything in Single Workshop</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Multi-bay dashboard</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Low-stock automation</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Priority support</span></li>
+                        </ul>
+
+                        <a class="btn btn-warning fw-semibold mt-auto" href="#final-cta">Request Live Demo</a>
+                    </div>
+                </article>
+            </div>
+
+            
+            <div class="col-lg-4">
+                <article class="card h-100 border-0 shadow-sm pricing-card">
+                    <div class="card-body p-4 p-lg-5 d-flex flex-column">
+                        <h3 class="h4 fw-semibold mb-1">Enterprise Fleet</h3>
+                        <p class="text-secondary mb-3">Multi-site fleets and dealer networks</p>
+                        <div class="display-4 fw-bold mb-1">Custom</div>
+                        <p class="small text-secondary mb-4">Talk to sales for a tailored quote</p>
+
+                        <ul class="list-unstyled mt-2 mb-4 d-flex flex-column gap-2">
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Unlimited locations</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Role-based access (SSO add-on)</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>API access to ERP / accounting</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Dedicated success manager</span></li>
+                            <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>SLA-backed support</span></li>
+                        </ul>
+
+                        <a class="btn btn-outline-dark fw-semibold mt-auto" href="mailto:sales@madlogstore.test?subject=Enterprise%20Fleet%20Inquiry">Contact Sales</a>
+                    </div>
+                </article>
+            </div>
+        </div>
+
+        <p class="text-center small text-secondary mt-4 mb-0">
+            Placeholder pricing — final figures confirmed with your sales team.
+        </p>
+    </div>
+</section>        <section id="faq" class="section bg-light">
+    <div class="container">
+        <div class="text-center mx-auto mb-5" style="max-width: 720px;">
+            <p class="eyebrow mb-2">FAQ</p>
+            <h2 class="display-5 fw-bold mb-3 text-balance">Frequently Asked Questions</h2>
+            <p class="lead text-secondary">Answers to the questions workshop owners and storekeepers ask before they switch.</p>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="accordion" id="faqAccordion">
+
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="faq-heading-1">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq-collapse-1"
+                                    aria-expanded="false" aria-controls="faq-collapse-1">
+                                Do I need to install any hardware?
+                            </button>
+                        </h3>
+                        <div id="faq-collapse-1" class="accordion-collapse collapse"
+                             aria-labelledby="faq-heading-1" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary">
+                                No. Madlog Store runs in the browser on any laptop, tablet, or phone. Your existing bar-code scanner or phone camera can scan bin labels.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="faq-heading-2">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq-collapse-2"
+                                    aria-expanded="false" aria-controls="faq-collapse-2">
+                                How long does setup take?
+                            </button>
+                        </h3>
+                        <div id="faq-collapse-2" class="accordion-collapse collapse"
+                             aria-labelledby="faq-heading-2" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary">
+                                A small workshop can import its current part list and start issuing stock the same day. Larger stores typically complete rollout within a week.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="faq-heading-3">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq-collapse-3"
+                                    aria-expanded="false" aria-controls="faq-collapse-3">
+                                Can I import my existing spreadsheet?
+                            </button>
+                        </h3>
+                        <div id="faq-collapse-3" class="accordion-collapse collapse"
+                             aria-labelledby="faq-heading-3" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary">
+                                Yes. Upload a CSV, map columns to part numbers, bins, and reorder thresholds. Existing stock counts can be entered directly or counted in-app.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="faq-heading-4">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq-collapse-4"
+                                    aria-expanded="false" aria-controls="faq-collapse-4">
+                                Does it work offline?
+                            </button>
+                        </h3>
+                        <div id="faq-collapse-4" class="accordion-collapse collapse"
+                             aria-labelledby="faq-heading-4" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary">
+                                The web app needs a connection, but receipts and issues can be queued on mobile devices and sync when the connection returns.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="faq-heading-5">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq-collapse-5"
+                                    aria-expanded="false" aria-controls="faq-collapse-5">
+                                What happens to my data?
+                            </button>
+                        </h3>
+                        <div id="faq-collapse-5" class="accordion-collapse collapse"
+                             aria-labelledby="faq-heading-5" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary">
+                                Your data is yours. Daily backups, full export to CSV at any time, and no lock-in if you decide to leave.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h3 class="accordion-header" id="faq-heading-6">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#faq-collapse-6"
+                                    aria-expanded="false" aria-controls="faq-collapse-6">
+                                Is there a mobile app?
+                            </button>
+                        </h3>
+                        <div id="faq-collapse-6" class="accordion-collapse collapse"
+                             aria-labelledby="faq-heading-6" data-bs-parent="#faqAccordion">
+                            <div class="accordion-body text-secondary">
+                                A progressive web app works on any modern phone. A dedicated mobile app for storekeepers is on the roadmap.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>        <section id="final-cta" class="section bg-dark text-light text-center">
+    <div class="container">
+        <div class="col-lg-8 mx-auto">
+            <p class="eyebrow text-warning mb-3">READY WHEN YOU ARE</p>
+            <h2 class="display-4 fw-bold mb-3 text-balance">See Your Stock in Madlog Store.</h2>
+            <p class="lead opacity-75 mb-4">
+                Book a 20-minute live walkthrough with a product specialist, or start a 14-day free trial — no credit card required.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a class="btn btn-warning btn-lg fw-semibold"
+                   href="mailto:demo@madlogstore.test?subject=Live%20Demo%20Request">
+                    <i class="bi-calendar-check me-2" aria-hidden="true"></i>Request Live Demo
+                </a>
+                <a class="btn btn-outline-light btn-lg" href="#top">
+                    <i class="bi-play-circle me-2" aria-hidden="true"></i>Start Free Trial
+                </a>
+            </div>
+
+            <p class="small opacity-50 mt-3 mb-0">
+                <i class="bi-shield-check me-1" aria-hidden="true"></i> No credit card. 14-day trial. Cancel any time.
+            </p>
+        </div>
+    </div>
+</section>    </main>
+
+    <footer class="bg-dark text-light pt-5 pb-4 border-top border-secondary">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-6 col-lg-3">
+                <h2 class="footer-col__heading h6">Product</h2>
+                <ul class="list-unstyled d-flex flex-column gap-2">
+                    <li><a class="footer-link" href="#features"><i class="bi-chevron-right small" aria-hidden="true"></i> Features</a></li>
+                    <li><a class="footer-link" href="#pricing"><i class="bi-chevron-right small" aria-hidden="true"></i> Pricing</a></li>
+                    <li><a class="footer-link" href="#workflow"><i class="bi-chevron-right small" aria-hidden="true"></i> Workflow</a></li>
+                    <li><a class="footer-link" href="#showcase"><i class="bi-chevron-right small" aria-hidden="true"></i> Product Tour</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <h2 class="footer-col__heading h6">Company</h2>
+                <ul class="list-unstyled d-flex flex-column gap-2">
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> About</a></li>
+                    <li><a class="footer-link" href="mailto:hello@madlogstore.test"><i class="bi-chevron-right small" aria-hidden="true"></i> Contact</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Careers</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Press</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <h2 class="footer-col__heading h6">Resources</h2>
+                <ul class="list-unstyled d-flex flex-column gap-2">
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Documentation</a></li>
+                    <li><a class="footer-link" href="#faq"><i class="bi-chevron-right small" aria-hidden="true"></i> FAQ</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Help Center</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Status</a></li>
+                </ul>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <h2 class="footer-col__heading h6">Legal</h2>
+                <ul class="list-unstyled d-flex flex-column gap-2">
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Terms</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Privacy</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Security</a></li>
+                    <li><a class="footer-link" href="#"><i class="bi-chevron-right small" aria-hidden="true"></i> Cookies</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="border-secondary my-4">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-2">
+            <p class="small opacity-50 mb-0">© 2026 Madlog Store. Inventory Management for Mechanical Workshops.</p>
+            <p class="small opacity-50 mb-0">Built with Laravel + Bootstrap.</p>
+        </div>
+    </div>
+</footer>
+    </body>
+</html>
