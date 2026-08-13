@@ -1,0 +1,73 @@
+// =============================================================================
+// Sections — Problem/Solution, Features, Workflow, Pricing, FAQ
+// =============================================================================
+
+// Problem vs Solution cards
+.ps-card {
+    border-radius: $border-radius-lg;
+}
+
+.ps-card--highlight {
+    border: 2px solid $madlog-accent;
+}
+
+.ps-list li {
+    line-height: 1.45;
+}
+
+// Feature cards
+.feature-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 .5rem 1.25rem rgba($madlog-primary, .08) !important;
+    }
+}
+
+// Workflow steps
+.workflow-step {
+    position: relative;
+}
+
+.workflow-step__number {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: .95rem;
+    padding: .35rem .75rem;
+    border-radius: $border-radius;
+}
+
+// Pricing cards
+.pricing-card {
+    transition: transform .15s ease, box-shadow .15s ease;
+
+    &--featured {
+        border: 2px solid $madlog-accent;
+        box-shadow: 0 .75rem 2rem rgba($madlog-primary, .12) !important;
+        transform: scale(1.02);
+
+        @media (max-width: 991.98px) {
+            transform: none;
+        }
+    }
+}
+
+// FAQ accordion (Bootstrap default works; just polish)
+.accordion-button {
+    font-weight: 600;
+
+    &:not(.collapsed) {
+        color: $madlog-primary;
+        background: rgba($madlog-accent, .06);
+    }
+
+    &:focus {
+        box-shadow: 0 0 0 .25rem rgba($madlog-accent, .25);
+    }
+}
+
+.accordion-item {
+    border-color: $madlog-border;
+}

@@ -1,0 +1,20 @@
+// =============================================================================
+// Animations — gated by prefers-reduced-motion
+// =============================================================================
+
+@media (prefers-reduced-motion: no-preference) {
+    .fade-up {
+        animation: fadeUp .55s ease-out both;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}

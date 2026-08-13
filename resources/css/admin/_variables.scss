@@ -1,0 +1,56 @@
+// =============================================================================
+// Madlog Store — Admin brand variable overrides
+// =============================================================================
+// Same palette as the marketing landing, but tuned for an "operations
+// console" feel: cooler neutrals, slightly larger focus rings, denser
+// typography, and a sidebar accent that distinguishes admin chrome from
+// the public site.
+
+// Brand palette
+$madlog-primary:   #0f172a;
+$madlog-secondary: #18181b;
+$madlog-accent:    #f59e0b;
+$madlog-accent-2:  #ea580c;
+$madlog-light-bg:  #f8fafc;
+$madlog-border:    #e2e8f0;
+$madlog-muted:     #64748b;
+$madlog-success:   #16a34a;
+$madlog-danger:    #dc2626;
+$madlog-info:      #2563eb;
+$madlog-sidebar:   #0b1220;
+$madlog-sidebar-text: #cbd5e1;
+
+// Bootstrap variable overrides
+$primary:        $madlog-primary;
+$secondary:      $madlog-secondary;
+$warning:        $madlog-accent;
+$danger:         $madlog-danger;
+$success:        $madlog-success;
+$info:           $madlog-info;
+$body-bg:        $madlog-light-bg;
+$body-color:     $madlog-primary;
+$body-secondary-color: $madlog-muted;
+$border-color:   $madlog-border;
+$font-family-sans-serif: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+$headings-font-weight: 600;
+$border-radius:  .5rem;
+$border-radius-sm: .375rem;
+$border-radius-lg: .75rem;
+$btn-padding-y: .55rem;
+$btn-padding-x: 1rem;
+$btn-font-weight: 600;
+$enable-shadows: true;
+$enable-rounded: true;
+$grid-gutter-width: 1.5rem;
+
+// Denser admin typography
+$font-size-base:  .9375rem;          // 15px
+$table-cell-padding-y: .55rem;
+$table-cell-padding-x: .75rem;
+$input-padding-y: .5rem;
+$input-padding-x: .75rem;
+
+// Sidebar
+$sidebar-width: 260px;
+$sidebar-width-collapsed: 64px;
+$topbar-height: 60px;

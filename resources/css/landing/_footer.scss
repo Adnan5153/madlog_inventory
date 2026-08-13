@@ -1,0 +1,27 @@
+// =============================================================================
+// Footer
+// =============================================================================
+
+.footer-col__heading {
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: $madlog-accent;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.footer-link {
+    color: rgba(#fff, .75);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .92rem;
+    transition: color .12s ease;
+
+    &:hover,
+    &:focus-visible {
+        color: #fff;
+    }
+}

@@ -1,0 +1,48 @@
+// =============================================================================
+// Madlog Store — Admin bundle
+// =============================================================================
+// Bootstrap-only. Tailwind/Flux stacks never load on /admin/*.
+//
+// This bundle is a strict subset of the landing bundle: it omits hero,
+// dashboard-mockup, footer, and animations partials. Anything marketing-only
+// stays out of the admin chrome.
+
+@import "variables";
+
+// Bootstrap 5.3 import order (canonical).
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/containers";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/accordion";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/offcanvas";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/helpers";
+
+@import "bootstrap/scss/utilities/api";
+
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+@import "layout";
+@import "components";
