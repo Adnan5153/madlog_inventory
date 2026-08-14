@@ -1,0 +1,73 @@
+services:
+  - type: web
+    name: madlog-store
+    runtime: php
+    plan: free
+    region: singapore
+    branch: main
+    autoDeploy: true
+
+    buildCommand: |
+      composer install --no-dev --no-interaction --optimize-autoloader
+      npm ci
+      npm run build
+      php artisan storage:link || true
+      php artisan migrate --force || true
+
+    startCommand: |
+      php artisan config:cache
+      php artisan route:cache
+      php artisan view:cache
+      php artisan serve --host 0.0.0.0 --port $PORT
+
+    healthCheckPath: /up
+
+    envVars:
+      # Laravel-required runtime settings
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_NAME
+        value: Madlog Store
+      - key: APP_URL
+        fromService: { type: web, name: madlog-store, property: host }
+      - key: APP_KEY
+        generateValue: true
+
+      # Database — Render's free tier Postgres works, or point at Neon
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DATABASE_URL
+        sync: false
+
+      # Sessions, cache, queue — all database-backed so we don't need
+      # an extra Redis instance on Render's free tier.
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: SESSION_LIFETIME
+        value: "120"
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: sync
+
+      # Logging — Render drains stderr into its log explorer
+      - key: LOG_CHANNEL
+        value: stderr
+
+      # Mail — log until a real SMTP/Resend/Postmark is wired up
+      - key: MAIL_MAILER
+        value: log
+      - key: MAIL_FROM_ADDRESS
+        value: hello@madlogstore.test
+      - key: MAIL_FROM_NAME
+        value: "${APP_NAME}"
+
+      # PHP runtime — Render's PHP 8.4 image ships these defaults; the
+      # lines below make it explicit so behaviour doesn't drift on a
+      # future Render image upgrade.
+      - key: PHP_VERSION
+        value: "8.4"

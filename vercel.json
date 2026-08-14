@@ -1,35 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "version": 2,
-  "name": "madlog-store",
-  "framework": null,
-
-  "buildCommand": "composer install --no-dev --no-interaction --optimize-autoloader && npm ci && npm run build && php artisan storage:link || true && php artisan migrate --force || true",
-  "devCommand": null,
-  "installCommand": "echo 'skipped — handled in buildCommand'",
-
-  "builds": [
-    {
-      "src": "api/index.php",
-      "use": "vercel-php@0.7.4"
-    }
-  ],
-
-  "routes": [
-    { "src": "/build/(.*)", "dest": "public/build/$1", "headers": { "cache-control": "public, max-age=31536000, immutable" } },
-    { "src": "/storage/(.*)", "dest": "public/storage/$1" },
-    { "src": "/(.*)", "dest": "api/index.php" }
-  ],
-
-  "env": {
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "LOG_CHANNEL": "stderr",
-    "SESSION_DRIVER": "database",
-    "SESSION_SECURE_COOKIE": "true",
-    "CACHE_STORE": "database",
-    "QUEUE_CONNECTION": "sync",
-    "MAIL_MAILER": "log",
-    "DB_CONNECTION": "pgsql"
-  }
+  "version": 2
 }
