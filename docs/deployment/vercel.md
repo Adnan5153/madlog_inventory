@@ -40,11 +40,22 @@ Laravel router  →  AdminDashboardController@index
 
 ### 2. Add a Postgres database
 
-- In the project, open the **Storage** tab → **Create Database** →
-  **Postgres**.
-- Vercel will provision the store and inject `POSTGRES_*` env vars into
+- In the project, open the **Storage** tab → **Create Database**.
+- Choose **Neon** from the marketplace list. (Vercel's own "Postgres"
+  tile is also Neon under the hood — Vercel rebrands Neon as its
+  managed Postgres. The other Postgres-compatible options like Amazon
+  Aurora, Supabase, or Prisma Postgres are real databases but Vercel
+  won't auto-provision them or auto-inject their `DATABASE_URL`. Pick
+  the engine that Vercel integrates with: **Neon**.)
+- Skip every non-Postgres option (DynamoDB, Redis, Turso, MongoDB
+  Atlas, Upstash, MotherDuck, Convex, Nile). Your Laravel app is wired
+  for SQL via `DB_CONNECTION=pgsql` in `vercel.json` — switching to a
+  non-relational engine would require code changes.
+- Neon will provision the store and inject `POSTGRES_*` env vars into
   every deployment. Copy the full **`.env.local` snippet** from the
   connect dialog — you'll want the `DATABASE_URL` line for step 3.
+- The Neon free tier (0.5 GB storage, ~190 compute hours/month,
+  scales-to-zero when idle) is plenty for a client-review demo.
 
 ### 3. Set environment variables
 
