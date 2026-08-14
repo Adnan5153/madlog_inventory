@@ -1,47 +1,39 @@
-# Vercel deployment — only ship the static landing page.
-# Everything else (Laravel app, vendor, node_modules, source, configs,
-# tests, docs) is excluded so the client demo only exposes the
-# marketing site, not the application code.
+# Vercel deployment ignore — exclude dev artefacts from the deploy bundle.
+# The build runs composer install (so vendor/ IS shipped) and npm run build
+# (so node_modules ends up in the bundled output but not as a deployable).
+# This file only affects what gets uploaded alongside the compiled output.
 
-# Always-ignore Laravel + Node + vendor
-/app
-/bootstrap
-/config
-/database
-/lang
-/public
-/resources
-/routes
-/storage
-/tests
-/vendor
-
-/node_modules
-/.git
-/.github
-/.idea
-/.vscode
-
-# Composer's Composer artefacts
-/composer.json
-/composer.lock
-/artisan
-/package.json
-/package-lock.json
-/vite.config.js
-/postcss.config.js
-/tailwind.config.js
-
-# Source code, build configs, and tooling
-/scripts
-/index.original.html
-/phpunit.xml
-/phpstan.neon
+# Local env files — secrets must live in Vercel env vars, not the repo.
 /.env
 /.env.*
 /.env.example
-/storage/*.sqlite
 
-# Just ship the static landing + Vercel config
-!/vercel.json
-!/index.html
+# Tests, dev tooling, IDE, OS junk
+/tests
+/.phpunit.cache
+/.phpunit.result.cache
+/.idea
+/.vscode
+/.editorconfig
+/.gitattributes
+/.gitignore
+/.git
+/.github
+
+# Documentation that doesn't belong on the server
+/README.md
+/CHANGELOG.md
+/LICENSE
+/docs
+
+# Static marketing artefacts — not served by this Vercel project
+/index.html
+/index.original.html
+/scripts
+
+# Build config that's only used locally (not at runtime)
+/vite.config.js
+/postcss.config.js
+/tailwind.config.js
+/phpunit.xml
+/phpstan.neon

@@ -1,35 +1,75 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+
+  "_comment": [
+    "Madlog Store on Vercel — serves the Laravel admin and staff panels only.",
+    "",
+    "How this works:",
+    "1. The `buildCommand` runs Composer to install PHP deps (so vendor/",
+    "   livewire/flux/dist/flux.css exists for the Vite build). Then npm ci",
+    "   + npm run build to produce the admin/landing JS+CSS bundles into",
+    "   public/build/assets/.",
+    "2. The `builds` block tells Vercel to compile api/index.php with the",
+    "   PHP runtime. The entry point require()s public/index.php so Laravel",
+    "   handles routing/sessions/CSRF as usual.",
+    "3. The `routes` block rewrites every incoming URL to api/index.php so",
+    "   /login, /admin, /staff, etc. all flow through Laravel.",
+    "4. Static assets in public/ are served directly by Vercel's CDN.",
+    "",
+    "REQUIRED ENV VARS (set in Vercel dashboard, NOT in this file):",
+    "  APP_KEY          - 32-char base64 key (php artisan key:generate --show)",
+    "  APP_URL          - https://<your-project>.vercel.app",
+    "  DB_CONNECTION    - pgsql",
+    "  DATABASE_URL     - Vercel Postgres connection string",
+    "   (or) PGHOST/PGPORT/PGDATABASE/PGUSER/PGPASSWORD individually",
+    "  SESSION_DRIVER   - database (default) or cookie for stateless",
+    "  CACHE_STORE      - database",
+    "  QUEUE_CONNECTION - sync (Vercel has no queue worker; use database",
+    "                     or sync only)",
+    "  SESSION_SECURE_COOKIE - true (forces HTTPS-only session cookies)",
+    "  LOG_CHANNEL      - stack (Vercel drains to its log explorer)",
+    "  MAIL_MAILER      - log (or set up Resend/Postmark/ SES env vars)",
+    "  VERCEL_PROJECT_PRODUCTION_URL - auto-set by Vercel; used for URL gen",
+    "",
+    "BEFORE FIRST DEPLOY:",
+    "  1. In Vercel dashboard, add the Postgres store from the Storage tab.",
+    "  2. Copy DATABASE_URL from the connect dialog into env vars.",
+    "  3. Set APP_KEY (= php -r \"echo 'base64:'.base64_encode(random_bytes(32));\" ).",
+    "  4. Push to trigger build. After build, run `vercel env pull` + `php",
+    "     artisan migrate --force` via a one-off shell (or auto-run via the",
+    "     `postbuild` step below — we run it on first build to bootstrap)."
+  ],
+
   "version": 2,
-  "name": "madlog-store-landing",
-
-  "_comment": "Static landing page only. The Laravel admin app at /admin is not deployed on Vercel — it requires a PHP runtime + database and lives in the Laravel codebase, not on a static host. This config serves the self-contained index.html (already built, fully inlined CSS/JS/fonts) at /, with friendly rewrites so any stray URL falls back to the landing page rather than 404ing.",
-
+  "name": "madlog-store",
   "framework": null,
-  "buildCommand": "",
-  "installCommand": "",
 
-  "cleanUrls": true,
-  "trailingSlash": false,
+  "buildCommand": "composer install --no-dev --no-interaction --optimize-autoloader && npm ci && npm run build && php artisan storage:link || true && php artisan migrate --force || true",
+  "devCommand": null,
+  "installCommand": "echo 'skipped — handled in buildCommand'",
 
-  "headers": [
+  "builds": [
     {
-      "source": "/(.*\\.(?:woff2|woff|css|js|svg|png|jpg|jpeg|gif|ico))",
-      "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
-      ]
+      "src": "api/index.php",
+      "use": "vercel-php@0.7.4"
     }
   ],
 
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "routes": [
+    { "src": "/build/(.*)", "dest": "public/build/$1", "headers": { "cache-control": "public, max-age=31536000, immutable" } },
+    { "src": "/storage/(.*)", "dest": "public/storage/$1" },
+    { "src": "/(.*)", "dest": "api/index.php" }
+  ],
+
+  "env": {
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "LOG_CHANNEL": "stderr",
+    "SESSION_DRIVER": "database",
+    "SESSION_SECURE_COOKIE": "true",
+    "CACHE_STORE": "database",
+    "QUEUE_CONNECTION": "sync",
+    "MAIL_MAILER": "log",
+    "DB_CONNECTION": "pgsql"
+  }
 }
