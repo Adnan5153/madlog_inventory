@@ -1,0 +1,35 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "name": "madlog-store-landing",
+
+  "_comment": "Static landing page only. The Laravel admin app at /admin is not deployed on Vercel — it requires a PHP runtime + database and lives in the Laravel codebase, not on a static host. This config serves the self-contained index.html (already built, fully inlined CSS/JS/fonts) at /, with friendly rewrites so any stray URL falls back to the landing page rather than 404ing.",
+
+  "framework": null,
+  "buildCommand": "",
+  "installCommand": "",
+
+  "cleanUrls": true,
+  "trailingSlash": false,
+
+  "headers": [
+    {
+      "source": "/(.*\\.(?:woff2|woff|css|js|svg|png|jpg|jpeg|gif|ico))",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ],
+
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

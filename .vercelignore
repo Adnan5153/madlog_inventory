@@ -1,0 +1,47 @@
+# Vercel deployment — only ship the static landing page.
+# Everything else (Laravel app, vendor, node_modules, source, configs,
+# tests, docs) is excluded so the client demo only exposes the
+# marketing site, not the application code.
+
+# Always-ignore Laravel + Node + vendor
+/app
+/bootstrap
+/config
+/database
+/lang
+/public
+/resources
+/routes
+/storage
+/tests
+/vendor
+
+/node_modules
+/.git
+/.github
+/.idea
+/.vscode
+
+# Composer's Composer artefacts
+/composer.json
+/composer.lock
+/artisan
+/package.json
+/package-lock.json
+/vite.config.js
+/postcss.config.js
+/tailwind.config.js
+
+# Source code, build configs, and tooling
+/scripts
+/index.original.html
+/phpunit.xml
+/phpstan.neon
+/.env
+/.env.*
+/.env.example
+/storage/*.sqlite
+
+# Just ship the static landing + Vercel config
+!/vercel.json
+!/index.html
