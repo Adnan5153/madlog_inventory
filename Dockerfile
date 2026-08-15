@@ -43,7 +43,8 @@ WORKDIR /var/www
 COPY . .
 
 # Copy built frontend from the frontend stage
-COPY --from=frontend /app/public/dist ./public/dist
+# Laravel's vite-plugin emits assets to public/build by default
+COPY --from=frontend /app/public/build ./public/build
 
 # Install PHP dependencies (no-dev, optimized autoloader)
 RUN composer install --no-dev --optimize-autoloader
