@@ -1,10 +1,29 @@
-# Stage 1 - Build Frontend (Vite)
+# Stage 1 - Build assets
+# `tailwaindcss/vite` plugin needs to resolve files inside `vendor/`
+# (e.g. `vendor/livewire/flux/dist/flux.css`), so we install PHP
+# dependencies BEFORE running the frontend build.
+
+# ---- Composer stage (so vendor/ is available to the frontend build) ----
+FROM composer:2 AS vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install \
+        --no-dev \
+        --no-scripts \
+        --no-autoloader \
+        --prefer-dist \
+        --no-interaction
+
+# ---- Frontend build stage ----
 # Vite 8 / rolldown require Node.js >= 20.19 (styleText export from node:util)
 FROM node:22 AS frontend
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+# Pull in vendor/ from the previous stage so flux.css and other
+# `../../vendor/...` imports inside our CSS resolve correctly.
+COPY --from=vendor /app/vendor ./vendor
 RUN npm run build
 
 # Stage 2 - Backend (Laravel + PHP + Composer)
@@ -23,10 +42,10 @@ WORKDIR /var/www
 # Copy app files
 COPY . .
 
-# Copy built frontend from Stage 1
+# Copy built frontend from the frontend stage
 COPY --from=frontend /app/public/dist ./public/dist
 
-# Install PHP dependencies
+# Install PHP dependencies (no-dev, optimized autoloader)
 RUN composer install --no-dev --optimize-autoloader
 
 # Laravel setup
