@@ -21,8 +21,11 @@ class AuthorizationScopeTest extends TestCase
     use RefreshDatabase;
 
     protected Workshop $workshopA;
+
     protected Workshop $workshopB;
+
     protected User $adminA;
+
     protected User $adminB;
 
     protected function setUp(): void
@@ -65,7 +68,7 @@ class AuthorizationScopeTest extends TestCase
         $this->actingAs($this->adminA)
             ->put("/admin/products/{$partB->id}", [
                 'name' => 'Hijacked',
-                'sku'  => $partB->sku,
+                'sku' => $partB->sku,
             ])
             ->assertNotFound();
 

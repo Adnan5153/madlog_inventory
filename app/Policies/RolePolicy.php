@@ -36,6 +36,7 @@ class RolePolicy
         if ($role->is_system) {
             return false;
         }
+
         return $user->hasPermission('roles.manage');
     }
 }

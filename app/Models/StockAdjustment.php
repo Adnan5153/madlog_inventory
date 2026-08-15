@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * A stock adjustment request: a set of signed-quantity changes against
@@ -22,8 +23,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $notes
  * @property int $requested_by
  * @property int|null $approved_by
- * @property \Illuminate\Support\Carbon|null $approved_at
- * @property \Illuminate\Support\Carbon|null $applied_at
+ * @property Carbon|null $approved_at
+ * @property Carbon|null $applied_at
  */
 #[Fillable([
     'workshop_id',
@@ -38,14 +39,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class StockAdjustment extends Model
 {
-    /** @use HasFactory<StockAdjustmentFactory> */
-    use HasFactory;
     use Concerns\BelongsToWorkshop;
 
+    /** @use HasFactory<StockAdjustmentFactory> */
+    use HasFactory;
+
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_REJECTED = 'rejected';
+
     public const STATUS_APPLIED = 'applied';
 
     protected function casts(): array

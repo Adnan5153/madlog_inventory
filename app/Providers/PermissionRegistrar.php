@@ -43,6 +43,7 @@ class PermissionRegistrar extends ServiceProvider
             if ($user->isAdmin()) {
                 return true;
             }
+
             return null; // fall through to the ability's own check
         });
     }

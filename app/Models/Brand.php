@@ -17,9 +17,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['workshop_id', 'name', 'slug'])]
 class Brand extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<BrandFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     public function parts(): HasMany
     {

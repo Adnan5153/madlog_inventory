@@ -4,7 +4,6 @@ namespace App\Http\Requests\Admin;
 
 use App\Models\PurchaseOrder;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StorePurchaseOrderRequest extends FormRequest
 {

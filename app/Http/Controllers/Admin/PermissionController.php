@@ -17,16 +17,15 @@ use Illuminate\View\View;
 class PermissionController extends Controller
 {
     use AuthorizesRequests;
-    public function __construct(protected RolePermissionService $rbac)
-    {
-    }
+
+    public function __construct(protected RolePermissionService $rbac) {}
 
     public function index(Request $request): View
     {
         $this->authorize('viewAny', Permission::class);
 
         return view('admin.permissions.index', [
-            'title'   => 'Permissions',
+            'title' => 'Permissions',
             'grouped' => $this->rbac->permissionsGrouped(),
         ]);
     }
@@ -36,9 +35,9 @@ class PermissionController extends Controller
         $this->authorize('view', $permission);
 
         return view('admin.permissions.show', [
-            'title'      => $permission->name,
+            'title' => $permission->name,
             'permission' => $permission,
-            'roles'      => $permission->roles()->orderBy('name')->get(),
+            'roles' => $permission->roles()->orderBy('name')->get(),
         ]);
     }
 }

@@ -10,7 +10,6 @@ use App\Models\Unit;
 use App\Models\User;
 use App\Scopes\WorkshopScope;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\LazyCollection;
 use Illuminate\Support\Str;
 use Throwable;
 
@@ -65,9 +64,10 @@ class ProductImportService
                     $headers = array_map(fn ($h) => strtolower(trim((string) $h)), $row);
                     $missing = array_diff(self::REQUIRED_HEADERS, $headers);
                     if ($missing) {
-                        $errors[] = "Missing required columns: " . implode(', ', $missing);
+                        $errors[] = 'Missing required columns: '.implode(', ', $missing);
                         break;
                     }
+
                     continue;
                 }
                 if (count(array_filter($row, fn ($v) => $v !== null && $v !== '')) === 0) {
@@ -78,11 +78,15 @@ class ProductImportService
 
                 try {
                     $result = $this->upsertRow($data, $workshopId);
-                    if ($result === 'created') $created++;
-                    elseif ($result === 'updated') $updated++;
-                    else $skipped++;
+                    if ($result === 'created') {
+                        $created++;
+                    } elseif ($result === 'updated') {
+                        $updated++;
+                    } else {
+                        $skipped++;
+                    }
                 } catch (Throwable $e) {
-                    $errors[] = "Row {$rowNum}: " . $e->getMessage();
+                    $errors[] = "Row {$rowNum}: ".$e->getMessage();
                 }
             }
         } finally {
@@ -91,12 +95,12 @@ class ProductImportService
 
         AuditLog::record('parts.imported', null, [
             'workshop_id' => $workshopId,
-            'file'        => $file->getClientOriginalName(),
-            'created'     => $created,
-            'updated'     => $updated,
-            'skipped'     => $skipped,
-            'errors'      => count($errors),
-            'actor_id'    => $actor->id,
+            'file' => $file->getClientOriginalName(),
+            'created' => $created,
+            'updated' => $updated,
+            'skipped' => $skipped,
+            'errors' => count($errors),
+            'actor_id' => $actor->id,
         ]);
 
         return compact('created', 'updated', 'skipped', 'errors');
@@ -140,6 +144,7 @@ class ProductImportService
         }
 
         rewind($buf);
+
         return stream_get_contents($buf) ?: '';
     }
 
@@ -163,41 +168,46 @@ class ProductImportService
         }
 
         $payload = [
-            'workshop_id'       => $workshopId,
-            'name'              => $name,
-            'sku'               => $sku ?: null,
-            'oem_part_number'   => $this->nullableString($data, 'oem_part_number'),
-            'barcode'           => $this->nullableString($data, 'barcode'),
-            'description'       => $this->nullableString($data, 'description'),
-            'category_id'       => $this->resolveCategoryId($data['category'] ?? null, $workshopId),
-            'brand_id'          => $this->resolveBrandId($data['brand'] ?? null, $workshopId),
-            'unit_id'           => $this->resolveUnitId($data['unit'] ?? null),
-            'cost_price'        => (float) ($data['cost_price'] ?? 0),
-            'sale_price'        => (float) ($data['sale_price'] ?? 0),
+            'workshop_id' => $workshopId,
+            'name' => $name,
+            'sku' => $sku ?: null,
+            'oem_part_number' => $this->nullableString($data, 'oem_part_number'),
+            'barcode' => $this->nullableString($data, 'barcode'),
+            'description' => $this->nullableString($data, 'description'),
+            'category_id' => $this->resolveCategoryId($data['category'] ?? null, $workshopId),
+            'brand_id' => $this->resolveBrandId($data['brand'] ?? null, $workshopId),
+            'unit_id' => $this->resolveUnitId($data['unit'] ?? null),
+            'cost_price' => (float) ($data['cost_price'] ?? 0),
+            'sale_price' => (float) ($data['sale_price'] ?? 0),
             'reorder_threshold' => (int) ($data['reorder_threshold'] ?? 0),
-            'reorder_quantity'  => (int) ($data['reorder_quantity'] ?? 0),
-            'is_active'         => ! in_array(strtolower((string) ($data['is_active'] ?? '1')), ['0', 'false', 'no'], true),
+            'reorder_quantity' => (int) ($data['reorder_quantity'] ?? 0),
+            'is_active' => ! in_array(strtolower((string) ($data['is_active'] ?? '1')), ['0', 'false', 'no'], true),
         ];
 
         if ($existing) {
             $existing->update($payload);
+
             return 'updated';
         }
 
         Part::create($payload);
+
         return 'created';
     }
 
     protected function nullableString(array $data, string $key): ?string
     {
         $v = $data[$key] ?? null;
+
         return ($v === null || $v === '') ? null : (string) $v;
     }
 
     protected function resolveCategoryId(mixed $value, int $workshopId): ?int
     {
         $value = trim((string) $value);
-        if ($value === '') return null;
+        if ($value === '') {
+            return null;
+        }
 
         $cat = WorkshopScope::disabled(function () use ($workshopId, $value) {
             return PartCategory::query()
@@ -205,20 +215,25 @@ class ProductImportService
                 ->whereRaw('LOWER(name) = ?', [Str::lower($value)])
                 ->first();
         });
-        if ($cat) return $cat->id;
+        if ($cat) {
+            return $cat->id;
+        }
 
         $cat = PartCategory::create([
             'workshop_id' => $workshopId,
-            'name'        => $value,
-            'slug'        => Str::slug($value),
+            'name' => $value,
+            'slug' => Str::slug($value),
         ]);
+
         return $cat->id;
     }
 
     protected function resolveBrandId(mixed $value, int $workshopId): ?int
     {
         $value = trim((string) $value);
-        if ($value === '') return null;
+        if ($value === '') {
+            return null;
+        }
 
         $brand = WorkshopScope::disabled(function () use ($workshopId, $value) {
             return Brand::query()
@@ -226,25 +241,31 @@ class ProductImportService
                 ->whereRaw('LOWER(name) = ?', [Str::lower($value)])
                 ->first();
         });
-        if ($brand) return $brand->id;
+        if ($brand) {
+            return $brand->id;
+        }
 
         $brand = Brand::create([
             'workshop_id' => $workshopId,
-            'name'        => $value,
-            'slug'        => Str::slug($value),
+            'name' => $value,
+            'slug' => Str::slug($value),
         ]);
+
         return $brand->id;
     }
 
     protected function resolveUnitId(mixed $value): ?int
     {
         $value = trim((string) $value);
-        if ($value === '') return null;
+        if ($value === '') {
+            return null;
+        }
 
         $unit = Unit::query()
             ->whereRaw('LOWER(short_code) = ?', [Str::lower($value)])
             ->orWhereRaw('LOWER(name) = ?', [Str::lower($value)])
             ->first();
+
         return $unit?->id;
     }
 }

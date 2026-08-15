@@ -24,12 +24,10 @@ use Illuminate\Support\Str;
  */
 class StockTransferService
 {
-    public function __construct(protected StockMovementService $movements)
-    {
-    }
+    public function __construct(protected StockMovementService $movements) {}
 
     /**
-     * @param array<int, array{part_id:int, quantity:float, batch_number?:string|null}> $items
+     * @param  array<int, array{part_id:int, quantity:float, batch_number?:string|null}>  $items
      */
     public function create(User $actor, int $workshopId, ?int $sourceBinId, int $destinationBinId, ?string $notes, array $items): StockTransfer
     {
@@ -201,7 +199,7 @@ class StockTransferService
         );
 
         if (StockTransfer::query()->where('workshop_id', $workshopId)->where('transfer_number', $number)->exists()) {
-            $number .= '-' . strtoupper(Str::random(4));
+            $number .= '-'.strtoupper(Str::random(4));
         }
 
         return $number;

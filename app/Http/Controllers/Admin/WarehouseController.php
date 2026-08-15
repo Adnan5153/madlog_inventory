@@ -21,7 +21,7 @@ class WarehouseController extends Controller
         $warehouses = Workshop::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('name', 'like', "%{$q}%")
-                  ->orWhere('slug', 'like', "%{$q}%");
+                    ->orWhere('slug', 'like', "%{$q}%");
             }))
             ->when($active === 'yes', fn ($qb) => $qb->where('is_active', true))
             ->when($active === 'no', fn ($qb) => $qb->where('is_active', false))
@@ -30,11 +30,11 @@ class WarehouseController extends Controller
             ->paginate(20);
 
         return view('admin.warehouses.index', [
-            'title'      => 'Warehouses',
+            'title' => 'Warehouses',
             'warehouses' => $warehouses,
-            'q'          => $q,
-            'active'     => $active,
-            'user'       => $request->user(),
+            'q' => $q,
+            'active' => $active,
+            'user' => $request->user(),
         ]);
     }
 
@@ -57,7 +57,7 @@ class WarehouseController extends Controller
         $warehouse->load(['binLocations' => fn ($q) => $q->orderBy('code')->limit(50)]);
 
         return view('admin.warehouses.show', [
-            'title'     => $warehouse->name,
+            'title' => $warehouse->name,
             'warehouse' => $warehouse,
         ]);
     }
@@ -65,7 +65,7 @@ class WarehouseController extends Controller
     public function edit(Workshop $warehouse): View
     {
         return view('admin.warehouses.edit', [
-            'title'     => 'Edit warehouse',
+            'title' => 'Edit warehouse',
             'warehouse' => $warehouse,
         ]);
     }

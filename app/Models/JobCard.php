@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * A job card ties parts, a vehicle, and a mechanic together for a single
@@ -24,8 +25,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null $vehicle_vin
  * @property string $status
  * @property string|null $description
- * @property \Illuminate\Support\Carbon $opened_at
- * @property \Illuminate\Support\Carbon|null $closed_at
+ * @property Carbon $opened_at
+ * @property Carbon|null $closed_at
  */
 #[Fillable([
     'job_number',
@@ -43,14 +44,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class JobCard extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<JobCardFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     /** Status constants — same string set as the migration. */
     public const STATUS_OPEN = 'open';
+
     public const STATUS_IN_PROGRESS = 'in_progress';
+
     public const STATUS_COMPLETED = 'completed';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected function casts(): array

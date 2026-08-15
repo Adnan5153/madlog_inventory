@@ -24,9 +24,9 @@ class BrandController extends Controller
             ->withQueryString();
 
         return view('admin.brands.index', [
-            'title'  => 'Brands',
+            'title' => 'Brands',
             'brands' => $brands,
-            'q'      => $q,
+            'q' => $q,
         ]);
     }
 
@@ -38,7 +38,7 @@ class BrandController extends Controller
     public function store(StoreBrandRequest $request): RedirectResponse
     {
         $brand = Brand::create($request->validated());
-        AuditLog::record('brand.created', $brand, $brand->only(['name','slug']));
+        AuditLog::record('brand.created', $brand, $brand->only(['name', 'slug']));
 
         return redirect()->route('admin.brands.index')->with('status', 'Brand created.');
     }
@@ -53,9 +53,9 @@ class BrandController extends Controller
 
     public function update(UpdateBrandRequest $request, Brand $brand): RedirectResponse
     {
-        $before = $brand->only(['name','slug']);
+        $before = $brand->only(['name', 'slug']);
         $brand->update($request->validated());
-        AuditLog::record('brand.updated', $brand, ['before' => $before, 'after' => $brand->only(['name','slug'])]);
+        AuditLog::record('brand.updated', $brand, ['before' => $before, 'after' => $brand->only(['name', 'slug'])]);
 
         return redirect()->route('admin.brands.index')->with('status', 'Brand updated.');
     }
@@ -66,7 +66,7 @@ class BrandController extends Controller
             return back()->withErrors(['brand' => 'Cannot delete a brand that is still in use by parts.']);
         }
 
-        AuditLog::record('brand.deleted', $brand, $brand->only(['name','slug']));
+        AuditLog::record('brand.deleted', $brand, $brand->only(['name', 'slug']));
         $brand->delete();
 
         return redirect()->route('admin.brands.index')->with('status', 'Brand deleted.');

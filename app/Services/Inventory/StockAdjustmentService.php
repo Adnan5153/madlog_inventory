@@ -24,12 +24,10 @@ use Illuminate\Support\Str;
  */
 class StockAdjustmentService
 {
-    public function __construct(protected StockMovementService $movements)
-    {
-    }
+    public function __construct(protected StockMovementService $movements) {}
 
     /**
-     * @param array<int, array{inventory_item_id:int, adjustment_quantity:float, unit_cost?:float|null}> $items
+     * @param  array<int, array{inventory_item_id:int, adjustment_quantity:float, unit_cost?:float|null}>  $items
      */
     public function create(User $actor, int $workshopId, string $reason, ?string $notes, array $items): StockAdjustment
     {
@@ -118,7 +116,7 @@ class StockAdjustmentService
 
         return DB::transaction(function () use ($adj, $approver, $reason) {
             $adj->status = StockAdjustment::STATUS_REJECTED;
-            $adj->notes = trim(($adj->notes ?? '') . "\n[Reject reason] " . ($reason ?? 'no reason given'));
+            $adj->notes = trim(($adj->notes ?? '')."\n[Reject reason] ".($reason ?? 'no reason given'));
             $adj->save();
 
             AuditLog::record('stock_adjustment.rejected', $adj, [
@@ -188,7 +186,7 @@ class StockAdjustmentService
         );
 
         if (StockAdjustment::query()->where('workshop_id', $workshopId)->where('adjustment_number', $number)->exists()) {
-            $number .= '-' . strtoupper(Str::random(4));
+            $number .= '-'.strtoupper(Str::random(4));
         }
 
         return $number;

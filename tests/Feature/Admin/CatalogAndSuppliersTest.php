@@ -2,17 +2,19 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\AuditLog;
 use App\Models\Brand;
 use App\Models\InventoryItem;
 use App\Models\Part;
 use App\Models\PartCategory;
+use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Models\SupplierCategory;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Workshop;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 /**
@@ -33,15 +35,18 @@ class CatalogAndSuppliersTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $staff;
+
     protected Workshop $workshop;
+
     protected Workshop $otherWorkshop;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         $this->workshop = Workshop::factory()->create();
         $this->otherWorkshop = Workshop::factory()->create();
@@ -183,7 +188,7 @@ class CatalogAndSuppliersTest extends TestCase
 
         // Symfony's UploadedFile tries to guess MIME from fileinfo extension,
         // which isn't loaded in this environment. Pass a 'test' client mime.
-        $uploaded = new \Illuminate\Http\UploadedFile($tmp, 'parts.csv', null, null, true);
+        $uploaded = new UploadedFile($tmp, 'parts.csv', null, null, true);
 
         $this->actingAs($this->admin)
             ->post('/admin/products/import', ['file' => $uploaded])
@@ -254,7 +259,7 @@ class CatalogAndSuppliersTest extends TestCase
     public function test_supplier_with_purchase_orders_cannot_be_deleted(): void
     {
         $supplier = Supplier::factory()->create(['workshop_id' => $this->workshop->id]);
-        \App\Models\PurchaseOrder::factory()->create([
+        PurchaseOrder::factory()->create([
             'workshop_id' => $this->workshop->id,
             'supplier_id' => $supplier->id,
         ]);

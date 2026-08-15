@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\StockMovementType;
 use App\Models\InventoryItem;
 use App\Models\Part;
 use App\Models\StockMovement;
@@ -24,8 +25,11 @@ class ReportExportTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected Workshop $workshop;
+
     protected Part $part;
+
     protected InventoryItem $item;
 
     protected function setUp(): void
@@ -49,7 +53,7 @@ class ReportExportTest extends TestCase
         StockMovement::create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
-            'type' => \App\Enums\StockMovementType::ManualAdjustment,
+            'type' => StockMovementType::ManualAdjustment,
             'quantity' => 5,
             'reason' => 'seed',
             'occurred_at' => now(),

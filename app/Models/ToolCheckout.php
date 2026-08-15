@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * A single checkout event for a tool. Multiple rows may exist per tool
@@ -18,9 +19,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $tool_id
  * @property int $user_id
  * @property int|null $issued_by
- * @property \Illuminate\Support\Carbon $checked_out_at
- * @property \Illuminate\Support\Carbon|null $returned_at
- * @property \Illuminate\Support\Carbon|null $expected_return_at
+ * @property Carbon $checked_out_at
+ * @property Carbon|null $returned_at
+ * @property Carbon|null $expected_return_at
  * @property string|null $notes
  */
 #[Fillable([
@@ -35,9 +36,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class ToolCheckout extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<ToolCheckoutFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {

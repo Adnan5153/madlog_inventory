@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * An inter-bin stock transfer. Lifecycle:
@@ -24,8 +25,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $destination_bin_id
  * @property int $transferred_by
  * @property int|null $received_by
- * @property \Illuminate\Support\Carbon|null $dispatched_at
- * @property \Illuminate\Support\Carbon|null $received_at
+ * @property Carbon|null $dispatched_at
+ * @property Carbon|null $received_at
  */
 #[Fillable([
     'workshop_id',
@@ -41,13 +42,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class StockTransfer extends Model
 {
-    /** @use HasFactory<StockTransferFactory> */
-    use HasFactory;
     use Concerns\BelongsToWorkshop;
 
+    /** @use HasFactory<StockTransferFactory> */
+    use HasFactory;
+
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_IN_TRANSIT = 'in_transit';
+
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     protected function casts(): array

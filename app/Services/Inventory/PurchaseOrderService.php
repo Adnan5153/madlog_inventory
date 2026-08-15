@@ -52,7 +52,7 @@ class PurchaseOrderService
         // Defensive: if the configured format yields a duplicate, append
         // a short random suffix rather than crashing the request.
         if (PurchaseOrder::query()->where('workshop_id', $workshopId)->where('po_number', $number)->exists()) {
-            $number .= '-' . strtoupper(Str::random(4));
+            $number .= '-'.strtoupper(Str::random(4));
         }
 
         return $number;
@@ -125,7 +125,7 @@ class PurchaseOrderService
 
         return DB::transaction(function () use ($po, $actor, $reason) {
             $po->status = PurchaseOrder::STATUS_CANCELLED;
-            $po->notes = trim(($po->notes ?? '') . "\n[Cancel reason] " . ($reason ?? 'no reason given'));
+            $po->notes = trim(($po->notes ?? '')."\n[Cancel reason] ".($reason ?? 'no reason given'));
             $po->save();
 
             AuditLog::record('purchase_order.cancelled', $po, [
@@ -158,6 +158,7 @@ class PurchaseOrderService
      *   expires_at: ?string,
      *   damaged_quantity?: float
      * }> $lines
+     *
      * @throws DomainException
      */
     public function receive(
@@ -341,7 +342,7 @@ class PurchaseOrderService
         );
 
         if (GoodsReceipt::query()->where('workshop_id', $workshopId)->where('grn_number', $number)->exists()) {
-            $number .= '-' . strtoupper(Str::random(4));
+            $number .= '-'.strtoupper(Str::random(4));
         }
 
         return $number;

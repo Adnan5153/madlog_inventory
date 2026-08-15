@@ -88,7 +88,7 @@ class DevelopmentSeeder extends Seeder
         ]);
         $mechanics->each(function (User $mechanic, int $i) use ($workshop) {
             $mechanic->update([
-                'name' => "Mechanic ".($i + 1)." — {$workshop->name}",
+                'name' => 'Mechanic '.($i + 1)." — {$workshop->name}",
                 'email' => "mech-{$workshop->slug}-".($i + 1).'@madlogstore.test',
                 'password' => Hash::make('password'),
             ]);

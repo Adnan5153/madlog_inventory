@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * A production/lot batch of a part. InventoryItems may reference a Batch
@@ -18,8 +19,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $workshop_id
  * @property int $part_id
  * @property string $batch_number
- * @property \Illuminate\Support\Carbon|null $manufactured_at
- * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property Carbon|null $manufactured_at
+ * @property Carbon|null $expires_at
  * @property numeric $initial_quantity
  * @property numeric $current_quantity
  * @property string $status
@@ -36,13 +37,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class Batch extends Model
 {
-    /** @use HasFactory<BatchFactory> */
-    use HasFactory;
     use Concerns\BelongsToWorkshop;
 
+    /** @use HasFactory<BatchFactory> */
+    use HasFactory;
+
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_DEPLETED = 'depleted';
+
     public const STATUS_EXPIRED = 'expired';
+
     public const STATUS_RECALLED = 'recalled';
 
     protected function casts(): array

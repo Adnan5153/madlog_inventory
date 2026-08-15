@@ -13,9 +13,7 @@ use Illuminate\View\View;
 
 class StockAdjustmentController extends Controller
 {
-    public function __construct(protected StockAdjustmentService $service)
-    {
-    }
+    public function __construct(protected StockAdjustmentService $service) {}
 
     public function index(Request $request): View
     {
@@ -25,7 +23,7 @@ class StockAdjustmentController extends Controller
         $adjustments = StockAdjustment::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('adjustment_number', 'like', "%{$q}%")
-                  ->orWhere('reason', 'like', "%{$q}%");
+                    ->orWhere('reason', 'like', "%{$q}%");
             }))
             ->when($status, fn ($qb) => $qb->where('status', $status))
             ->with(['requester:id,name', 'approver:id,name'])

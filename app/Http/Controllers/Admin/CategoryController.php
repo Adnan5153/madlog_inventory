@@ -24,9 +24,9 @@ class CategoryController extends Controller
             ->withQueryString();
 
         return view('admin.categories.index', [
-            'title'      => 'Categories',
+            'title' => 'Categories',
             'categories' => $categories,
-            'q'          => $q,
+            'q' => $q,
         ]);
     }
 
@@ -38,7 +38,7 @@ class CategoryController extends Controller
     public function store(StorePartCategoryRequest $request): RedirectResponse
     {
         $category = PartCategory::create($request->validated());
-        AuditLog::record('category.created', $category, $category->only(['name','slug','description']));
+        AuditLog::record('category.created', $category, $category->only(['name', 'slug', 'description']));
 
         return redirect()->route('admin.categories.index')->with('status', 'Category created.');
     }
@@ -46,16 +46,16 @@ class CategoryController extends Controller
     public function edit(PartCategory $category): View
     {
         return view('admin.categories.edit', [
-            'title'    => 'Edit category',
+            'title' => 'Edit category',
             'category' => $category,
         ]);
     }
 
     public function update(UpdatePartCategoryRequest $request, PartCategory $category): RedirectResponse
     {
-        $before = $category->only(['name','slug','description']);
+        $before = $category->only(['name', 'slug', 'description']);
         $category->update($request->validated());
-        AuditLog::record('category.updated', $category, ['before' => $before, 'after' => $category->only(['name','slug','description'])]);
+        AuditLog::record('category.updated', $category, ['before' => $before, 'after' => $category->only(['name', 'slug', 'description'])]);
 
         return redirect()->route('admin.categories.index')->with('status', 'Category updated.');
     }
@@ -66,7 +66,7 @@ class CategoryController extends Controller
             return back()->withErrors(['category' => 'Cannot delete a category that is still in use by parts.']);
         }
 
-        AuditLog::record('category.deleted', $category, $category->only(['name','slug']));
+        AuditLog::record('category.deleted', $category, $category->only(['name', 'slug']));
         $category->delete();
 
         return redirect()->route('admin.categories.index')->with('status', 'Category deleted.');

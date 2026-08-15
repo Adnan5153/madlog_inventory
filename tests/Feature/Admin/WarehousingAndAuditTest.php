@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Events\InventoryLowStockReached;
 use App\Models\AuditLog;
 use App\Models\BinLocation;
 use App\Models\InventoryItem;
@@ -10,7 +11,9 @@ use App\Models\PartCategory;
 use App\Models\User;
 use App\Models\Workshop;
 use App\Scopes\WorkshopScope;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
 /**
@@ -23,14 +26,16 @@ class WarehousingAndAuditTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $globalAdmin;
+
     protected Workshop $workshop;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         $this->workshop = Workshop::factory()->create();
 
@@ -249,7 +254,7 @@ class WarehousingAndAuditTest extends TestCase
 
     public function test_low_stock_event_fires_when_threshold_crossed(): void
     {
-        \Illuminate\Support\Facades\Event::fake([\App\Events\InventoryLowStockReached::class]);
+        Event::fake([InventoryLowStockReached::class]);
 
         $part = Part::factory()->create([
             'workshop_id' => $this->workshop->id,
@@ -262,8 +267,8 @@ class WarehousingAndAuditTest extends TestCase
         ]);
         $part->touch(); // trigger saved observer
 
-        \Illuminate\Support\Facades\Event::assertDispatched(
-            \App\Events\InventoryLowStockReached::class,
+        Event::assertDispatched(
+            InventoryLowStockReached::class,
             function ($event) use ($part) {
                 return $event->part->id === $part->id && $event->threshold === 5;
             }

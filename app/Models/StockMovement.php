@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Append-only ledger row. Movements are never updated or deleted; corrections
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $reference_type
  * @property int|null $reference_id
  * @property string|null $reason
- * @property \Illuminate\Support\Carbon $occurred_at
+ * @property Carbon $occurred_at
  */
 #[Fillable([
     'workshop_id',
@@ -46,9 +47,10 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 ])]
 class StockMovement extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<StockMovementFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {

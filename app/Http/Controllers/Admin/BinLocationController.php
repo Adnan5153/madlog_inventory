@@ -7,7 +7,6 @@ use App\Http\Requests\Admin\StoreBinLocationRequest;
 use App\Http\Requests\Admin\UpdateBinLocationRequest;
 use App\Models\AuditLog;
 use App\Models\BinLocation;
-use App\Models\Workshop;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -23,9 +22,9 @@ class BinLocationController extends Controller
         $bins = BinLocation::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('code', 'like', "%{$q}%")
-                  ->orWhere('zone', 'like', "%{$q}%")
-                  ->orWhere('aisle', 'like', "%{$q}%")
-                  ->orWhere('shelf', 'like', "%{$q}%");
+                    ->orWhere('zone', 'like', "%{$q}%")
+                    ->orWhere('aisle', 'like', "%{$q}%")
+                    ->orWhere('shelf', 'like', "%{$q}%");
             }))
             ->when($active === 'yes', fn ($qb) => $qb->where('is_active', true))
             ->when($active === 'no', fn ($qb) => $qb->where('is_active', false))
@@ -38,10 +37,10 @@ class BinLocationController extends Controller
 
         return view('admin.bin-locations.index', [
             'title' => 'Bin locations',
-            'bins'  => $bins,
-            'q'     => $q,
-            'active'=> $active,
-            'zone'  => $zone,
+            'bins' => $bins,
+            'q' => $q,
+            'active' => $active,
+            'zone' => $zone,
             'zones' => $zones,
         ]);
     }
@@ -49,6 +48,7 @@ class BinLocationController extends Controller
     public function create(Request $request): View
     {
         $workshopId = $request->user()->workshop_id;
+
         return view('admin.bin-locations.create', [
             'title' => 'New bin location',
             'workshopId' => $workshopId,
@@ -67,7 +67,7 @@ class BinLocationController extends Controller
     {
         return view('admin.bin-locations.edit', [
             'title' => 'Edit bin location',
-            'bin'   => $binLocation,
+            'bin' => $binLocation,
         ]);
     }
 

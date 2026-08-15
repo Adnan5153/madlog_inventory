@@ -44,13 +44,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class JobCardPart extends Model
 {
-    /** @use HasFactory<JobCardPartFactory> */
-    use HasFactory;
     use Concerns\BelongsToWorkshop;
 
+    /** @use HasFactory<JobCardPartFactory> */
+    use HasFactory;
+
     public const STATUS_RESERVED = 'reserved';
+
     public const STATUS_CONSUMED = 'consumed';
+
     public const STATUS_RETURNED = 'returned';
+
     public const STATUS_PARTIAL = 'partial';
 
     protected function casts(): array

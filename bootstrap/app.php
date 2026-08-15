@@ -1,9 +1,14 @@
 <?php
 
+use App\Http\Middleware\EnsureUserHasPermission;
+use App\Http\Middleware\EnsureUserHasRole;
+use App\Http\Middleware\EnsureUserIsAdmin;
+use App\Http\Middleware\EnsureUserIsStaff;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,19 +19,19 @@ return Application::configure(basePath: dirname(__DIR__))
             // Wire role-scoped route files. Each file is responsible for
             // its own auth/role middleware so the route groups stay
             // self-documenting.
-            \Illuminate\Support\Facades\Route::middleware('web')
+            Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
 
-            \Illuminate\Support\Facades\Route::middleware('web')
+            Route::middleware('web')
                 ->group(base_path('routes/staff.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
-            'staff' => \App\Http\Middleware\EnsureUserIsStaff::class,
-            'role' => \App\Http\Middleware\EnsureUserHasRole::class,
-            'permission' => \App\Http\Middleware\EnsureUserHasPermission::class,
+            'admin' => EnsureUserIsAdmin::class,
+            'staff' => EnsureUserIsStaff::class,
+            'role' => EnsureUserHasRole::class,
+            'permission' => EnsureUserHasPermission::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

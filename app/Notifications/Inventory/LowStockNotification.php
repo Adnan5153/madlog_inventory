@@ -22,8 +22,7 @@ class LowStockNotification extends Notification implements ShouldQueue
         public Part $part,
         public float $onHand,
         public int $threshold,
-    ) {
-    }
+    ) {}
 
     /**
      * @return list<string>

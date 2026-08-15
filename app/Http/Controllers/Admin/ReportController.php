@@ -11,9 +11,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
-    public function __construct(protected ReportService $reports)
-    {
-    }
+    public function __construct(protected ReportService $reports) {}
 
     public function valuation(Request $request): View
     {
@@ -21,7 +19,7 @@ class ReportController extends Controller
 
         return view('admin.reports.valuation', [
             'title' => 'Inventory valuation',
-            'data'  => $this->reports->inventoryValuation($workshopId),
+            'data' => $this->reports->inventoryValuation($workshopId),
             'currency' => setting('inventory.default_currency', 'USD'),
         ]);
     }
@@ -64,7 +62,7 @@ class ReportController extends Controller
             'rows' => $this->reports->topConsumed($workshopId, $from, $to, 25),
             'days' => $days,
             'from' => $from,
-            'to'   => $to,
+            'to' => $to,
         ]);
     }
 

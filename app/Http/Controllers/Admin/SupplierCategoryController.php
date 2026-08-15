@@ -21,7 +21,7 @@ class SupplierCategoryController extends Controller
             ->paginate(20);
 
         return view('admin.supplier-categories.index', [
-            'title'      => 'Supplier categories',
+            'title' => 'Supplier categories',
             'categories' => $categories,
         ]);
     }
@@ -42,7 +42,7 @@ class SupplierCategoryController extends Controller
     public function edit(SupplierCategory $supplierCategory): View
     {
         return view('admin.supplier-categories.edit', [
-            'title'    => 'Edit supplier category',
+            'title' => 'Edit supplier category',
             'category' => $supplierCategory,
         ]);
     }

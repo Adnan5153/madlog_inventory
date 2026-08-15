@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class SupplierCategory extends Model
 {
     /** @use HasFactory<SupplierCategoryFactory> */
-    use HasFactory, Concerns\BelongsToWorkshop;
+    use Concerns\BelongsToWorkshop, HasFactory;
 
     protected function casts(): array
     {

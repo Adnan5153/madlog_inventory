@@ -32,9 +32,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class BinLocation extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<BinLocationFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {

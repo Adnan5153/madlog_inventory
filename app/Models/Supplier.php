@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -36,9 +37,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Supplier extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<SupplierFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {
@@ -47,7 +49,7 @@ class Supplier extends Model
         ];
     }
 
-    public function category(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(SupplierCategory::class, 'supplier_category_id');
     }

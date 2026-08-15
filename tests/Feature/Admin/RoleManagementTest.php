@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workshop;
@@ -39,7 +40,7 @@ class RoleManagementTest extends TestCase
 
     public function test_admin_can_create_custom_role(): void
     {
-        $perm = \App\Models\Permission::query()->where('name', 'products.view')->firstOrFail();
+        $perm = Permission::query()->where('name', 'products.view')->firstOrFail();
 
         $this->actingAs($this->admin)
             ->post('/admin/roles', [
@@ -66,9 +67,9 @@ class RoleManagementTest extends TestCase
             'is_system' => false,
         ]);
 
-        $a = \App\Models\Permission::query()->where('name', 'products.view')->firstOrFail();
-        $b = \App\Models\Permission::query()->where('name', 'reports.view')->firstOrFail();
-        $c = \App\Models\Permission::query()->where('name', 'audit-logs.view')->firstOrFail();
+        $a = Permission::query()->where('name', 'products.view')->firstOrFail();
+        $b = Permission::query()->where('name', 'reports.view')->firstOrFail();
+        $c = Permission::query()->where('name', 'audit-logs.view')->firstOrFail();
         $role->syncPermissions([$a->id, $b->id]);
 
         $this->actingAs($this->admin)
@@ -123,7 +124,7 @@ class RoleManagementTest extends TestCase
 
     public function test_admin_can_view_a_single_permission(): void
     {
-        $perm = \App\Models\Permission::query()->where('name', 'products.view')->firstOrFail();
+        $perm = Permission::query()->where('name', 'products.view')->firstOrFail();
 
         $this->actingAs($this->admin)
             ->get("/admin/permissions/{$perm->id}")

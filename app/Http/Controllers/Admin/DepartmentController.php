@@ -26,9 +26,9 @@ class DepartmentController extends Controller
             ->withQueryString();
 
         return view('admin.departments.index', [
-            'title'       => 'Departments',
+            'title' => 'Departments',
             'departments' => $departments,
-            'q'           => $q,
+            'q' => $q,
         ]);
     }
 
@@ -37,7 +37,7 @@ class DepartmentController extends Controller
         $managers = User::query()->orderBy('name')->limit(200)->get(['id', 'name']);
 
         return view('admin.departments.create', [
-            'title'    => 'New department',
+            'title' => 'New department',
             'managers' => $managers,
         ]);
     }
@@ -45,7 +45,7 @@ class DepartmentController extends Controller
     public function store(StoreDepartmentRequest $request): RedirectResponse
     {
         $department = Department::create($request->validated());
-        AuditLog::record('department.created', $department, $department->only(['name','code','manager_id','is_active']));
+        AuditLog::record('department.created', $department, $department->only(['name', 'code', 'manager_id', 'is_active']));
 
         return redirect()->route('admin.departments.index')->with('status', 'Department created.');
     }
@@ -55,17 +55,17 @@ class DepartmentController extends Controller
         $managers = User::query()->orderBy('name')->limit(200)->get(['id', 'name']);
 
         return view('admin.departments.edit', [
-            'title'      => 'Edit department',
+            'title' => 'Edit department',
             'department' => $department,
-            'managers'   => $managers,
+            'managers' => $managers,
         ]);
     }
 
     public function update(UpdateDepartmentRequest $request, Department $department): RedirectResponse
     {
-        $before = $department->only(['name','code','manager_id','is_active']);
+        $before = $department->only(['name', 'code', 'manager_id', 'is_active']);
         $department->update($request->validated());
-        AuditLog::record('department.updated', $department, ['before' => $before, 'after' => $department->only(['name','code','manager_id','is_active'])]);
+        AuditLog::record('department.updated', $department, ['before' => $before, 'after' => $department->only(['name', 'code', 'manager_id', 'is_active'])]);
 
         return redirect()->route('admin.departments.index')->with('status', 'Department updated.');
     }
@@ -76,7 +76,7 @@ class DepartmentController extends Controller
             return back()->withErrors(['department' => 'Cannot delete a department that still has equipment.']);
         }
 
-        AuditLog::record('department.deleted', $department, $department->only(['name','code']));
+        AuditLog::record('department.deleted', $department, $department->only(['name', 'code']));
         $department->delete();
 
         return redirect()->route('admin.departments.index')->with('status', 'Department deleted.');

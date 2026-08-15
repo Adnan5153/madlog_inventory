@@ -17,7 +17,7 @@ class GoodsReceiptController extends Controller
         $receipts = GoodsReceipt::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('grn_number', 'like', "%{$q}%")
-                  ->orWhere('supplier_invoice_number', 'like', "%{$q}%");
+                    ->orWhere('supplier_invoice_number', 'like', "%{$q}%");
             }))
             ->when($status, fn ($qb) => $qb->where('status', $status))
             ->with(['purchaseOrder:id,po_number,supplier_id', 'purchaseOrder.supplier:id,name', 'receiver:id,name'])

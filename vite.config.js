@@ -11,9 +11,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                /* @chisel-passkeys */
                 'resources/js/passkeys.js',
-                /* @end-chisel-passkeys */
                 'resources/css/landing/landing.scss',
                 'resources/js/landing.js',
                 // Admin bundle: Bootstrap-only, no Tailwind/Flux.

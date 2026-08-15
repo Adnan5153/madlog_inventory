@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\User;
 use App\Models\Workshop;
 use App\Scopes\WorkshopScope;
 use Illuminate\Http\Request;
@@ -27,14 +28,14 @@ class AuditLogController extends Controller
             ->when($userId, fn ($qb) => $qb->where('user_id', $userId))
             ->when($action, fn ($qb) => $qb->where('action', 'like', "{$action}%"))
             ->when($subjectType, fn ($qb) => $qb->where('subject_type', $subjectType))
-            ->when($from, fn ($qb) => $qb->where('created_at', '>=', $from . ' 00:00:00'))
-            ->when($to, fn ($qb) => $qb->where('created_at', '<=', $to . ' 23:59:59'))
+            ->when($from, fn ($qb) => $qb->where('created_at', '>=', $from.' 00:00:00'))
+            ->when($to, fn ($qb) => $qb->where('created_at', '<=', $to.' 23:59:59'))
             ->latest('created_at')
             ->paginate(50)
             ->withQueryString();
 
         $users = WorkshopScope::disabled(function () {
-            return \App\Models\User::query()->orderBy('name')->get(['id', 'name']);
+            return User::query()->orderBy('name')->get(['id', 'name']);
         });
 
         $actions = AuditLog::query()->distinct()->orderBy('action')->pluck('action');
@@ -42,8 +43,8 @@ class AuditLogController extends Controller
 
         return view('admin.audit-logs.index', [
             'title' => 'Audit logs',
-            'logs'  => $logs,
-            'q'     => $q,
+            'logs' => $logs,
+            'q' => $q,
             'users' => $users,
             'actions' => $actions,
             'subjectTypes' => $subjectTypes,
@@ -60,7 +61,7 @@ class AuditLogController extends Controller
 
         return view('admin.audit-logs.show', [
             'title' => 'Audit log detail',
-            'log'   => $log,
+            'log' => $log,
         ]);
     }
 
@@ -69,9 +70,9 @@ class AuditLogController extends Controller
         $query = AuditLog::query()
             ->with('user:id,name,email')
             ->when($request->query('user_id'), fn ($q) => $q->where('user_id', $request->query('user_id')))
-            ->when($request->query('action'), fn ($q) => $q->where('action', 'like', $request->query('action') . '%'))
-            ->when($request->query('from'), fn ($q) => $q->where('created_at', '>=', $request->query('from') . ' 00:00:00'))
-            ->when($request->query('to'), fn ($q) => $q->where('created_at', '<=', $request->query('to') . ' 23:59:59'))
+            ->when($request->query('action'), fn ($q) => $q->where('action', 'like', $request->query('action').'%'))
+            ->when($request->query('from'), fn ($q) => $q->where('created_at', '>=', $request->query('from').' 00:00:00'))
+            ->when($request->query('to'), fn ($q) => $q->where('created_at', '<=', $request->query('to').' 23:59:59'))
             ->latest('created_at')
             ->limit(10000);
 
@@ -90,7 +91,7 @@ class AuditLogController extends Controller
                 ]);
             }
             fclose($out);
-        }, 'audit-logs-' . date('Ymd-His') . '.csv', [
+        }, 'audit-logs-'.date('Ymd-His').'.csv', [
             'Content-Type' => 'text/csv',
         ]);
     }

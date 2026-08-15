@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * A goods receipt note (GRN) recorded against a purchase order. Each GRN
@@ -22,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $grn_number
  * @property string|null $supplier_invoice_number
  * @property string $status
- * @property \Illuminate\Support\Carbon $received_at
+ * @property Carbon $received_at
  * @property string|null $notes
  */
 #[Fillable([
@@ -38,12 +39,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class GoodsReceipt extends Model
 {
-    /** @use HasFactory<GoodsReceiptFactory> */
-    use HasFactory;
     use Concerns\BelongsToWorkshop;
 
+    /** @use HasFactory<GoodsReceiptFactory> */
+    use HasFactory;
+
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_PARTIAL = 'partial';
+
     public const STATUS_DISPUTED = 'disputed';
 
     protected function casts(): array

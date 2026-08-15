@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Department extends Model
 {
     /** @use HasFactory<DepartmentFactory> */
-    use HasFactory, Concerns\BelongsToWorkshop;
+    use Concerns\BelongsToWorkshop, HasFactory;
 
     protected function casts(): array
     {

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * An individual serial-numbered unit of a part. Each SerialNumber belongs
@@ -19,8 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $inventory_item_id
  * @property string $serial
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $purchased_at
- * @property \Illuminate\Support\Carbon|null $sold_at
+ * @property Carbon|null $purchased_at
+ * @property Carbon|null $sold_at
  */
 #[Fillable([
     'workshop_id',
@@ -33,14 +34,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 ])]
 class SerialNumber extends Model
 {
-    /** @use HasFactory<SerialNumberFactory> */
-    use HasFactory;
     use Concerns\BelongsToWorkshop;
 
+    /** @use HasFactory<SerialNumberFactory> */
+    use HasFactory;
+
     public const STATUS_AVAILABLE = 'available';
+
     public const STATUS_ALLOCATED = 'allocated';
+
     public const STATUS_SOLD = 'sold';
+
     public const STATUS_RETURNED = 'returned';
+
     public const STATUS_SCRAPPED = 'scrapped';
 
     protected function casts(): array

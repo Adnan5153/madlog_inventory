@@ -18,8 +18,8 @@ class StorePartCategoryRequest extends FormRequest
         $workshopId = $this->user()->workshop_id ?? 0;
 
         return [
-            'name'        => ['required', 'string', 'max:120'],
-            'slug'        => ['nullable', 'string', 'max:120', Rule::unique('part_categories', 'slug')->where('workshop_id', $workshopId)],
+            'name' => ['required', 'string', 'max:120'],
+            'slug' => ['nullable', 'string', 'max:120', Rule::unique('part_categories', 'slug')->where('workshop_id', $workshopId)],
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }

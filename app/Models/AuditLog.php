@@ -37,9 +37,10 @@ use Illuminate\Support\Str;
 ])]
 class AuditLog extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<AuditLogFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {

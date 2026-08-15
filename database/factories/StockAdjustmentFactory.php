@@ -17,7 +17,7 @@ class StockAdjustmentFactory extends Factory
     {
         return [
             'workshop_id' => Workshop::factory(),
-            'adjustment_number' => 'ADJ-' . date('Y') . '-' . strtoupper(Str::random(6)),
+            'adjustment_number' => 'ADJ-'.date('Y').'-'.strtoupper(Str::random(6)),
             'status' => StockAdjustment::STATUS_DRAFT,
             'reason' => fake()->randomElement(['cycle_count', 'shrinkage', 'damage', 'found']),
             'notes' => fake()->optional(0.5)->sentence(),

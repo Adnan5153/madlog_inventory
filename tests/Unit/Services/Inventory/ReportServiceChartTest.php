@@ -25,6 +25,7 @@ class ReportServiceChartTest extends TestCase
     use RefreshDatabase;
 
     protected User $globalAdmin;
+
     protected Workshop $workshop;
 
     protected function setUp(): void

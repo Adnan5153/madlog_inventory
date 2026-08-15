@@ -37,9 +37,10 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 ])]
 class Tool extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<ToolFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {

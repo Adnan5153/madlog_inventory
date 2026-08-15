@@ -19,8 +19,8 @@ class UpdatePartCategoryRequest extends FormRequest
         $categoryId = $this->route('category')?->getKey();
 
         return [
-            'name'        => ['required', 'string', 'max:120'],
-            'slug'        => ['nullable', 'string', 'max:120', Rule::unique('part_categories', 'slug')->where('workshop_id', $workshopId)->ignore($categoryId)],
+            'name' => ['required', 'string', 'max:120'],
+            'slug' => ['nullable', 'string', 'max:120', Rule::unique('part_categories', 'slug')->where('workshop_id', $workshopId)->ignore($categoryId)],
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }

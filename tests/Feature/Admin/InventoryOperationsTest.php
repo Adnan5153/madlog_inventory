@@ -9,10 +9,15 @@ use App\Models\InventoryItem;
 use App\Models\Part;
 use App\Models\SerialNumber;
 use App\Models\StockAdjustment;
+use App\Models\StockMovement;
 use App\Models\StockTransfer;
 use App\Models\User;
 use App\Models\Workshop;
+use App\Services\SettingService;
+use Database\Seeders\SettingsSeeder;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -25,17 +30,22 @@ class InventoryOperationsTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $staff;
+
     protected Workshop $workshop;
+
     protected Part $part;
+
     protected BinLocation $sourceBin;
+
     protected BinLocation $destBin;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         $this->workshop = Workshop::factory()->create();
         $this->admin = User::factory()->create([
@@ -86,8 +96,8 @@ class InventoryOperationsTest extends TestCase
 
     public function test_adjustment_with_positive_delta_applies_immediately_when_approval_disabled(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
-        app(\App\Services\SettingService::class)->set(
+        Cache::flush();
+        app(SettingService::class)->set(
             'inventory.require_adjustment_approval',
             false,
             $this->workshop->id,
@@ -120,10 +130,10 @@ class InventoryOperationsTest extends TestCase
 
     public function test_adjustment_blocks_below_zero_by_default(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         // Disable approval so apply runs immediately and the negative-stock
         // gate inside StockMovementService triggers.
-        app(\App\Services\SettingService::class)->set(
+        app(SettingService::class)->set(
             'inventory.require_adjustment_approval',
             false,
             $this->workshop->id,
@@ -153,17 +163,17 @@ class InventoryOperationsTest extends TestCase
 
     public function test_adjustment_allows_negative_when_setting_enabled(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         // Disable approval so the adjustment applies immediately and the
         // allow_negative_stock gate is exercised at movement time.
-        app(\App\Services\SettingService::class)->set(
+        app(SettingService::class)->set(
             'inventory.require_adjustment_approval',
             false,
             $this->workshop->id,
             'inventory',
             'bool',
         );
-        app(\App\Services\SettingService::class)->set(
+        app(SettingService::class)->set(
             'inventory.allow_negative_stock',
             true,
             $this->workshop->id,
@@ -192,7 +202,7 @@ class InventoryOperationsTest extends TestCase
 
     public function test_requester_cannot_self_approve(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $item = InventoryItem::factory()->create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
@@ -225,7 +235,7 @@ class InventoryOperationsTest extends TestCase
 
     public function test_other_admin_can_approve_pending_adjustment(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $item = InventoryItem::factory()->create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
@@ -264,7 +274,7 @@ class InventoryOperationsTest extends TestCase
 
     public function test_rejected_adjustment_leaves_quantity_unchanged(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $item = InventoryItem::factory()->create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
@@ -343,11 +353,11 @@ class InventoryOperationsTest extends TestCase
         $this->assertSame(4.0, (float) $destBucket->quantity);
 
         // Stock movements: 1 transfer_out + 1 transfer_in
-        $this->assertSame(1, \App\Models\StockMovement::query()
+        $this->assertSame(1, StockMovement::query()
             ->where('type', StockMovementType::TransferOut)
             ->where('reference_id', $t->id)
             ->count());
-        $this->assertSame(1, \App\Models\StockMovement::query()
+        $this->assertSame(1, StockMovement::query()
             ->where('type', StockMovementType::TransferIn)
             ->where('reference_id', $t->id)
             ->count());
@@ -407,7 +417,7 @@ class InventoryOperationsTest extends TestCase
             'batch_number' => 'B-001',
         ]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         Batch::factory()->create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
@@ -423,7 +433,7 @@ class InventoryOperationsTest extends TestCase
             'serial' => 'SN-XYZ',
         ]);
 
-        $this->expectException(\Illuminate\Database\QueryException::class);
+        $this->expectException(QueryException::class);
         SerialNumber::factory()->create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
@@ -456,7 +466,7 @@ class InventoryOperationsTest extends TestCase
 
     public function test_stock_movement_cannot_be_updated(): void
     {
-        $movement = \App\Models\StockMovement::create([
+        $movement = StockMovement::create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
             'type' => StockMovementType::ManualAdjustment,
@@ -471,7 +481,7 @@ class InventoryOperationsTest extends TestCase
 
     public function test_stock_movement_cannot_be_deleted(): void
     {
-        $movement = \App\Models\StockMovement::create([
+        $movement = StockMovement::create([
             'workshop_id' => $this->workshop->id,
             'part_id' => $this->part->id,
             'type' => StockMovementType::ManualAdjustment,

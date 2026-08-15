@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * Physical equipment maintained in a workshop (asset register).
@@ -24,8 +25,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $manufacturer
  * @property string|null $model
  * @property string|null $serial_number
- * @property \Illuminate\Support\Carbon|null $purchase_date
- * @property \Illuminate\Support\Carbon|null $warranty_expires_at
+ * @property Carbon|null $purchase_date
+ * @property Carbon|null $warranty_expires_at
  * @property string $status
  * @property string|null $notes
  * @property bool $is_active
@@ -49,7 +50,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Equipment extends Model
 {
     /** @use HasFactory<EquipmentFactory> */
-    use HasFactory, Concerns\BelongsToWorkshop;
+    use Concerns\BelongsToWorkshop, HasFactory;
 
     protected function casts(): array
     {
@@ -88,7 +89,10 @@ class Equipment extends Model
     }
 
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_MAINTENANCE = 'maintenance';
+
     public const STATUS_RETIRED = 'retired';
+
     public const STATUS_DISPOSED = 'disposed';
 }

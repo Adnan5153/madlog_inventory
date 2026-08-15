@@ -65,17 +65,17 @@ class SettingService
                 return $merged
                     ->mapWithKeys(fn (Setting $s) => [
                         $s->key => [
-                            'value'      => $this->castFromRow($s),
-                            'type'       => $s->type,
-                            'group'      => $s->group,
+                            'value' => $this->castFromRow($s),
+                            'type' => $s->type,
+                            'group' => $s->group,
                             'workshopId' => $s->workshop_id,
                         ],
                     ])
                     ->merge($rows->mapWithKeys(fn (Setting $s) => [
                         $s->key => [
-                            'value'      => $this->castFromRow($s),
-                            'type'       => $s->type,
-                            'group'      => $s->group,
+                            'value' => $this->castFromRow($s),
+                            'type' => $s->type,
+                            'group' => $s->group,
                             'workshopId' => $s->workshop_id,
                         ],
                     ]))
@@ -202,6 +202,7 @@ class SettingService
     protected function cacheKey(?int $workshopId): string
     {
         $gen = $this->currentGeneration();
+
         return 'settings:'.$gen.':'.($workshopId ?? 'global');
     }
 }

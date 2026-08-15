@@ -3,13 +3,13 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\AuditLog;
-use App\Models\Department;
 use App\Models\Equipment;
+use App\Models\Part;
 use App\Models\PartCategory;
-use App\Models\Setting;
 use App\Models\Unit;
 use App\Models\User;
 use App\Models\Workshop;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,7 +29,9 @@ class FoundationTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $staff;
+
     protected Workshop $workshop;
 
     protected function setUp(): void
@@ -37,7 +39,7 @@ class FoundationTest extends TestCase
         parent::setUp();
 
         // Seed the default settings so the SettingsSeeder codepath isn't a false negative.
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         // A workshop so workshop-scoped records (categories/units/equipment/etc.) have a parent.
         $this->workshop = Workshop::factory()->create();
@@ -225,7 +227,7 @@ class FoundationTest extends TestCase
     public function test_category_with_parts_cannot_be_deleted(): void
     {
         $category = PartCategory::factory()->create(['workshop_id' => $this->workshop->id]);
-        \App\Models\Part::factory()->create(['workshop_id' => $this->workshop->id, 'category_id' => $category->id]);
+        Part::factory()->create(['workshop_id' => $this->workshop->id, 'category_id' => $category->id]);
 
         $this->actingAs($this->admin)
             ->delete("/admin/categories/{$category->id}")
@@ -238,7 +240,7 @@ class FoundationTest extends TestCase
     public function test_unit_in_use_cannot_be_deleted(): void
     {
         $unit = Unit::factory()->create();
-        \App\Models\Part::factory()->create([
+        Part::factory()->create([
             'workshop_id' => $this->workshop->id,
             'unit_id' => $unit->id,
         ]);

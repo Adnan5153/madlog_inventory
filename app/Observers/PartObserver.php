@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Events\InventoryLowStockReached;
 use App\Models\Part;
+use App\Models\User;
 use App\Notifications\Inventory\LowStockNotification;
 
 /**
@@ -37,7 +38,7 @@ class PartObserver
             $recipients = setting('notifications.low_stock_recipients', []);
             if (is_array($recipients) && ! empty($recipients)) {
                 foreach ($recipients as $userId) {
-                    $user = \App\Models\User::find($userId);
+                    $user = User::find($userId);
                     if ($user) {
                         $user->notify(new LowStockNotification($part, $onHand, $threshold));
                     }

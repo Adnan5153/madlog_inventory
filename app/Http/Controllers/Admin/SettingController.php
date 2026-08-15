@@ -12,9 +12,7 @@ use Illuminate\View\View;
 
 class SettingController extends Controller
 {
-    public function __construct(protected SettingService $settings)
-    {
-    }
+    public function __construct(protected SettingService $settings) {}
 
     public function edit(Request $request): View
     {
@@ -29,10 +27,10 @@ class SettingController extends Controller
         $groupWorkshop = $workshop?->groupBy('group') ?? collect();
 
         return view('admin.settings.edit', [
-            'title'          => 'Settings',
-            'groupGlobal'    => $groupGlobal,
-            'groupWorkshop'  => $groupWorkshop,
-            'workshopId'     => $workshopId,
+            'title' => 'Settings',
+            'groupGlobal' => $groupGlobal,
+            'groupWorkshop' => $groupWorkshop,
+            'workshopId' => $workshopId,
         ]);
     }
 
@@ -45,7 +43,7 @@ class SettingController extends Controller
         // scope hint (global or the user's workshop). Both arrays may
         // be present in the same request.
         $payload = $request->validate([
-            'global'   => ['nullable', 'array'],
+            'global' => ['nullable', 'array'],
             'workshop' => ['nullable', 'array'],
         ]);
 

@@ -16,9 +16,7 @@ use Illuminate\View\View;
  */
 class DashboardController extends Controller
 {
-    public function __construct(protected ReportService $reports)
-    {
-    }
+    public function __construct(protected ReportService $reports) {}
 
     public function index(Request $request): View
     {
@@ -36,21 +34,22 @@ class DashboardController extends Controller
             if ($workshopId !== null) {
                 $q->where('workshop_id', $workshopId);
             }
+
             return $q->get();
         });
 
         $charts = [
-            'topConsumed'    => $this->reports->topConsumedForChart($workshopId),
+            'topConsumed' => $this->reports->topConsumedForChart($workshopId),
             'inventoryByCat' => $this->reports->inventoryValueByCategory($workshopId),
         ];
 
         return view('admin.dashboard', [
-            'title'         => 'Dashboard',
-            'totals'        => $totals,
-            'user'          => $user,
+            'title' => 'Dashboard',
+            'totals' => $totals,
+            'user' => $user,
             'lowStockCount' => $lowStockCount,
-            'recentActivity'=> $recentActivity,
-            'charts'        => $charts,
+            'recentActivity' => $recentActivity,
+            'charts' => $charts,
         ]);
     }
 }

@@ -6,7 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StorePartRequest;
 use App\Http\Requests\Admin\UpdatePartRequest;
 use App\Models\AuditLog;
+use App\Models\Brand;
 use App\Models\Part;
+use App\Models\PartCategory;
+use App\Models\StockMovement;
+use App\Models\Unit;
 use App\Scopes\WorkshopScope;
 use App\Services\Inventory\ProductImportService;
 use Illuminate\Http\RedirectResponse;
@@ -16,9 +20,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
 {
-    public function __construct(protected ProductImportService $importer)
-    {
-    }
+    public function __construct(protected ProductImportService $importer) {}
 
     public function index(Request $request): View
     {
@@ -31,9 +33,9 @@ class ProductController extends Controller
             ->when($q !== '', function ($qb) use ($q) {
                 $qb->where(function ($w) use ($q) {
                     $w->where('name', 'like', "%{$q}%")
-                      ->orWhere('sku', 'like', "%{$q}%")
-                      ->orWhere('oem_part_number', 'like', "%{$q}%")
-                      ->orWhere('barcode', 'like', "%{$q}%");
+                        ->orWhere('sku', 'like', "%{$q}%")
+                        ->orWhere('oem_part_number', 'like', "%{$q}%")
+                        ->orWhere('barcode', 'like', "%{$q}%");
                 });
             })
             ->when($active === 'yes', fn ($qb) => $qb->where('is_active', true))
@@ -49,12 +51,12 @@ class ProductController extends Controller
         return view('admin.products.index', [
             'title' => 'Products',
             'parts' => $parts,
-            'q'     => $q,
+            'q' => $q,
             'active' => $active,
             'categoryId' => $categoryId,
             'brandId' => $brandId,
-            'categories' => \App\Models\PartCategory::query()->orderBy('name')->get(['id', 'name']),
-            'brands' => \App\Models\Brand::query()->orderBy('name')->get(['id', 'name']),
+            'categories' => PartCategory::query()->orderBy('name')->get(['id', 'name']),
+            'brands' => Brand::query()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -62,9 +64,9 @@ class ProductController extends Controller
     {
         return view('admin.products.create', [
             'title' => 'New product',
-            'categories' => \App\Models\PartCategory::query()->orderBy('name')->get(['id', 'name']),
-            'brands'    => \App\Models\Brand::query()->orderBy('name')->get(['id', 'name']),
-            'units'     => \App\Models\Unit::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'short_code']),
+            'categories' => PartCategory::query()->orderBy('name')->get(['id', 'name']),
+            'brands' => Brand::query()->orderBy('name')->get(['id', 'name']),
+            'units' => Unit::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'short_code']),
         ]);
     }
 
@@ -82,7 +84,7 @@ class ProductController extends Controller
         $product->loadSum('inventoryItems as on_hand', 'quantity');
 
         $movements = WorkshopScope::disabled(function () use ($product) {
-            return \App\Models\StockMovement::query()
+            return StockMovement::query()
                 ->where('workshop_id', $product->workshop_id)
                 ->where('part_id', $product->id)
                 ->with(['bin:id,code', 'user:id,name'])
@@ -92,8 +94,8 @@ class ProductController extends Controller
         });
 
         return view('admin.products.show', [
-            'title'     => $product->name,
-            'product'   => $product,
+            'title' => $product->name,
+            'product' => $product,
             'movements' => $movements,
         ]);
     }
@@ -103,9 +105,9 @@ class ProductController extends Controller
         return view('admin.products.edit', [
             'title' => 'Edit product',
             'product' => $product,
-            'categories' => \App\Models\PartCategory::query()->orderBy('name')->get(['id', 'name']),
-            'brands'    => \App\Models\Brand::query()->orderBy('name')->get(['id', 'name']),
-            'units'     => \App\Models\Unit::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'short_code']),
+            'categories' => PartCategory::query()->orderBy('name')->get(['id', 'name']),
+            'brands' => Brand::query()->orderBy('name')->get(['id', 'name']),
+            'units' => Unit::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'short_code']),
         ]);
     }
 
@@ -150,9 +152,11 @@ class ProductController extends Controller
             $result['skipped'],
         );
         if (! empty($result['errors'])) {
-            $message .= ' Errors: ' . implode(' | ', array_slice($result['errors'], 0, 5));
+            $message .= ' Errors: '.implode(' | ', array_slice($result['errors'], 0, 5));
+
             return back()->withErrors(['import' => $message]);
         }
+
         return back()->with('status', $message);
     }
 
@@ -163,7 +167,7 @@ class ProductController extends Controller
 
         return response()->streamDownload(function () use ($csv) {
             echo $csv;
-        }, 'products-' . date('Ymd-His') . '.csv', [
+        }, 'products-'.date('Ymd-His').'.csv', [
             'Content-Type' => 'text/csv',
         ]);
     }

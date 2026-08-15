@@ -18,15 +18,15 @@ class UpdateSupplierCategoryRequest extends FormRequest
         $workshopId = $this->user()?->workshop_id;
 
         return [
-            'name'        => ['required', 'string', 'max:120'],
-            'code'        => [
+            'name' => ['required', 'string', 'max:120'],
+            'code' => [
                 'nullable', 'string', 'max:32',
                 Rule::unique('supplier_categories', 'code')
                     ->where('workshop_id', $workshopId)
                     ->ignore($cat->id),
             ],
             'description' => ['nullable', 'string', 'max:1000'],
-            'is_active'   => ['required', 'boolean'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 }

@@ -3,14 +3,18 @@
 namespace Tests\Feature\Admin;
 
 use App\Enums\StockMovementType;
-use App\Models\AuditLog;
+use App\Exceptions\DomainException;
 use App\Models\BinLocation;
+use App\Models\GoodsReceipt;
 use App\Models\InventoryItem;
 use App\Models\Part;
 use App\Models\PurchaseOrder;
+use App\Models\StockMovement;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Workshop;
+use App\Services\Inventory\PurchaseOrderService;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,17 +28,22 @@ class ProcurementWorkflowTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $staff;
+
     protected Workshop $workshop;
+
     protected Supplier $supplier;
+
     protected Part $part;
+
     protected BinLocation $bin;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         $this->workshop = Workshop::factory()->create();
         $this->admin = User::factory()->create([
@@ -200,8 +209,8 @@ class ProcurementWorkflowTest extends TestCase
 
         // Cancel is a delete-ability; the policy already rejects fully-received
         // POs with 403. We assert the service throws if we somehow get past.
-        $this->expectException(\App\Exceptions\DomainException::class);
-        app(\App\Services\Inventory\PurchaseOrderService::class)
+        $this->expectException(DomainException::class);
+        app(PurchaseOrderService::class)
             ->cancel($po, $this->admin, 'test');
     }
 
@@ -252,10 +261,10 @@ class ProcurementWorkflowTest extends TestCase
         $this->assertEquals(10.0, (float) $bucket->quantity);
 
         // StockMovement ledger has a single receipt row tied to this PO via the GRN reference
-        $grn = \App\Models\GoodsReceipt::query()->where('purchase_order_id', $po->id)->first();
+        $grn = GoodsReceipt::query()->where('purchase_order_id', $po->id)->first();
         $this->assertNotNull($grn);
-        $movementCount = \App\Models\StockMovement::query()
-            ->where('reference_type', \App\Models\GoodsReceipt::class)
+        $movementCount = StockMovement::query()
+            ->where('reference_type', GoodsReceipt::class)
             ->where('reference_id', $grn->id)
             ->count();
         $this->assertSame(1, $movementCount);
@@ -422,9 +431,9 @@ class ProcurementWorkflowTest extends TestCase
             ])
             ->assertRedirect();
 
-        $grn = \App\Models\GoodsReceipt::query()->where('purchase_order_id', $po->id)->first();
-        $movement = \App\Models\StockMovement::query()
-            ->where('reference_type', \App\Models\GoodsReceipt::class)
+        $grn = GoodsReceipt::query()->where('purchase_order_id', $po->id)->first();
+        $movement = StockMovement::query()
+            ->where('reference_type', GoodsReceipt::class)
             ->where('reference_id', $grn->id)
             ->first();
         $this->assertNotNull($movement);

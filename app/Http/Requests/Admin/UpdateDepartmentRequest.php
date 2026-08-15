@@ -18,11 +18,11 @@ class UpdateDepartmentRequest extends FormRequest
         $departmentId = $this->route('department')?->getKey();
 
         return [
-            'name'        => ['required', 'string', 'max:120'],
-            'code'        => ['required', 'string', 'max:32', Rule::unique('departments', 'code')->where('workshop_id', $workshopId)->ignore($departmentId)],
+            'name' => ['required', 'string', 'max:120'],
+            'code' => ['required', 'string', 'max:32', Rule::unique('departments', 'code')->where('workshop_id', $workshopId)->ignore($departmentId)],
             'description' => ['nullable', 'string', 'max:500'],
-            'manager_id'  => ['nullable', 'integer', 'exists:users,id'],
-            'is_active'   => ['required', 'boolean'],
+            'manager_id' => ['nullable', 'integer', 'exists:users,id'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 }

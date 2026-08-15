@@ -16,9 +16,8 @@ use Illuminate\View\View;
 class RoleController extends Controller
 {
     use AuthorizesRequests;
-    public function __construct(protected RolePermissionService $rbac)
-    {
-    }
+
+    public function __construct(protected RolePermissionService $rbac) {}
 
     public function index(Request $request): View
     {
@@ -40,9 +39,9 @@ class RoleController extends Controller
         $this->authorize('create', Role::class);
 
         return view('admin.roles.create', [
-            'title'        => 'New role',
-            'grouped'      => $this->rbac->permissionsGrouped(),
-            'rolePermIds'  => [],
+            'title' => 'New role',
+            'grouped' => $this->rbac->permissionsGrouped(),
+            'rolePermIds' => [],
         ]);
     }
 
@@ -54,10 +53,10 @@ class RoleController extends Controller
 
         $role = DB::transaction(function () use ($data) {
             $role = Role::create([
-                'name'        => $data['name'],
-                'slug'        => $data['slug'],
+                'name' => $data['name'],
+                'slug' => $data['slug'],
                 'description' => $data['description'] ?? null,
-                'is_system'   => false,
+                'is_system' => false,
             ]);
 
             $this->rbac->syncRolePermissions($role, $data['permissions'] ?? []);
@@ -75,8 +74,8 @@ class RoleController extends Controller
         $role->load(['permissions']);
 
         return view('admin.roles.show', [
-            'title'   => $role->name,
-            'role'    => $role,
+            'title' => $role->name,
+            'role' => $role,
             'grouped' => $this->rbac->permissionsGrouped(),
         ]);
     }
@@ -86,9 +85,9 @@ class RoleController extends Controller
         $this->authorize('update', $role);
 
         return view('admin.roles.edit', [
-            'title'       => 'Edit role',
-            'role'        => $role,
-            'grouped'     => $this->rbac->permissionsGrouped(),
+            'title' => 'Edit role',
+            'role' => $role,
+            'grouped' => $this->rbac->permissionsGrouped(),
             'rolePermIds' => $role->permissions()->pluck('permissions.id')->all(),
         ]);
     }
@@ -101,8 +100,8 @@ class RoleController extends Controller
 
         DB::transaction(function () use ($role, $data) {
             $role->update([
-                'name'        => $data['name'],
-                'slug'        => $data['slug'],
+                'name' => $data['name'],
+                'slug' => $data['slug'],
                 'description' => $data['description'] ?? null,
             ]);
 

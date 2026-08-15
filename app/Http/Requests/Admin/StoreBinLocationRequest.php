@@ -18,12 +18,12 @@ class StoreBinLocationRequest extends FormRequest
         $workshopId = $this->user()?->workshop_id ?? 0;
 
         return [
-            'code'        => ['required', 'string', 'max:32', Rule::unique('bin_locations', 'code')->where('workshop_id', $workshopId)->whereNull('deleted_at')],
-            'zone'        => ['nullable', 'string', 'max:64'],
-            'aisle'       => ['nullable', 'string', 'max:32'],
-            'shelf'       => ['nullable', 'string', 'max:32'],
+            'code' => ['required', 'string', 'max:32', Rule::unique('bin_locations', 'code')->where('workshop_id', $workshopId)->whereNull('deleted_at')],
+            'zone' => ['nullable', 'string', 'max:64'],
+            'aisle' => ['nullable', 'string', 'max:32'],
+            'shelf' => ['nullable', 'string', 'max:32'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'is_active'   => ['required', 'boolean'],
+            'is_active' => ['required', 'boolean'],
         ];
     }
 }

@@ -18,6 +18,5 @@ class InventoryLowStockReached
         public Part $part,
         public float $onHand,
         public int $threshold,
-    ) {
-    }
+    ) {}
 }

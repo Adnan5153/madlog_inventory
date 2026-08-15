@@ -31,7 +31,9 @@ class AuditObserver
 
     public function created(Model $model): void
     {
-        if ($this->shouldSkip($model, 'created')) return;
+        if ($this->shouldSkip($model, 'created')) {
+            return;
+        }
 
         AuditLog::record(
             action: $this->actionFor($model, 'created'),
@@ -42,10 +44,14 @@ class AuditObserver
 
     public function updated(Model $model): void
     {
-        if ($this->shouldSkip($model, 'updated')) return;
+        if ($this->shouldSkip($model, 'updated')) {
+            return;
+        }
 
         $dirty = $model->getDirty();
-        if (empty($dirty)) return;
+        if (empty($dirty)) {
+            return;
+        }
 
         $original = array_intersect_key($model->getOriginal(), $dirty);
 
@@ -54,14 +60,16 @@ class AuditObserver
             subject: $model,
             changes: [
                 'before' => $this->filterAttributes($original),
-                'after'  => $this->filterAttributes($dirty),
+                'after' => $this->filterAttributes($dirty),
             ],
         );
     }
 
     public function deleted(Model $model): void
     {
-        if ($this->shouldSkip($model, 'deleted')) return;
+        if ($this->shouldSkip($model, 'deleted')) {
+            return;
+        }
 
         AuditLog::record(
             action: $this->actionFor($model, 'deleted'),
@@ -72,7 +80,9 @@ class AuditObserver
 
     public function restored(Model $model): void
     {
-        if ($this->shouldSkip($model, 'restored')) return;
+        if ($this->shouldSkip($model, 'restored')) {
+            return;
+        }
 
         AuditLog::record(
             action: $this->actionFor($model, 'restored'),
@@ -90,6 +100,7 @@ class AuditObserver
         $base = class_basename($model);
         // snake_case the model name (e.g. PurchaseOrderItem -> purchase_order_item).
         $snake = strtolower(preg_replace('/(?<!^)([A-Z])/', '_$1', $base) ?? $base);
+
         return "{$snake}.{$event}";
     }
 
@@ -101,6 +112,7 @@ class AuditObserver
         foreach (self::REDACTED_ATTRIBUTES as $field) {
             unset($attrs[$field]);
         }
+
         return $attrs;
     }
 
@@ -113,6 +125,7 @@ class AuditObserver
         if ($model instanceof AuditLog) {
             return true;
         }
+
         // Skip if the model is currently inside a bulk save where
         // auditing would explode the log. Callers can disable via the
         // static `$auditEnabled` toggle on the model if needed.

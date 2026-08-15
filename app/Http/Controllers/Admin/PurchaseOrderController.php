@@ -20,9 +20,7 @@ class PurchaseOrderController extends Controller
 {
     use AuthorizesRequests;
 
-    public function __construct(protected PurchaseOrderService $service)
-    {
-    }
+    public function __construct(protected PurchaseOrderService $service) {}
 
     public function index(Request $request): View
     {
@@ -33,7 +31,7 @@ class PurchaseOrderController extends Controller
         $orders = PurchaseOrder::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('po_number', 'like', "%{$q}%")
-                  ->orWhere('notes', 'like', "%{$q}%");
+                    ->orWhere('notes', 'like', "%{$q}%");
             }))
             ->when($status, fn ($qb) => $qb->where('status', $status))
             ->when($supplierId, fn ($qb) => $qb->where('supplier_id', $supplierId))

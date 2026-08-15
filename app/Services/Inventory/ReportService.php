@@ -2,12 +2,14 @@
 
 namespace App\Services\Inventory;
 
+use App\Models\Department;
+use App\Models\Equipment;
 use App\Models\InventoryItem;
 use App\Models\Part;
+use App\Models\PartCategory;
 use App\Models\PurchaseOrder;
 use App\Models\StockMovement;
 use App\Models\Supplier;
-use App\Models\SupplierCategory;
 use App\Models\Unit;
 use App\Models\Workshop;
 use App\Scopes\WorkshopScope;
@@ -45,8 +47,8 @@ class ReportService
 
             return [
                 'inventory_value' => (float) ($rows->value ?? 0),
-                'parts_in_stock'  => (int) $partsInStock,
-                'items_count'     => (int) ($rows->items ?? 0),
+                'parts_in_stock' => (int) $partsInStock,
+                'items_count' => (int) ($rows->items ?? 0),
             ];
         });
     }
@@ -68,6 +70,7 @@ class ReportService
                 ->get()
                 ->filter(function (Part $p) {
                     $onHand = (float) ($p->on_hand ?? 0);
+
                     return $onHand <= (float) $p->reorder_threshold;
                 })
                 ->sortBy('name')
@@ -113,10 +116,10 @@ class ReportService
                 ->get()
                 ->map(function ($row) {
                     return (object) [
-                        'part_id'  => (int) $row->part_id,
-                        'name'     => $row->part?->name ?? "(deleted #{$row->part_id})",
-                        'sku'      => $row->part?->sku,
-                        'total_out'=> (float) $row->total_out,
+                        'part_id' => (int) $row->part_id,
+                        'name' => $row->part?->name ?? "(deleted #{$row->part_id})",
+                        'sku' => $row->part?->sku,
+                        'total_out' => (float) $row->total_out,
                     ];
                 });
         });
@@ -150,12 +153,12 @@ class ReportService
         return WorkshopScope::disabled(function () use ($workshopId) {
             return [
                 'workshops' => Workshop::query()->when($workshopId, fn ($q) => $q->where('id', $workshopId))->count(),
-                'parts'     => Part::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
+                'parts' => Part::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
                 'suppliers' => Supplier::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
-                'equipment' => \App\Models\Equipment::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
-                'units'     => Unit::query()->where('is_active', true)->count(),
-                'categories' => \App\Models\PartCategory::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
-                'departments' => \App\Models\Department::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
+                'equipment' => Equipment::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
+                'units' => Unit::query()->where('is_active', true)->count(),
+                'categories' => PartCategory::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
+                'departments' => Department::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
             ];
         });
     }
@@ -234,12 +237,12 @@ class ReportService
 
             $labels = $rows->pluck('label')->all();
             $values = $rows->pluck('value')->map(fn ($v) => round((float) $v, 2))->all();
-            $total  = array_sum($values);
+            $total = array_sum($values);
 
             return [
                 'labels' => $labels,
                 'values' => $values,
-                'total'  => round($total, 2),
+                'total' => round($total, 2),
             ];
         });
     }

@@ -19,7 +19,7 @@ class PermissionFactory extends Factory
         $verb = fake()->randomElement(['view', 'create', 'update', 'delete']);
 
         return [
-            'name' => "{$group}.{$verb}.test." . Str::random(4),
+            'name' => "{$group}.{$verb}.test.".Str::random(4),
             'group' => $group,
             'description' => fake()->sentence(),
         ];

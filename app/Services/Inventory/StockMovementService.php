@@ -24,7 +24,7 @@ class StockMovementService
      * quantity atomically.
      *
      * @throws DomainException when the resulting on-hand would go below
-     *                        zero and `inventory.allow_negative_stock` is false.
+     *                         zero and `inventory.allow_negative_stock` is false.
      */
     public function record(
         StockMovementType $type,

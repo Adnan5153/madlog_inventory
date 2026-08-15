@@ -6,6 +6,7 @@ use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workshop;
+use App\Policies\RolePolicy;
 use App\Services\Access\RolePermissionService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -141,7 +142,7 @@ class RbacTest extends TestCase
         $superAdmin = Role::query()->where('slug', 'super-admin')->firstOrFail();
         $this->assertTrue($superAdmin->is_system);
 
-        $policy = new \App\Policies\RolePolicy();
+        $policy = new RolePolicy;
 
         // The policy returns false for system roles without consulting
         // the caller's permission set. We verify the policy logic with
@@ -155,7 +156,7 @@ class RbacTest extends TestCase
         // The policy's delete method explicitly returns false for
         // is_system roles; the rest of the logic only checks
         // roles.manage. Even with roles.manage granted, is_system blocks.
-        $staff->givePermissionTo(\App\Models\Permission::query()->where('name', 'roles.manage')->firstOrFail());
+        $staff->givePermissionTo(Permission::query()->where('name', 'roles.manage')->firstOrFail());
 
         $this->assertFalse($policy->delete($staff, $superAdmin));
 

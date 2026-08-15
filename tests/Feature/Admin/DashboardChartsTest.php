@@ -10,6 +10,7 @@ use App\Models\PartCategory;
 use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Workshop;
+use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,14 +30,16 @@ class DashboardChartsTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected Workshop $workshop;
+
     protected BinLocation $bin;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\SettingsSeeder::class);
+        $this->seed(SettingsSeeder::class);
 
         $this->workshop = Workshop::factory()->create();
         $this->admin = User::factory()->create([

@@ -29,7 +29,7 @@ class UserController extends Controller
             ->with('workshop:id,name', 'rbacRoles:id,name,slug')
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('name', 'like', "%{$q}%")
-                  ->orWhere('email', 'like', "%{$q}%");
+                    ->orWhere('email', 'like', "%{$q}%");
             }))
             ->when($role !== '', fn ($qb) => $qb->where('role', $role))
             ->orderBy('name')
@@ -39,8 +39,8 @@ class UserController extends Controller
         return view('admin.users.index', [
             'title' => 'Users',
             'users' => $users,
-            'q'     => $q,
-            'role'  => $role,
+            'q' => $q,
+            'role' => $role,
         ]);
     }
 
@@ -49,9 +49,9 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         return view('admin.users.create', [
-            'title'      => 'New user',
-            'workshops'  => Workshop::query()->orderBy('name')->get(['id', 'name']),
-            'roles'      => Role::query()->orderBy('name')->get(['id', 'name', 'slug']),
+            'title' => 'New user',
+            'workshops' => Workshop::query()->orderBy('name')->get(['id', 'name']),
+            'roles' => Role::query()->orderBy('name')->get(['id', 'name', 'slug']),
         ]);
     }
 
@@ -60,20 +60,20 @@ class UserController extends Controller
         $this->authorize('create', User::class);
 
         $payload = $request->validate([
-            'name'        => ['required', 'string', 'max:160'],
-            'email'       => ['required', 'email', 'max:160', Rule::unique('users', 'email')->whereNull('deleted_at')],
-            'password'    => ['required', 'string', 'min:8', 'confirmed'],
-            'role'        => ['required', Rule::in(User::roles())],
+            'name' => ['required', 'string', 'max:160'],
+            'email' => ['required', 'email', 'max:160', Rule::unique('users', 'email')->whereNull('deleted_at')],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', Rule::in(User::roles())],
             'workshop_id' => ['nullable', 'integer', Rule::exists('workshops', 'id')],
-            'rbac_roles'   => ['array'],
+            'rbac_roles' => ['array'],
             'rbac_roles.*' => ['integer', Rule::exists('roles', 'id')],
         ]);
 
         $user = User::create([
-            'name'      => $payload['name'],
-            'email'     => $payload['email'],
-            'password'  => Hash::make($payload['password']),
-            'role'      => $payload['role'],
+            'name' => $payload['name'],
+            'email' => $payload['email'],
+            'password' => Hash::make($payload['password']),
+            'role' => $payload['role'],
             'workshop_id' => $payload['workshop_id'] ?? null,
         ]);
 
@@ -91,10 +91,10 @@ class UserController extends Controller
         $this->assertSameWorkshop($user);
 
         return view('admin.users.edit', [
-            'title'      => 'Edit user',
-            'user'       => $user,
-            'workshops'  => Workshop::query()->orderBy('name')->get(['id', 'name']),
-            'roles'      => Role::query()->orderBy('name')->get(['id', 'name', 'slug']),
+            'title' => 'Edit user',
+            'user' => $user,
+            'workshops' => Workshop::query()->orderBy('name')->get(['id', 'name']),
+            'roles' => Role::query()->orderBy('name')->get(['id', 'name', 'slug']),
         ]);
     }
 
@@ -104,19 +104,19 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         $payload = $request->validate([
-            'name'        => ['required', 'string', 'max:160'],
-            'email'       => ['required', 'email', 'max:160', Rule::unique('users', 'email')->ignore($user->id)->whereNull('deleted_at')],
-            'password'    => ['nullable', 'string', 'min:8', 'confirmed'],
-            'role'        => ['required', Rule::in(User::roles())],
+            'name' => ['required', 'string', 'max:160'],
+            'email' => ['required', 'email', 'max:160', Rule::unique('users', 'email')->ignore($user->id)->whereNull('deleted_at')],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'role' => ['required', Rule::in(User::roles())],
             'workshop_id' => ['nullable', 'integer', Rule::exists('workshops', 'id')],
-            'rbac_roles'   => ['array'],
+            'rbac_roles' => ['array'],
             'rbac_roles.*' => ['integer', Rule::exists('roles', 'id')],
         ]);
 
         $user->fill([
-            'name'        => $payload['name'],
-            'email'       => $payload['email'],
-            'role'        => $payload['role'],
+            'name' => $payload['name'],
+            'email' => $payload['email'],
+            'role' => $payload['role'],
             'workshop_id' => $payload['workshop_id'] ?? null,
         ]);
 

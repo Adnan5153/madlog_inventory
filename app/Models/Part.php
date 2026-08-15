@@ -42,9 +42,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class Part extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<PartFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {

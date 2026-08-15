@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\SupplierCategory;
 use App\Models\Workshop;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends Factory<SupplierCategory>

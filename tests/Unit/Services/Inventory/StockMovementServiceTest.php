@@ -9,8 +9,10 @@ use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Workshop;
 use App\Services\Inventory\StockMovementService;
+use App\Services\SettingService;
 use Database\Seeders\SettingsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 /**
@@ -53,9 +55,9 @@ class StockMovementServiceTest extends TestCase
 
     public function test_record_blocks_negative_when_setting_disabled(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         // Default is false; explicit reset for safety.
-        app(\App\Services\SettingService::class)->set(
+        app(SettingService::class)->set(
             'inventory.allow_negative_stock', false, $this->workshopId(), 'inventory', 'bool'
         );
 
@@ -69,9 +71,9 @@ class StockMovementServiceTest extends TestCase
 
     public function test_record_allows_negative_when_setting_enabled(): void
     {
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
         $ws = Workshop::factory()->create();
-        app(\App\Services\SettingService::class)->set(
+        app(SettingService::class)->set(
             'inventory.allow_negative_stock', true, $ws->id, 'inventory', 'bool'
         );
 

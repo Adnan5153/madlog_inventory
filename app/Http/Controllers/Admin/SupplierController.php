@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\StoreSupplierRequest;
 use App\Http\Requests\Admin\UpdateSupplierRequest;
 use App\Models\AuditLog;
 use App\Models\Supplier;
+use App\Models\SupplierCategory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,8 +23,8 @@ class SupplierController extends Controller
         $suppliers = Supplier::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('name', 'like', "%{$q}%")
-                  ->orWhere('contact_name', 'like', "%{$q}%")
-                  ->orWhere('email', 'like', "%{$q}%");
+                    ->orWhere('contact_name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%");
             }))
             ->when($active === 'yes', fn ($qb) => $qb->where('is_active', true))
             ->when($active === 'no', fn ($qb) => $qb->where('is_active', false))
@@ -34,20 +35,20 @@ class SupplierController extends Controller
             ->withQueryString();
 
         return view('admin.suppliers.index', [
-            'title'      => 'Suppliers',
-            'suppliers'  => $suppliers,
-            'q'          => $q,
-            'active'     => $active,
+            'title' => 'Suppliers',
+            'suppliers' => $suppliers,
+            'q' => $q,
+            'active' => $active,
             'categoryId' => $categoryId,
-            'categories' => \App\Models\SupplierCategory::query()->orderBy('name')->get(['id', 'name']),
+            'categories' => SupplierCategory::query()->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function create(): View
     {
         return view('admin.suppliers.create', [
-            'title'      => 'New supplier',
-            'categories' => \App\Models\SupplierCategory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'title' => 'New supplier',
+            'categories' => SupplierCategory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -62,9 +63,9 @@ class SupplierController extends Controller
     public function edit(Supplier $supplier): View
     {
         return view('admin.suppliers.edit', [
-            'title'      => 'Edit supplier',
-            'supplier'   => $supplier,
-            'categories' => \App\Models\SupplierCategory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'title' => 'Edit supplier',
+            'supplier' => $supplier,
+            'categories' => SupplierCategory::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
         ]);
     }
 

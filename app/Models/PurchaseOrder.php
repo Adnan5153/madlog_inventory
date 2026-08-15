@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * A purchase order to a supplier. Status drives workflow:
@@ -20,9 +21,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $created_by
  * @property int|null $approved_by
  * @property string $status
- * @property \Illuminate\Support\Carbon $order_date
- * @property \Illuminate\Support\Carbon|null $expected_date
- * @property \Illuminate\Support\Carbon|null $received_date
+ * @property Carbon $order_date
+ * @property Carbon|null $expected_date
+ * @property Carbon|null $received_date
  * @property numeric $subtotal
  * @property numeric $tax
  * @property numeric $total
@@ -45,9 +46,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class PurchaseOrder extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<PurchaseOrderFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {
@@ -63,10 +65,15 @@ class PurchaseOrder extends Model
 
     /** Status constants — the migration column is a string for forward-compat. */
     public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SUBMITTED = 'submitted';
+
     public const STATUS_APPROVED = 'approved';
+
     public const STATUS_PARTIALLY_RECEIVED = 'partially_received';
+
     public const STATUS_RECEIVED = 'received';
+
     public const STATUS_CANCELLED = 'cancelled';
 
     public function supplier(): BelongsTo

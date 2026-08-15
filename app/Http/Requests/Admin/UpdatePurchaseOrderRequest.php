@@ -10,6 +10,7 @@ class UpdatePurchaseOrderRequest extends FormRequest
     public function authorize(): bool
     {
         $po = $this->route('purchaseOrder');
+
         return ($po instanceof PurchaseOrder) && ($this->user()?->can('update', $po) ?? false);
     }
 

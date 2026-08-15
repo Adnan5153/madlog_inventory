@@ -17,7 +17,7 @@ class StockTransferFactory extends Factory
     {
         return [
             'workshop_id' => Workshop::factory(),
-            'transfer_number' => 'TRF-' . date('Y') . '-' . strtoupper(Str::random(6)),
+            'transfer_number' => 'TRF-'.date('Y').'-'.strtoupper(Str::random(6)),
             'status' => StockTransfer::STATUS_DRAFT,
             'source_bin_id' => null,
             'destination_bin_id' => null,

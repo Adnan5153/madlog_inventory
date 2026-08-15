@@ -17,7 +17,7 @@ class BatchFactory extends Factory
         return [
             'workshop_id' => Workshop::factory(),
             'part_id' => Part::factory(),
-            'batch_number' => 'BATCH-' . strtoupper(fake()->bothify('????####')),
+            'batch_number' => 'BATCH-'.strtoupper(fake()->bothify('????####')),
             'manufactured_at' => fake()->optional(0.7)->dateTimeBetween('-2 years', 'now'),
             'expires_at' => fake()->optional(0.7)->dateTimeBetween('now', '+3 years'),
             'initial_quantity' => 100,

@@ -13,9 +13,7 @@ use Illuminate\View\View;
 
 class StockTransferController extends Controller
 {
-    public function __construct(protected StockTransferService $service)
-    {
-    }
+    public function __construct(protected StockTransferService $service) {}
 
     public function index(Request $request): View
     {

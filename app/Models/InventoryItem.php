@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * A per-(part, bin, batch) bucket that holds an actual quantity. Stock
@@ -24,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property numeric $quantity
  * @property numeric $reserved_quantity
  * @property numeric $cost_price
- * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property Carbon|null $expires_at
  */
 #[Fillable([
     'workshop_id',
@@ -39,9 +40,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 ])]
 class InventoryItem extends Model
 {
+    use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<InventoryItemFactory> */
     use HasFactory;
-    use Concerns\BelongsToWorkshop;
 
     protected function casts(): array
     {
