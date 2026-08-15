@@ -1,5 +1,6 @@
 # Stage 1 - Build Frontend (Vite)
-FROM node:18 AS frontend
+# Vite 8 / rolldown require Node.js >= 20.19 (styleText export from node:util)
+FROM node:22 AS frontend
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
