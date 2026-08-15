@@ -31,12 +31,15 @@ services:
       - key: APP_KEY
         generateValue: true
 
-      # Database — Use Render's hosted Postgres. We inject the individual
-      # DB_* env vars (host, port, database, username, password) from the
-      # psql service so Laravel's database config (which reads DB_URL or
-      # DB_HOST/DB_PORT/...) can connect without a separate URL parser.
+      # Database — Use Render's hosted Postgres. `DATABASE_URL` (via
+      # `connectionString`) takes precedence inside config/database.php's
+      # `url` fields, which is the cleanest way to wire Laravel to a
+      # managed Postgres. The individual DB_* vars are still injected as
+      # fallbacks (and so the entrypoint can log them in the .env preview).
       - key: DB_CONNECTION
         value: pgsql
+      - key: DATABASE_URL
+        fromService: { type: psql, name: madlog-store-db, property: connectionString }
       - key: DB_HOST
         fromService: { type: psql, name: madlog-store-db, property: host }
       - key: DB_PORT

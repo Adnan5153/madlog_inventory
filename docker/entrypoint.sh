@@ -30,13 +30,24 @@ fi
 # environment if VAR is set, else uses the default. Single-quote values
 # avoid any shell metacharacter surprises; values containing apostrophes
 # are exceedingly unlikely in this environment block.
+#
+# IMPORTANT: DB_CONNECTION is HARD-CODED to `pgsql` regardless of the
+# environment. Render's free-tier image only built pdo_pgsql / pgsql
+# extensions, so any other driver would fail. If a stale dashboard env
+# var says DB_CONNECTION=mysql we'd happily forward it through; instead
+# we override it so the connect attempt at least has a chance.
 APP_NAME="${APP_NAME:-Madlog Store}"
 APP_ENV="${APP_ENV:-production}"
 APP_DEBUG="${APP_DEBUG:-false}"
 APP_KEY="${APP_KEY:-}"
 APP_URL="${APP_URL:-http://localhost:${PORT_VALUE}}"
 
-DB_CONNECTION="${DB_CONNECTION:-pgsql}"
+DB_CONNECTION="pgsql"
+# Prefer Render's `DATABASE_URL` (the psql service's connectionString)
+# because it's the canonical way to wire Laravel to a managed Postgres
+# and sidesteps any stale per-key env vars in the dashboard. Laravel's
+# database config reads `DB_URL` (not `DATABASE_URL`), so we map it.
+DB_URL="${DATABASE_URL:-${DB_URL:-}}"
 DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-5432}"
 DB_DATABASE="${DB_DATABASE:-laravel}"
@@ -49,6 +60,13 @@ SESSION_SECURE_COOKIE="${SESSION_SECURE_COOKIE:-true}"
 SESSION_LIFETIME="${SESSION_LIFETIME:-120}"
 CACHE_STORE="${CACHE_STORE:-database}"
 QUEUE_CONNECTION="${QUEUE_CONNECTION:-sync}"
+
+# Force the log channel to stderr so we don't depend on a writable
+# storage/logs/laravel.log (which on the previous deploy was the
+# original source of the cascading "Permission denied" failure).
+LOG_CHANNEL="stderr"
+LOG_STACK="stderr"
+LOG_LEVEL="${LOG_LEVEL:-info}"
 
 MAIL_MAILER="${MAIL_MAILER:-log}"
 MAIL_FROM_ADDRESS="${MAIL_FROM_ADDRESS:-hello@madlogstore.test}"
@@ -72,6 +90,9 @@ write_env() {
     write_env APP_KEY           "$APP_KEY"
     write_env APP_URL           "$APP_URL"
     write_env DB_CONNECTION     "$DB_CONNECTION"
+    if [ -n "$DB_URL" ]; then
+        write_env DB_URL         "$DB_URL"
+    fi
     write_env DB_HOST           "$DB_HOST"
     write_env DB_PORT           "$DB_PORT"
     write_env DB_DATABASE       "$DB_DATABASE"
@@ -83,9 +104,9 @@ write_env() {
     write_env SESSION_LIFETIME  "$SESSION_LIFETIME"
     write_env CACHE_STORE       "$CACHE_STORE"
     write_env QUEUE_CONNECTION  "$QUEUE_CONNECTION"
-    write_env LOG_CHANNEL       stderr
-    write_env LOG_STACK         stderr
-    write_env LOG_LEVEL         info
+    write_env LOG_CHANNEL       "$LOG_CHANNEL"
+    write_env LOG_STACK         "$LOG_STACK"
+    write_env LOG_LEVEL         "$LOG_LEVEL"
     write_env MAIL_MAILER       "$MAIL_MAILER"
     write_env MAIL_FROM_ADDRESS "$MAIL_FROM_ADDRESS"
     write_env MAIL_FROM_NAME    "$MAIL_FROM_NAME"
