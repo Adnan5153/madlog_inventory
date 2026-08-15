@@ -39,15 +39,18 @@ public/hot
 public/fonts-manifest.dev.json
 public/storage
 
-# Local storage overrides (let the runtime create its own)
+# Local storage overrides (let the runtime create its own).
+# IMPORTANT: only exclude specific files, not the whole storage/ tree.
+# Laravel's view compiler needs storage/framework/views at build time
+# (the @php artisan package:discover script spins up the View factory
+#  with `view.compiled` pointing at storage/framework/views).
 storage/*.key
 storage/pail
-storage/framework/cache/data
-storage/framework/sessions
-storage/framework/testing
-storage/framework/views
-storage/logs
-storage/app/private
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/testing/*
+storage/logs/*
+storage/app/private/*
 
 # Docker / Render config not needed inside the runtime image
 docker-compose*.yml
