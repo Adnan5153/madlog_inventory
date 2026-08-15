@@ -26,4 +26,15 @@ fi
 chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache 2>/dev/null || true
 chmod -R ug+rwX /var/www/storage /var/www/bootstrap/cache 2>/dev/null || true
 
+# Run database migrations on every boot. `artisan migrate --force` is
+# idempotent — already-applied migrations are skipped. Set RUN_MIGRATIONS=0
+# in Render's env if you ever need to boot without touching the DB
+# (e.g. during incident response).
+if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
+    echo "[entrypoint] running database migrations"
+    php artisan migrate --force --no-interaction || {
+        echo "[entrypoint] migration failed; continuing to start web server anyway"
+    }
+fi
+
 exec "$@"

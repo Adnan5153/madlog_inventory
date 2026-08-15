@@ -35,10 +35,11 @@ RUN npm run build
 FROM php:8.4-fpm AS backend
 
 # System dependencies: nginx, supervisor, plus the bits php needs.
+# `libpq-dev` is needed to build pdo_pgsql + pgsql extensions.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git curl unzip libpq-dev libonig-dev libzip-dev zip \
         nginx supervisor \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip \
+    && docker-php-ext-install pdo pdo_mysql pdo_pgsql pgsql mbstring zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Composer (used at build time to install PHP deps in this stage)

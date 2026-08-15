@@ -1,24 +1,20 @@
 services:
+  # ----- Postgres database ------------------------------------------------
+  - type: psql
+    name: madlog-store-db
+    plan: free
+    region: singapore
+    ipAllowList: []  # only allow internal Render connections
+
+  # ----- Web service (Laravel) -------------------------------------------
   - type: web
     name: madlog-store
-    runtime: php
+    runtime: docker
     plan: free
     region: singapore
     branch: main
     autoDeploy: true
-
-    buildCommand: |
-      composer install --no-dev --no-interaction --optimize-autoloader
-      npm ci
-      npm run build
-      php artisan storage:link || true
-      php artisan migrate --force || true
-
-    startCommand: |
-      php artisan config:cache
-      php artisan route:cache
-      php artisan view:cache
-      php artisan serve --host 0.0.0.0 --port $PORT
+    dockerfilePath: ./Dockerfile
 
     healthCheckPath: /up
 
@@ -35,11 +31,26 @@ services:
       - key: APP_KEY
         generateValue: true
 
-      # Database — Render's free tier Postgres works, or point at Neon
+      # Database — Use Render's hosted Postgres. We inject the individual
+      # DB_* env vars (host, port, database, username, password) from the
+      # psql service so Laravel's database config (which reads DB_URL or
+      # DB_HOST/DB_PORT/...) can connect without a separate URL parser.
       - key: DB_CONNECTION
         value: pgsql
-      - key: DATABASE_URL
-        sync: false
+      - key: DB_HOST
+        fromService: { type: psql, name: madlog-store-db, property: host }
+      - key: DB_PORT
+        fromService: { type: psql, name: madlog-store-db, property: port }
+      - key: DB_DATABASE
+        fromService: { type: psql, name: madlog-store-db, property: database }
+      - key: DB_USERNAME
+        fromService: { type: psql, name: madlog-store-db, property: user }
+      - key: DB_PASSWORD
+        fromService: { type: psql, name: madlog-store-db, property: password }
+      # Render Postgres requires SSL; the pgsql block in config/database.php
+      # already defaults sslmode to 'prefer', which is fine for the free tier.
+      - key: DB_SSLMODE
+        value: require
 
       # Sessions, cache, queue — all database-backed so we don't need
       # an extra Redis instance on Render's free tier.
@@ -65,9 +76,3 @@ services:
         value: hello@madlogstore.test
       - key: MAIL_FROM_NAME
         value: "${APP_NAME}"
-
-      # PHP runtime — Render's PHP 8.4 image ships these defaults; the
-      # lines below make it explicit so behaviour doesn't drift on a
-      # future Render image upgrade.
-      - key: PHP_VERSION
-        value: "8.4"
