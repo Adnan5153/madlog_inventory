@@ -1,0 +1,76 @@
+# =============================================================================
+# .dockerignore — keep the build context small and prevent secrets / dev
+# junk from leaking into the image.
+# =============================================================================
+# Anything that ISN'T required at build time or in the runtime image
+# should be listed here. `COPY . .` in the Dockerfile will skip these.
+# =============================================================================
+
+# Git + IDE metadata
+.git
+.gitignore
+.gitattributes
+.github
+.idea
+.vscode
+.fleet
+.nova
+.zed
+
+# Local environment files — these MUST NOT ship in the image. The
+# entrypoint script generates /var/www/.env at runtime from the
+# container's real environment variables.
+.env
+.env.*
+!.env.example
+
+# Local Node deps / build outputs (the frontend stage builds fresh)
+node_modules
+npm-debug.log
+yarn-error.log
+.npm
+
+# Local PHP deps (the vendor stage builds fresh)
+vendor
+
+# Vite / frontend build artefacts (the frontend stage builds fresh)
+public/build
+public/hot
+public/fonts-manifest.dev.json
+public/storage
+
+# Local storage overrides (let the runtime create its own)
+storage/*.key
+storage/pail
+storage/framework/cache/data
+storage/framework/sessions
+storage/framework/testing
+storage/framework/views
+storage/logs
+storage/app/private
+
+# Docker / Render config not needed inside the runtime image
+docker-compose*.yml
+.dockerignore
+render.yaml
+.npmrc
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Test artefacts
+.phpunit.cache
+.phpunit.result.cache
+.phpactor.json
+coverage
+pint.json
+phpstan.neon
+phpunit.xml
+
+# Local dev scripts
+Homestead.json
+Homestead.yaml
+auth.json
+rename_livewire_files.php
+index.original.html
