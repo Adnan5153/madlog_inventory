@@ -55,6 +55,24 @@ DB_USERNAME="${DB_USERNAME:-root}"
 DB_PASSWORD="${DB_PASSWORD:-}"
 DB_SSLMODE="${DB_SSLMODE:-prefer}"
 
+# Heuristic: if there's no DATABASE_URL (no psql service wired) AND the
+# DB_HOST is still the default 127.0.0.1 we know we can't possibly reach
+# a Postgres server, so warn loudly and let the boot continue so we still
+# get logs. Set FAIL_ON_MISSING_DB=1 to abort boot instead.
+if [ -z "$DB_URL" ] && [ "$DB_HOST" = "127.0.0.1" ]; then
+    echo "[entrypoint] WARNING: no Postgres service appears to be wired up."
+    echo "[entrypoint]   DB_URL is empty and DB_HOST is the loopback default."
+    echo "[entrypoint]   Either:"
+    echo "[entrypoint]     1. Apply render.yaml from your Render dashboard to create"
+    echo "[entrypoint]        the madlog-store-db Postgres service, OR"
+    echo "[entrypoint]     2. Set DATABASE_URL (or DB_HOST/DB_PORT/DB_DATABASE/...)"
+    echo "[entrypoint]        in the web service's Environment tab to point at your"
+    echo "[entrypoint]        own Postgres/MySQL server."
+    if [ "${FAIL_ON_MISSING_DB:-0}" = "1" ]; then
+        exit 1
+    fi
+fi
+
 SESSION_DRIVER="${SESSION_DRIVER:-database}"
 SESSION_SECURE_COOKIE="${SESSION_SECURE_COOKIE:-true}"
 SESSION_LIFETIME="${SESSION_LIFETIME:-120}"
