@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Models\Batch;
 use App\Models\BinLocation;
-use App\Models\Brand;
 use App\Models\Department;
 use App\Models\Equipment;
 use App\Models\GoodsReceipt;
@@ -63,7 +62,6 @@ class AppServiceProvider extends ServiceProvider
         $observed = [
             Workshop::class,
             PartCategory::class,
-            Brand::class,
             Unit::class,
             Supplier::class,
             SupplierCategory::class,

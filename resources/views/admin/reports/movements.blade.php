@@ -35,11 +35,11 @@
             <tbody>
                 @forelse($movements as $m)
                     <tr>
-                        <td class="small text-muted">{{ $m->occurred_at?->format('Y-m-d H:i') ?? $m->created_at->format('Y-m-d H:i') }}</td>
+                        <td class="small text-muted num">{{ $m->occurred_at?->format('Y-m-d H:i') ?? $m->created_at->format('Y-m-d H:i') }}</td>
                         <td><x-admin.status-badge variant="info">{{ $m->type }}</x-admin.status-badge></td>
                         <td>{{ $m->part?->name ?? '—' }}</td>
-                        <td>{{ $m->bin?->code ?? '—' }}</td>
-                        <td class="text-end {{ (float) $m->quantity < 0 ? 'text-danger' : 'text-success' }}">{{ number_format((float) $m->quantity, 2) }}</td>
+                        <td class="text-muted small">{{ $m->bin?->code ?? '—' }}</td>
+                        <td class="num text-end {{ (float) $m->quantity < 0 ? 'text-danger' : 'text-success' }}">{{ number_format((float) $m->quantity, 2) }}</td>
                         <td class="text-muted small">{{ $m->reason ?? '—' }}</td>
                         <td class="text-muted">{{ $m->user?->name ?? '—' }}</td>
                     </tr>

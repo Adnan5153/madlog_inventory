@@ -9,7 +9,7 @@
                 </p>
 
                 <div class="d-flex flex-wrap hero__cta-row">
-                    <a class="btn btn-warning btn-lg fw-semibold" href="#final-cta">
+                    <a class="btn btn-primary btn-lg fw-semibold" href="#final-cta">
                         <i class="bi-calendar-check me-2" aria-hidden="true"></i>Request Live Demo
                     </a>
                     <a class="btn btn-outline-light btn-lg" href="#final-cta">

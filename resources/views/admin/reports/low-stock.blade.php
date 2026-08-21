@@ -32,7 +32,7 @@
                             <div class="small text-muted">{{ $p->sku ?? '—' }}</div>
                         </td>
                         <td>{{ $p->category?->name ?? '—' }}</td>
-                        <td>{{ $p->brand?->name ?? '—' }}</td>
+                        <td>{{ $p->brand ?? '—' }}</td>
                         <td class="text-end fw-semibold text-danger">{{ number_format((float) ($p->on_hand ?? 0), 2) }}</td>
                         <td class="text-end">{{ number_format($p->reorder_threshold) }}</td>
                         <td class="text-end">{{ number_format($p->reorder_quantity) }}</td>

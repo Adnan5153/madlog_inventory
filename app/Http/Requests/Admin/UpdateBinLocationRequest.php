@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesWorkshopScoping;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateBinLocationRequest extends FormRequest
 {
+    use HandlesWorkshopScoping;
+
     public function authorize(): bool
     {
         return $this->user()?->can('update', $this->route('bin_location')) ?? false;
@@ -15,9 +18,10 @@ class UpdateBinLocationRequest extends FormRequest
     public function rules(): array
     {
         $bin = $this->route('bin_location');
-        $workshopId = $this->user()?->workshop_id ?? 0;
+        $workshopId = $this->effectiveWorkshopId();
 
         return [
+            'workshop_id' => $this->workshopRule(),
             'code' => [
                 'required', 'string', 'max:32',
                 Rule::unique('bin_locations', 'code')
@@ -31,5 +35,10 @@ class UpdateBinLocationRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:1000'],
             'is_active' => ['required', 'boolean'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->lockWorkshopFromRouteModel('bin_location');
     }
 }

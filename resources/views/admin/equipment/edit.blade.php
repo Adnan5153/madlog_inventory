@@ -14,10 +14,11 @@
             'equipment' => $equipment,
             'departments' => $departments,
             'bins' => $bins,
+            'workshops' => $workshops,
         ])
 
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning"><i class="bi bi-check-lg me-1"></i> Save changes</button>
+            <button class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Save changes</button>
             <a href="{{ route('admin.equipment.index') }}" class="btn btn-outline-secondary">Cancel</a>
         </div>
     </form>

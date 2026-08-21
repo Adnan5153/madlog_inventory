@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ToolCheckoutStatus;
+use App\Enums\ToolCondition;
 use Database\Factories\ToolCheckoutFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,9 +12,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * A single checkout event for a tool. Multiple rows may exist per tool
- * over time, but only one may be "open" (returned_at IS NULL) at any
- * given moment. Enforced in application code (see ToolCheckoutService).
+ * A single checkout / check-in event for a tool. The "open" checkout
+ * (returned_at IS NULL) is the tool's current holder. Multiple rows
+ * accumulate over time as history. Only one open checkout per tool is
+ * allowed at any moment — enforced by ToolCheckoutService.
  *
  * @property int $id
  * @property int $workshop_id
@@ -20,9 +23,13 @@ use Illuminate\Support\Carbon;
  * @property int $user_id
  * @property int|null $issued_by
  * @property Carbon $checked_out_at
- * @property Carbon|null $returned_at
  * @property Carbon|null $expected_return_at
+ * @property Carbon|null $returned_at
+ * @property int|null $received_by
+ * @property string|null $purpose
  * @property string|null $notes
+ * @property string|null $condition_at_return
+ * @property string $status
  */
 #[Fillable([
     'workshop_id',
@@ -30,9 +37,13 @@ use Illuminate\Support\Carbon;
     'user_id',
     'issued_by',
     'checked_out_at',
-    'returned_at',
     'expected_return_at',
+    'returned_at',
+    'received_by',
+    'purpose',
     'notes',
+    'condition_at_return',
+    'status',
 ])]
 class ToolCheckout extends Model
 {
@@ -45,8 +56,10 @@ class ToolCheckout extends Model
     {
         return [
             'checked_out_at' => 'datetime',
-            'returned_at' => 'datetime',
             'expected_return_at' => 'datetime',
+            'returned_at' => 'datetime',
+            'condition_at_return' => ToolCondition::class,
+            'status' => ToolCheckoutStatus::class,
         ];
     }
 
@@ -65,9 +78,19 @@ class ToolCheckout extends Model
         return $this->belongsTo(User::class, 'issued_by');
     }
 
+    public function receivedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'received_by');
+    }
+
     public function isOpen(): bool
     {
         return $this->returned_at === null;
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->returned_at !== null;
     }
 
     public function isOverdue(): bool

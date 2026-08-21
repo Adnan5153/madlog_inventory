@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#0f172a">
     <title>Staff · Madlog Store</title>
-    @vite(['resources/css/landing/landing.scss', 'resources/js/landing.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-light text-body">
     <main class="container py-5" style="max-width: 760px;">

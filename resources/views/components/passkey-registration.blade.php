@@ -1,5 +1,7 @@
 @assets
-@vite('resources/js/passkeys.js')
+{{-- `window.Passkeys` is provided by resources/js/app.js, which is already
+     loaded by the auth layout. The `@assets` block stays so future updates
+     can re-enqueue additional scripts if needed. --}}
 @endassets
 
 <div

@@ -10,6 +10,6 @@
 
     <form method="POST" action="{{ route('admin.suppliers.store') }}">
         @csrf
-        @include('admin.suppliers._form', ['supplier' => null])
+        @include('admin.suppliers._form', ['supplier' => null, 'workshops' => $workshops])
     </form>
 @endsection

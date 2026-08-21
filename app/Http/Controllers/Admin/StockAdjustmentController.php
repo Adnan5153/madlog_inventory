@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\DomainException;
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
 use App\Http\Controllers\Controller;
 use App\Models\InventoryItem;
 use App\Models\StockAdjustment;
 use App\Services\Inventory\StockAdjustmentService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StockAdjustmentController extends Controller
 {
+    use HasLiveSearch;
+
     public function __construct(protected StockAdjustmentService $service) {}
 
     public function index(Request $request): View
@@ -20,15 +24,7 @@ class StockAdjustmentController extends Controller
         $q = trim((string) $request->query('q', ''));
         $status = $request->query('status');
 
-        $adjustments = StockAdjustment::query()
-            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
-                $w->where('adjustment_number', 'like', "%{$q}%")
-                    ->orWhere('reason', 'like', "%{$q}%");
-            }))
-            ->when($status, fn ($qb) => $qb->where('status', $status))
-            ->with(['requester:id,name', 'approver:id,name'])
-            ->withCount('items')
-            ->latest('created_at')
+        $adjustments = $this->buildStockAdjustmentsQuery($q, $status)
             ->paginate(20)
             ->withQueryString();
 
@@ -45,6 +41,47 @@ class StockAdjustmentController extends Controller
                 StockAdjustment::STATUS_APPLIED,
             ],
         ]);
+    }
+
+    /**
+     * Live-search JSON endpoint for the stock adjustments index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        $status = $request->query('status');
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.stock-adjustments._row-template',
+            singular: 'adjustment',
+            builder: fn () => $this->buildStockAdjustmentsQuery($q, $status),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly.
+     */
+    private function buildStockAdjustmentsQuery(string $q, mixed $status)
+    {
+        return StockAdjustment::query()
+            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
+                $w->where('adjustment_number', 'like', "%{$q}%")
+                    ->orWhere('reason', 'like', "%{$q}%");
+            }))
+            ->when($status, fn ($qb) => $qb->where('status', $status))
+            ->with(['requester:id,name', 'approver:id,name'])
+            ->withCount('items')
+            ->latest('created_at');
+    }
+
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$adjustments`.
+     */
+    protected function singularNoun(): string
+    {
+        return 'adjustment';
     }
 
     public function create(Request $request): View
@@ -70,10 +107,24 @@ class StockAdjustmentController extends Controller
             'items.*.unit_cost' => ['nullable', 'numeric', 'min:0'],
         ]);
 
+        $workshopId = (int) ($request->user()->workshop_id ?? 0);
+        if (! $workshopId) {
+            $firstItem = InventoryItem::query()
+                ->whereKey($data['items'][0]['inventory_item_id'])
+                ->first(['workshop_id']);
+            $workshopId = (int) ($firstItem?->workshop_id ?? 0);
+        }
+
+        if (! $workshopId) {
+            return back()->withInput()->withErrors([
+                'adjustment' => 'Could not determine the workshop for this adjustment.',
+            ]);
+        }
+
         try {
             $adj = $this->service->create(
                 $request->user(),
-                $request->user()->workshop_id,
+                $workshopId,
                 $data['reason'],
                 $data['notes'] ?? null,
                 $data['items'],

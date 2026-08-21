@@ -13,7 +13,7 @@
         @include('admin.units._form')
 
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning"><i class="bi bi-check-lg me-1"></i> Create unit</button>
+            <button class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Create unit</button>
             <a href="{{ route('admin.units.index') }}" class="btn btn-outline-secondary">Cancel</a>
         </div>
     </form>

@@ -11,10 +11,10 @@
     <form method="POST" action="{{ route('admin.purchase-orders.store') }}">
         @csrf
 
-        @include('admin.purchase-orders._form', ['order' => null, 'suppliers' => $suppliers])
+        @include('admin.purchase-orders._form', ['order' => null, 'suppliers' => $suppliers, 'workshops' => $workshops])
 
         <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-save me-1"></i> Create draft
             </button>
             <a href="{{ route('admin.purchase-orders.index') }}" class="btn btn-outline-secondary">Cancel</a>

@@ -8,7 +8,7 @@
             <a href="{{ route('admin.permissions.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-key me-1"></i> Permission catalogue
             </a>
-            <a href="{{ route('admin.roles.create') }}" class="btn btn-warning">
+            <a href="{{ route('admin.roles.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i> New role
             </a>
         </x-slot:actions>
@@ -40,17 +40,11 @@
                         <td class="text-end">{{ number_format($role->users_count) }}</td>
                         <td class="text-end">{{ number_format($role->permissions_count) }}</td>
                         <td class="text-end">
-                            <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
+                            <x-admin.actions.edit :href="route('admin.roles.edit', $role)" />
                             @if(! $role->is_system)
-                                <form method="POST" action="{{ route('admin.roles.destroy', $role) }}" class="d-inline" data-confirm-form data-confirm="Delete this role? Users with only this role lose its permissions on next request.">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <x-admin.actions.delete
+                                    :action="route('admin.roles.destroy', $role)"
+                                    confirm="Delete this role? Users with only this role lose its permissions on next request." />
                             @endif
                         </td>
                     </tr>

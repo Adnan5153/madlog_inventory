@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Workshop;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -17,6 +19,7 @@ use Illuminate\View\View;
 class UserController extends Controller
 {
     use AuthorizesRequests;
+    use HasLiveSearch;
 
     public function index(Request $request): View
     {
@@ -25,14 +28,7 @@ class UserController extends Controller
         $q = trim((string) $request->query('q', ''));
         $role = trim((string) $request->query('role', ''));
 
-        $users = User::query()
-            ->with('workshop:id,name', 'rbacRoles:id,name,slug')
-            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
-                $w->where('name', 'like', "%{$q}%")
-                    ->orWhere('email', 'like', "%{$q}%");
-            }))
-            ->when($role !== '', fn ($qb) => $qb->where('role', $role))
-            ->orderBy('name')
+        $users = $this->buildUsersQuery($q, $role)
             ->paginate(25)
             ->withQueryString();
 
@@ -42,6 +38,48 @@ class UserController extends Controller
             'q' => $q,
             'role' => $role,
         ]);
+    }
+
+    /**
+     * Live-search JSON endpoint for the users index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $this->authorize('viewAny', User::class);
+
+        $q = trim((string) $request->query('q', ''));
+        $role = trim((string) $request->query('role', ''));
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.users._row-template',
+            singular: 'user',
+            builder: fn () => $this->buildUsersQuery($q, $role),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly.
+     */
+    private function buildUsersQuery(string $q, string $role)
+    {
+        return User::query()
+            ->with('workshop:id,name', 'rbacRoles:id,name,slug')
+            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
+                $w->where('name', 'like', "%{$q}%")
+                    ->orWhere('email', 'like', "%{$q}%");
+            }))
+            ->when($role !== '', fn ($qb) => $qb->where('role', $role))
+            ->orderBy('name');
+    }
+
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$users`.
+     */
+    protected function singularNoun(): string
+    {
+        return 'user';
     }
 
     public function create(): View

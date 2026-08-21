@@ -13,31 +13,39 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $id
  * @property int $workshop_id
  * @property int|null $category_id
- * @property int|null $brand_id
+ * @property int|null $unit_id
  * @property string|null $sku
  * @property string|null $oem_part_number
+ * @property string|null $brand
  * @property string|null $barcode
  * @property string $name
  * @property string|null $description
+ * @property string|null $equipment_compatibility
+ * @property int|null $bin_location_id
+ * @property string|null $location
+ * @property int|null $supplier_id
  * @property int $reorder_threshold
  * @property int $reorder_quantity
- * @property numeric $cost_price
- * @property numeric $sale_price
+ * @property string $cost_price
  * @property bool $is_active
  */
 #[Fillable([
     'workshop_id',
     'category_id',
-    'brand_id',
+    'unit_id',
     'sku',
     'oem_part_number',
+    'brand',
     'barcode',
     'name',
     'description',
+    'equipment_compatibility',
+    'bin_location_id',
+    'location',
+    'supplier_id',
     'reorder_threshold',
     'reorder_quantity',
     'cost_price',
-    'sale_price',
     'is_active',
 ])]
 class Part extends Model
@@ -53,7 +61,6 @@ class Part extends Model
             'reorder_threshold' => 'integer',
             'reorder_quantity' => 'integer',
             'cost_price' => 'decimal:2',
-            'sale_price' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }
@@ -63,14 +70,19 @@ class Part extends Model
         return $this->belongsTo(PartCategory::class, 'category_id');
     }
 
-    public function brand(): BelongsTo
-    {
-        return $this->belongsTo(Brand::class);
-    }
-
     public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
+    }
+
+    public function binLocation(): BelongsTo
+    {
+        return $this->belongsTo(BinLocation::class, 'bin_location_id');
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     public function inventoryItems(): HasMany

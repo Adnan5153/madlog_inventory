@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesWorkshopScoping;
 use App\Models\Supplier;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreSupplierRequest extends FormRequest
 {
+    use HandlesWorkshopScoping;
+
     public function authorize(): bool
     {
         return $this->user()?->can('create', Supplier::class) ?? false;
@@ -15,10 +18,16 @@ class StoreSupplierRequest extends FormRequest
 
     public function rules(): array
     {
-        $workshopId = $this->user()?->workshop_id;
+        $workshopId = $this->effectiveWorkshopId();
 
         return [
-            'name' => ['required', 'string', 'max:160', Rule::unique('suppliers', 'name')->where('workshop_id', $workshopId)->whereNull('deleted_at')],
+            'workshop_id' => $this->workshopRule(),
+            'name' => [
+                'required', 'string', 'max:160',
+                Rule::unique('suppliers', 'name')
+                    ->where('workshop_id', $workshopId)
+                    ->whereNull('deleted_at'),
+            ],
             'contact_name' => ['nullable', 'string', 'max:160'],
             'email' => ['nullable', 'email', 'max:160'],
             'phone' => ['nullable', 'string', 'max:64'],
@@ -28,5 +37,10 @@ class StoreSupplierRequest extends FormRequest
             'supplier_category_id' => ['nullable', 'integer', 'exists:supplier_categories,id'],
             'is_active' => ['required', 'boolean'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->prepareForWorkshopScoping();
     }
 }

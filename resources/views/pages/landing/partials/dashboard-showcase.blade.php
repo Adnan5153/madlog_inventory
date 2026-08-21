@@ -1,7 +1,7 @@
 <section id="showcase" class="section bg-dark text-light">
     <div class="container">
         <div class="text-center mx-auto mb-5" style="max-width: 720px;">
-            <p class="eyebrow text-warning mb-2">THE PRODUCT</p>
+            <p class="eyebrow text-primary mb-2">THE PRODUCT</p>
             <h2 class="display-5 fw-bold mb-3 text-balance">One Dashboard. Every Bay.</h2>
             <p class="lead opacity-75">
                 See live inventory, low-stock alerts, and job-card consumption from a single screen — built for the realities of a working storeroom.

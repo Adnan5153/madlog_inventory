@@ -9,7 +9,7 @@
     <x-admin.page-header :title="$warehouse->name" :subtitle="$warehouse->slug ?? 'No slug'">
         <x-slot:actions>
             @if($user?->isAdmin() && $user?->workshop_id === null)
-                <a href="{{ route('admin.warehouses.edit', $warehouse) }}" class="btn btn-warning">
+                <a href="{{ route('admin.warehouses.edit', $warehouse) }}" class="btn btn-primary">
                     <i class="bi bi-pencil me-1"></i> Edit
                 </a>
             @endif

@@ -9,7 +9,7 @@
     <x-admin.page-header :title="$order->po_number" :subtitle="$order->supplier?->name ?? ''">
         <x-slot:actions>
             @if(in_array($order->status, ['draft'], true))
-                <a href="{{ route('admin.purchase-orders.edit', $order) }}" class="btn btn-warning">
+                <a href="{{ route('admin.purchase-orders.edit', $order) }}" class="btn btn-primary">
                     <i class="bi bi-pencil me-1"></i> Edit
                 </a>
             @endif
@@ -30,7 +30,7 @@
                 </form>
             @endif
             @if(in_array($order->status, ['approved','partially_received'], true))
-                <a href="{{ route('admin.purchase-orders.receive', $order) }}" class="btn btn-warning">
+                <a href="{{ route('admin.purchase-orders.receive', $order) }}" class="btn btn-primary">
                     <i class="bi bi-box-arrow-in-down me-1"></i> Receive goods
                 </a>
             @endif

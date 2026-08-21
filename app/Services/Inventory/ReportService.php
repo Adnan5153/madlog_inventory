@@ -10,6 +10,8 @@ use App\Models\PartCategory;
 use App\Models\PurchaseOrder;
 use App\Models\StockMovement;
 use App\Models\Supplier;
+use App\Models\Tool;
+use App\Models\ToolCheckout;
 use App\Models\Unit;
 use App\Models\Workshop;
 use App\Scopes\WorkshopScope;
@@ -66,7 +68,7 @@ class ReportService
                 ->where('workshop_id', $workshopId)
                 ->where('is_active', true)
                 ->withSum('inventoryItems as on_hand', 'quantity')
-                ->with('category:id,name', 'brand:id,name')
+                ->with('category:id,name')
                 ->get()
                 ->filter(function (Part $p) {
                     $onHand = (float) ($p->on_hand ?? 0);
@@ -146,11 +148,25 @@ class ReportService
     /**
      * Workshop counts for the dashboard.
      *
-     * @return array{workshops: int, parts: int, suppliers: int, equipment: int, units: int}
+     * @return array{workshops: int, parts: int, suppliers: int, equipment: int, units: int, tools: int, tools_available: int, tools_checked_out: int, tools_under_maintenance: int, tools_overdue_checkouts: int}
      */
     public function dashboardTotals(?int $workshopId = null): array
     {
         return WorkshopScope::disabled(function () use ($workshopId) {
+            $toolsQuery = Tool::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId));
+            $toolsByStatus = (clone $toolsQuery)
+                ->selectRaw('status, COUNT(*) as c')
+                ->groupBy('status')
+                ->pluck('c', 'status')
+                ->all();
+
+            $overdueCheckouts = ToolCheckout::query()
+                ->whereNull('returned_at')
+                ->whereNotNull('expected_return_at')
+                ->where('expected_return_at', '<', now())
+                ->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))
+                ->count();
+
             return [
                 'workshops' => Workshop::query()->when($workshopId, fn ($q) => $q->where('id', $workshopId))->count(),
                 'parts' => Part::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
@@ -159,6 +175,11 @@ class ReportService
                 'units' => Unit::query()->where('is_active', true)->count(),
                 'categories' => PartCategory::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
                 'departments' => Department::query()->when($workshopId, fn ($q) => $q->where('workshop_id', $workshopId))->count(),
+                'tools' => array_sum($toolsByStatus),
+                'tools_available' => $toolsByStatus['available'] ?? 0,
+                'tools_checked_out' => $toolsByStatus['checked_out'] ?? 0,
+                'tools_under_maintenance' => $toolsByStatus['under_maintenance'] ?? 0,
+                'tools_overdue_checkouts' => $overdueCheckouts,
             ];
         });
     }

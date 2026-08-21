@@ -12,7 +12,7 @@
         @method('PUT')
         @include('admin.roles._form')
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Save changes
             </button>
             <a href="{{ route('admin.roles.index') }}" class="btn btn-outline-secondary">Cancel</a>

@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesWorkshopScoping;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateSupplierRequest extends FormRequest
 {
+    use HandlesWorkshopScoping;
+
     public function authorize(): bool
     {
         return $this->user()?->can('update', $this->route('supplier')) ?? false;
@@ -15,9 +18,10 @@ class UpdateSupplierRequest extends FormRequest
     public function rules(): array
     {
         $supplier = $this->route('supplier');
-        $workshopId = $this->user()?->workshop_id;
+        $workshopId = $this->effectiveWorkshopId();
 
         return [
+            'workshop_id' => $this->workshopRule(),
             'name' => [
                 'required', 'string', 'max:160',
                 Rule::unique('suppliers', 'name')
@@ -34,5 +38,10 @@ class UpdateSupplierRequest extends FormRequest
             'supplier_category_id' => ['nullable', 'integer', 'exists:supplier_categories,id'],
             'is_active' => ['required', 'boolean'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->lockWorkshopFromRouteModel('supplier');
     }
 }

@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Brand;
 use App\Models\Part;
 use App\Models\PartCategory;
 use App\Models\Workshop;
@@ -30,16 +29,15 @@ class PartFactory extends Factory
         return [
             'workshop_id' => Workshop::factory(),
             'category_id' => PartCategory::factory(),
-            'brand_id' => Brand::factory(),
             'sku' => Str::upper(Str::random(3)).'-'.fake()->numberBetween(1000, 9999),
             'oem_part_number' => 'OEM-'.Str::upper(Str::random(8)),
+            'brand' => fake()->randomElement(['Bosch', 'NGK', 'Denso', 'ACDelco', 'Mahle', 'Continental', 'Valeo', 'Brembo']),
             'barcode' => (string) fake()->numberBetween(1000000000000, 9999999999999),
             'name' => $name,
             'description' => fake()->sentence(),
             'reorder_threshold' => fake()->numberBetween(2, 10),
             'reorder_quantity' => fake()->numberBetween(10, 50),
             'cost_price' => fake()->randomFloat(2, 1, 80),
-            'sale_price' => fake()->randomFloat(2, 5, 150),
             'is_active' => true,
         ];
     }

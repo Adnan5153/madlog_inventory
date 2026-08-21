@@ -10,10 +10,10 @@
 
     <form method="POST" action="{{ route('admin.categories.store') }}">
         @csrf
-        @include('admin.categories._form')
+        @include('admin.categories._form', ['workshops' => $workshops])
 
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Create category
             </button>
             <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary">Cancel</a>

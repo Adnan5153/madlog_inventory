@@ -13,10 +13,10 @@
         @csrf
         @method('PUT')
 
-        @include('admin.purchase-orders._form', ['order' => $order, 'suppliers' => $suppliers])
+        @include('admin.purchase-orders._form', ['order' => $order, 'suppliers' => $suppliers, 'workshops' => $workshops])
 
         <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-save me-1"></i> Save changes
             </button>
             <a href="{{ route('admin.purchase-orders.show', $order) }}" class="btn btn-outline-secondary">Cancel</a>

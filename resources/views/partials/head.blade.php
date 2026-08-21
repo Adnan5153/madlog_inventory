@@ -13,3 +13,14 @@
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
+
+<script>
+    (function () {
+        try {
+            var density = localStorage.getItem('madlog.table.density');
+            if (density === 'compact' || density === 'comfortable') {
+                document.documentElement.dataset.density = density;
+            }
+        } catch (e) {}
+    })();
+</script>

@@ -48,11 +48,6 @@ class Workshop extends Model
         return $this->hasMany(PartCategory::class);
     }
 
-    public function brands(): HasMany
-    {
-        return $this->hasMany(Brand::class);
-    }
-
     public function parts(): HasMany
     {
         return $this->hasMany(Part::class);

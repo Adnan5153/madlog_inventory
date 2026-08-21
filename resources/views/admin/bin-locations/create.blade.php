@@ -10,6 +10,6 @@
 
     <form method="POST" action="{{ route('admin.bin-locations.store') }}">
         @csrf
-        @include('admin.bin-locations._form', ['bin' => null])
+        @include('admin.bin-locations._form', ['bin' => null, 'workshops' => $workshops])
     </form>
 @endsection

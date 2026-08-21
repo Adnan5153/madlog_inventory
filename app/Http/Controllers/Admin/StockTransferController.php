@@ -3,16 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\DomainException;
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
 use App\Http\Controllers\Controller;
 use App\Models\BinLocation;
 use App\Models\StockTransfer;
 use App\Services\Inventory\StockTransferService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class StockTransferController extends Controller
 {
+    use HasLiveSearch;
+
     public function __construct(protected StockTransferService $service) {}
 
     public function index(Request $request): View
@@ -20,12 +24,7 @@ class StockTransferController extends Controller
         $q = trim((string) $request->query('q', ''));
         $status = $request->query('status');
 
-        $transfers = StockTransfer::query()
-            ->when($q !== '', fn ($qb) => $qb->where('transfer_number', 'like', "%{$q}%"))
-            ->when($status, fn ($qb) => $qb->where('status', $status))
-            ->with(['sourceBin:id,code', 'destinationBin:id,code', 'transferer:id,name', 'receiver:id,name'])
-            ->withCount('items')
-            ->latest('created_at')
+        $transfers = $this->buildStockTransfersQuery($q, $status)
             ->paginate(20)
             ->withQueryString();
 
@@ -41,6 +40,44 @@ class StockTransferController extends Controller
                 StockTransfer::STATUS_CANCELLED,
             ],
         ]);
+    }
+
+    /**
+     * Live-search JSON endpoint for the stock transfers index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        $status = $request->query('status');
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.stock-transfers._row-template',
+            singular: 'transfer',
+            builder: fn () => $this->buildStockTransfersQuery($q, $status),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly.
+     */
+    private function buildStockTransfersQuery(string $q, mixed $status)
+    {
+        return StockTransfer::query()
+            ->when($q !== '', fn ($qb) => $qb->where('transfer_number', 'like', "%{$q}%"))
+            ->when($status, fn ($qb) => $qb->where('status', $status))
+            ->with(['sourceBin:id,code', 'destinationBin:id,code', 'transferer:id,name', 'receiver:id,name'])
+            ->withCount('items')
+            ->latest('created_at');
+    }
+
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$transfers`.
+     */
+    protected function singularNoun(): string
+    {
+        return 'transfer';
     }
 
     public function create(Request $request): View

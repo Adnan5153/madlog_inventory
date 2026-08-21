@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Models\Brand;
+use App\Models\BinLocation;
 use App\Models\InventoryItem;
 use App\Models\Part;
 use App\Models\PartCategory;
@@ -76,7 +76,6 @@ class CatalogAndSuppliersTest extends TestCase
     public function test_admin_can_create_product(): void
     {
         $category = PartCategory::factory()->create(['workshop_id' => $this->workshop->id]);
-        $brand = Brand::factory()->create(['workshop_id' => $this->workshop->id]);
         $unit = Unit::factory()->create();
 
         $this->actingAs($this->admin)
@@ -85,10 +84,9 @@ class CatalogAndSuppliersTest extends TestCase
                 'sku' => 'BP-0001',
                 'oem_part_number' => 'OEM-1',
                 'category_id' => $category->id,
-                'brand_id' => $brand->id,
+                'brand' => 'Bosch',
                 'unit_id' => $unit->id,
                 'cost_price' => 12.50,
-                'sale_price' => 19.99,
                 'reorder_threshold' => 5,
                 'reorder_quantity' => 25,
                 'is_active' => true,
@@ -118,7 +116,6 @@ class CatalogAndSuppliersTest extends TestCase
                 'name' => 'New name',
                 'sku' => $part->sku,
                 'cost_price' => $part->cost_price,
-                'sale_price' => $part->sale_price,
                 'reorder_threshold' => $part->reorder_threshold,
                 'reorder_quantity' => $part->reorder_quantity,
                 'is_active' => true,
@@ -145,7 +142,6 @@ class CatalogAndSuppliersTest extends TestCase
                 'name' => 'Same SKU',
                 'sku' => 'SHARED-SKU',
                 'cost_price' => 1.00,
-                'sale_price' => 2.00,
                 'reorder_threshold' => 1,
                 'reorder_quantity' => 1,
                 'is_active' => true,
@@ -178,9 +174,9 @@ class CatalogAndSuppliersTest extends TestCase
     public function test_product_import_creates_rows(): void
     {
         $csv = implode("\n", [
-            'sku,name,cost_price,sale_price,reorder_threshold,reorder_quantity',
-            'IMP-1,Imported part 1,10,15,2,10',
-            'IMP-2,Imported part 2,20,30,3,15',
+            'sku,name,cost_price,reorder_threshold,reorder_quantity',
+            'IMP-1,Imported part 1,10,2,10',
+            'IMP-2,Imported part 2,20,3,15',
         ]);
 
         $tmp = tempnam(sys_get_temp_dir(), 'parts-');
@@ -217,7 +213,6 @@ class CatalogAndSuppliersTest extends TestCase
             'sku' => 'EXP-1',
             'name' => 'Export me',
             'cost_price' => 9.99,
-            'sale_price' => 19.99,
         ]);
 
         $response = $this->actingAs($this->admin)->get('/admin/products-export');
@@ -346,7 +341,6 @@ class CatalogAndSuppliersTest extends TestCase
             ->post('/admin/products', [
                 'name' => 'Forbidden',
                 'cost_price' => 1,
-                'sale_price' => 2,
                 'reorder_threshold' => 1,
                 'reorder_quantity' => 1,
                 'is_active' => true,
@@ -372,5 +366,503 @@ class CatalogAndSuppliersTest extends TestCase
         $this->actingAs($this->admin)
             ->get("/admin/products/{$partB->id}")
             ->assertStatus(404); // global scope hides it → 404
+    }
+
+    public function test_admin_can_create_product_with_bin_location(): void
+    {
+        $bin = BinLocation::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'code' => 'BIN-001',
+            'zone' => 'Z',
+            'aisle' => 'A',
+            'shelf' => '3',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Stored in bin',
+                'sku' => 'BIN-STORED',
+                'bin_location_id' => $bin->id,
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('parts', [
+            'workshop_id' => $this->workshop->id,
+            'sku' => 'BIN-STORED',
+            'bin_location_id' => $bin->id,
+            'location' => null,
+        ]);
+
+        $part = Part::where('sku', 'BIN-STORED')->first();
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('BIN-001')
+            ->assertSee('Z');
+    }
+
+    public function test_admin_can_create_product_with_custom_location(): void
+    {
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Stored in almirah',
+                'sku' => 'ALMIRAH-1',
+                'location' => 'Almirah #4, Shelf 3',
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('parts', [
+            'workshop_id' => $this->workshop->id,
+            'sku' => 'ALMIRAH-1',
+            'bin_location_id' => null,
+            'location' => 'Almirah #4, Shelf 3',
+        ]);
+
+        $part = Part::where('sku', 'ALMIRAH-1')->first();
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Almirah #4, Shelf 3');
+    }
+
+    public function test_admin_can_create_product_with_both_bin_and_custom_location(): void
+    {
+        $bin = BinLocation::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'code' => 'BIN-002',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Both set',
+                'sku' => 'BOTH-1',
+                'bin_location_id' => $bin->id,
+                'location' => 'CUSTOM-WINS',
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $part = Part::where('sku', 'BOTH-1')->first();
+        $this->assertNotNull($part->bin_location_id);
+        $this->assertSame('CUSTOM-WINS', $part->location);
+
+        // Free-text location wins in display precedence.
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('CUSTOM-WINS');
+    }
+
+    public function test_admin_can_update_product_storage(): void
+    {
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'bin_location_id' => null,
+            'location' => null,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->put("/admin/products/{$part->id}", [
+                'name' => $part->name,
+                'sku' => $part->sku,
+                'cost_price' => $part->cost_price,
+                'reorder_threshold' => $part->reorder_threshold,
+                'reorder_quantity' => $part->reorder_quantity,
+                'is_active' => true,
+                'location' => 'Off-site safe',
+            ])
+            ->assertRedirect('/admin/products');
+
+        $part->refresh();
+        $this->assertSame('Off-site safe', $part->location);
+    }
+
+    public function test_validation_rejects_bin_from_other_workshop(): void
+    {
+        // Bin belonging to the OTHER workshop.
+        $foreignBin = BinLocation::factory()->create([
+            'workshop_id' => $this->otherWorkshop->id,
+            'code' => 'FOREIGN-BIN',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Cross-tenant attempt',
+                'bin_location_id' => $foreignBin->id,
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('bin_location_id');
+
+        $this->assertDatabaseMissing('parts', [
+            'name' => 'Cross-tenant attempt',
+        ]);
+    }
+
+    public function test_search_finds_product_by_location_string(): void
+    {
+        Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Searchable by location',
+            'location' => 'Almirah #4, Shelf 3',
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/products?q=Almirah');
+
+        $response->assertOk();
+        $response->assertSee('Searchable by location');
+    }
+
+    public function test_search_finds_product_by_bin_code(): void
+    {
+        $bin = BinLocation::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'code' => 'STEEL-A1',
+        ]);
+
+        Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Lives in steel bin',
+            'bin_location_id' => $bin->id,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get('/admin/products?q=STEEL-A1');
+
+        $response->assertOk();
+        $response->assertSee('Lives in steel bin');
+    }
+
+    public function test_admin_can_create_product_with_supplier(): void
+    {
+        $supplier = Supplier::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Acme Parts',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Sourced from Acme',
+                'sku' => 'ACME-1',
+                'supplier_id' => $supplier->id,
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('parts', [
+            'workshop_id' => $this->workshop->id,
+            'sku' => 'ACME-1',
+            'supplier_id' => $supplier->id,
+        ]);
+
+        $part = Part::where('sku', 'ACME-1')->first();
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Acme Parts');
+    }
+
+    public function test_admin_can_create_product_without_supplier(): void
+    {
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'No supplier here',
+                'sku' => 'NOSUP-1',
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('parts', [
+            'sku' => 'NOSUP-1',
+            'supplier_id' => null,
+        ]);
+
+        $part = Part::where('sku', 'NOSUP-1')->first();
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Supplier')
+            ->assertSee('—');
+    }
+
+    public function test_admin_can_update_product_supplier(): void
+    {
+        $supplier = Supplier::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'New Vendor',
+        ]);
+
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'supplier_id' => null,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->put("/admin/products/{$part->id}", [
+                'name' => $part->name,
+                'sku' => $part->sku,
+                'cost_price' => $part->cost_price,
+                'reorder_threshold' => $part->reorder_threshold,
+                'reorder_quantity' => $part->reorder_quantity,
+                'is_active' => true,
+                'supplier_id' => $supplier->id,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $part->refresh();
+        $this->assertSame($supplier->id, $part->supplier_id);
+    }
+
+    public function test_admin_can_clear_supplier_on_update(): void
+    {
+        $supplier = Supplier::factory()->create(['workshop_id' => $this->workshop->id]);
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'supplier_id' => $supplier->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->put("/admin/products/{$part->id}", [
+                'name' => $part->name,
+                'sku' => $part->sku,
+                'cost_price' => $part->cost_price,
+                'reorder_threshold' => $part->reorder_threshold,
+                'reorder_quantity' => $part->reorder_quantity,
+                'is_active' => true,
+                'supplier_id' => null,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $part->refresh();
+        $this->assertNull($part->supplier_id);
+    }
+
+    public function test_validation_rejects_supplier_from_other_workshop(): void
+    {
+        $foreignSupplier = Supplier::factory()->create([
+            'workshop_id' => $this->otherWorkshop->id,
+            'name' => 'Foreign Vendor',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Cross-tenant supplier attempt',
+                'supplier_id' => $foreignSupplier->id,
+                'cost_price' => 5.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertSessionHasErrors('supplier_id');
+
+        $this->assertDatabaseMissing('parts', [
+            'name' => 'Cross-tenant supplier attempt',
+        ]);
+    }
+
+    public function test_show_page_renders_supplier_label_and_name(): void
+    {
+        $supplier = Supplier::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Show Supplier Co',
+        ]);
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'supplier_id' => $supplier->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Supplier')
+            ->assertSee('Show Supplier Co');
+    }
+
+    public function test_index_page_does_not_render_supplier_name(): void
+    {
+        $uniqueName = 'ZZZ-UNIQUE-SUPPLIER-'.uniqid();
+        $supplier = Supplier::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => $uniqueName,
+        ]);
+        Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Product with hidden supplier',
+            'supplier_id' => $supplier->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get('/admin/products')
+            ->assertOk()
+            ->assertSee('Product with hidden supplier')
+            ->assertDontSee($uniqueName);
+    }
+
+    public function test_admin_can_create_product_with_equipment_compatibility(): void
+    {
+        $compat = "Toyota Corolla 2014–2018\nHonda Civic 2016+";
+
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Brake disc rotor',
+                'sku' => 'COMPAT-1',
+                'equipment_compatibility' => $compat,
+                'cost_price' => 25.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('parts', [
+            'workshop_id' => $this->workshop->id,
+            'sku' => 'COMPAT-1',
+            'equipment_compatibility' => $compat,
+        ]);
+
+        $part = Part::where('sku', 'COMPAT-1')->first();
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Equipment compatibility')
+            ->assertSee('Toyota Corolla 2014–2018');
+    }
+
+    public function test_admin_can_create_product_without_equipment_compatibility(): void
+    {
+        $this->actingAs($this->admin)
+            ->post('/admin/products', [
+                'name' => 'Generic bolt',
+                'sku' => 'NOCOMPAT-1',
+                'cost_price' => 1.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 5,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $this->assertDatabaseHas('parts', [
+            'sku' => 'NOCOMPAT-1',
+            'equipment_compatibility' => null,
+        ]);
+
+        $part = Part::where('sku', 'NOCOMPAT-1')->first();
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Equipment compatibility')
+            ->assertSee('—');
+    }
+
+    public function test_admin_can_update_product_equipment_compatibility(): void
+    {
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'equipment_compatibility' => null,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->put("/admin/products/{$part->id}", [
+                'name' => $part->name,
+                'sku' => $part->sku,
+                'cost_price' => $part->cost_price,
+                'reorder_threshold' => $part->reorder_threshold,
+                'reorder_quantity' => $part->reorder_quantity,
+                'is_active' => true,
+                'equipment_compatibility' => 'Yamaha FZ-16, Honda CB350',
+            ])
+            ->assertRedirect('/admin/products');
+
+        $part->refresh();
+        $this->assertSame('Yamaha FZ-16, Honda CB350', $part->equipment_compatibility);
+    }
+
+    public function test_admin_can_clear_equipment_compatibility_on_update(): void
+    {
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'equipment_compatibility' => 'Initial compatibility text',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->put("/admin/products/{$part->id}", [
+                'name' => $part->name,
+                'sku' => $part->sku,
+                'cost_price' => $part->cost_price,
+                'reorder_threshold' => $part->reorder_threshold,
+                'reorder_quantity' => $part->reorder_quantity,
+                'is_active' => true,
+                'equipment_compatibility' => null,
+            ])
+            ->assertRedirect('/admin/products');
+
+        $part->refresh();
+        $this->assertNull($part->equipment_compatibility);
+    }
+
+    public function test_show_page_renders_equipment_compatibility_card(): void
+    {
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Brake pad set',
+            'equipment_compatibility' => 'Maruti Swift, Hyundai i20',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Equipment compatibility')
+            ->assertSee('Maruti Swift, Hyundai i20');
+    }
+
+    public function test_show_page_renders_dash_when_equipment_compatibility_empty(): void
+    {
+        $part = Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Universal fitting',
+            'equipment_compatibility' => null,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get("/admin/products/{$part->id}")
+            ->assertOk()
+            ->assertSee('Equipment compatibility')
+            ->assertSee('—');
+    }
+
+    public function test_index_page_does_not_render_equipment_compatibility(): void
+    {
+        $uniqueCompat = 'ZZZ-UNIQUE-COMPAT-'.uniqid();
+        Part::factory()->create([
+            'workshop_id' => $this->workshop->id,
+            'name' => 'Product with hidden compatibility',
+            'equipment_compatibility' => $uniqueCompat,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get('/admin/products')
+            ->assertOk()
+            ->assertSee('Product with hidden compatibility')
+            ->assertDontSee($uniqueCompat);
     }
 }

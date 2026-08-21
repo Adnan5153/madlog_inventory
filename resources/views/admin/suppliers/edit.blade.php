@@ -11,6 +11,6 @@
     <form method="POST" action="{{ route('admin.suppliers.update', $supplier) }}">
         @csrf
         @method('PUT')
-        @include('admin.suppliers._form', ['supplier' => $supplier])
+        @include('admin.suppliers._form', ['supplier' => $supplier, 'workshops' => $workshops])
     </form>
 @endsection

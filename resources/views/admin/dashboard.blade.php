@@ -6,8 +6,8 @@
         :subtitle="'Welcome, '.($user?->name ?? 'admin').'. Here is the state of your inventory.'">
         <x-slot:actions>
             @if (Route::has('admin.products.index'))
-                <a href="{{ route('admin.products.index') }}" class="btn btn-warning">
-                    <i class="bi bi-box-seam me-1"></i> Products
+                <a href="{{ route('admin.products.index') }}" class="btn btn-primary">
+                    <i class="bi bi-box-seam me-1"></i> Browse products
                 </a>
             @endif
             <a href="{{ route('admin.settings.edit') }}" class="btn btn-outline-secondary">
@@ -75,6 +75,37 @@
     </div>
 
     <div class="row g-3 mb-4">
+        <div class="col-12 col-md-3">
+            <x-admin.stat-card
+                label="Tools"
+                :value="number_format($totals['tools'] ?? 0)"
+                icon="bi-wrench-adjustable"
+                :href="route('admin.tools.index')" />
+        </div>
+        <div class="col-12 col-md-3">
+            <x-admin.stat-card
+                label="Tools checked out"
+                :value="number_format($totals['tools_checked_out'] ?? 0)"
+                icon="bi-box-arrow-up-right"
+                variant="primary" />
+        </div>
+        <div class="col-12 col-md-3">
+            <x-admin.stat-card
+                label="Tools under maintenance"
+                :value="number_format($totals['tools_under_maintenance'] ?? 0)"
+                icon="bi-wrench"
+                variant="warning" />
+        </div>
+        <div class="col-12 col-md-3">
+            <x-admin.stat-card
+                label="Overdue tool checkouts"
+                :value="number_format($totals['tools_overdue_checkouts'] ?? 0)"
+                icon="bi-clock-history"
+                :variant="($totals['tools_overdue_checkouts'] ?? 0) > 0 ? 'danger' : 'success'" />
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
         <div class="col-12 col-lg-7">
             <x-admin.chart-card
                 title="Top 10 most-consumed parts (last 30 days)"
@@ -116,7 +147,7 @@
                         <tbody>
                             @forelse($recentActivity as $log)
                                 <tr>
-                                    <td class="small text-muted">{{ $log->created_at->format('Y-m-d H:i') }}</td>
+                                    <td class="small text-muted num">{{ $log->created_at->format('Y-m-d H:i') }}</td>
                                     <td><x-admin.status-badge variant="info">{{ $log->action }}</x-admin.status-badge></td>
                                 </tr>
                             @empty
@@ -133,103 +164,10 @@
 @endsection
 
 @push('scripts')
-    {{-- Chart.js global registered Chart + tree-shaken controllers via admin.js. --}}
+    {{-- Expose chart data to the consolidated app.js bundle, which owns the
+         Chart.js rendering logic. We just hand it a JSON-shaped object on
+         `window.__dashboardCharts` and let app.js pick it up. --}}
     <script>
-        (function () {
-            'use strict';
-
-            // Bar chart: top-N most-consumed parts.
-            const barLabels = @json($charts['topConsumed']['labels'] ?? []);
-            const barValues = @json($charts['topConsumed']['values'] ?? []);
-
-            if (barLabels.length && window.Chart) {
-                const canvas = document.getElementById('chart-top-consumed');
-                if (canvas) {
-                    new Chart(canvas, {
-                        type: 'bar',
-                        data: {
-                            labels: barLabels,
-                            datasets: [{
-                                label: 'Units consumed',
-                                data: barValues,
-                                backgroundColor: '#0d6efd',
-                                borderRadius: 4,
-                                maxBarThickness: 32,
-                            }],
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            indexAxis: 'y',
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: (ctx) => `${ctx.parsed.x} units`,
-                                    },
-                                },
-                            },
-                            scales: {
-                                x: {
-                                    beginAtZero: true,
-                                    ticks: { precision: 0 },
-                                },
-                            },
-                        },
-                    });
-                }
-            }
-
-            // Doughnut chart: inventory value by category.
-            const pieLabels = @json($charts['inventoryByCat']['labels'] ?? []);
-            const pieValues = @json($charts['inventoryByCat']['values'] ?? []);
-            const pieTotal  = @json($charts['inventoryByCat']['total']  ?? 0);
-
-            if (pieLabels.length && window.Chart) {
-                const canvas = document.getElementById('chart-inventory-by-category');
-                if (canvas) {
-                    const palette = [
-                        '#0d6efd', '#198754', '#dc3545', '#ffc107',
-                        '#6f42c1', '#fd7e14', '#20c997', '#0dcaf0',
-                    ];
-                    const colors = pieLabels.map((_, i) => palette[i % palette.length]);
-
-                    new Chart(canvas, {
-                        type: 'doughnut',
-                        data: {
-                            labels: pieLabels,
-                            datasets: [{
-                                data: pieValues,
-                                backgroundColor: colors,
-                                borderColor: '#fff',
-                                borderWidth: 2,
-                            }],
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom',
-                                    labels: { boxWidth: 12, padding: 8 },
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: (ctx) => {
-                                            const value = Number(ctx.parsed) || 0;
-                                            const pct = pieTotal > 0
-                                                ? ((value / pieTotal) * 100).toFixed(1)
-                                                : '0.0';
-                                            return `${ctx.label}: ${value.toFixed(2)} (${pct}%)`;
-                                        },
-                                    },
-                                },
-                            },
-                            cutout: '55%',
-                        },
-                    });
-                }
-            }
-        })();
+        window.__dashboardCharts = @json($charts ?? []);
     </script>
 @endpush

@@ -8,10 +8,35 @@
         ])->toArray()
         : [['part_id' => '', 'quantity_ordered' => 1, 'unit_cost' => '0.00']]
     );
+    $isGlobalAdmin = auth()->user()?->isGlobalAdmin() ?? false;
+    $selectedWorkshopId = old(
+        'workshop_id',
+        $order?->workshop_id ?? auth()->user()?->workshop_id
+    );
 @endphp
 
 <div class="admin-card">
     <div class="row g-3">
+        @if ($isGlobalAdmin)
+            <div class="col-md-6">
+                <label for="workshop_id" class="form-label">
+                    Workshop <span class="text-danger">*</span>
+                </label>
+                <select id="workshop_id" name="workshop_id" required
+                        class="form-select @error('workshop_id') is-invalid @enderror">
+                    <option value="">— Select a workshop —</option>
+                    @foreach ($workshops as $workshop)
+                        <option value="{{ $workshop->id }}"
+                                @selected((int) $selectedWorkshopId === (int) $workshop->id)>
+                            {{ $workshop->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="form-text">The workshop this purchase order belongs to.</div>
+                @error('workshop_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        @endif
+
         <div class="col-md-6">
             <label for="supplier_id" class="form-label">Supplier</label>
             <select id="supplier_id" name="supplier_id" class="form-select" required>
@@ -75,36 +100,4 @@
     </button>
 </div>
 
-@once
-    @push('scripts')
-        <script>
-            (function () {
-                const wrap = document.getElementById('po-lines');
-                const addBtn = document.getElementById('po-add');
-                if (!wrap || !addBtn) return;
-
-                addBtn.addEventListener('click', () => {
-                    const idx = wrap.querySelectorAll('.po-line').length;
-                    const tmpl = document.createElement('div');
-                    tmpl.className = 'row g-2 align-items-end po-line mb-2';
-                    tmpl.innerHTML = `
-                        <div class="col-md-5"><input type="number" name="items[${idx}][part_id]" class="form-control" placeholder="Part ID" required></div>
-                        <div class="col-md-3"><input type="number" step="0.01" name="items[${idx}][quantity_ordered]" class="form-control" value="1" min="0.01" required></div>
-                        <div class="col-md-3"><input type="number" step="0.01" name="items[${idx}][unit_cost]" class="form-control" value="0.00" min="0" required></div>
-                        <div class="col-md-1 text-end"><button type="button" class="btn btn-outline-danger btn-sm po-remove"><i class="bi bi-trash"></i></button></div>
-                    `;
-                    wrap.appendChild(tmpl);
-                });
-
-                wrap.addEventListener('click', (e) => {
-                    const btn = e.target.closest('.po-remove');
-                    if (!btn) return;
-                    const line = btn.closest('.po-line');
-                    if (line && wrap.querySelectorAll('.po-line').length > 1) {
-                        line.remove();
-                    }
-                });
-            })();
-        </script>
-    @endpush
-@endonce
+{{-- PO line item add/remove behaviour lives in resources/js/app.js --}}

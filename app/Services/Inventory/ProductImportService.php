@@ -3,7 +3,6 @@
 namespace App\Services\Inventory;
 
 use App\Models\AuditLog;
-use App\Models\Brand;
 use App\Models\Part;
 use App\Models\PartCategory;
 use App\Models\Unit;
@@ -18,16 +17,16 @@ use Throwable;
  *
  * The CSV layout is documented in /admin/products (download link).
  * Columns: sku, name, oem_part_number, barcode, description, category,
- * brand, unit, cost_price, sale_price, reorder_threshold,
- * reorder_quantity, is_active.
+ * brand, unit, cost_price, reorder_threshold, reorder_quantity, is_active.
  *
- * Category / brand / unit names are looked up by exact case-insensitive
- * match against the workshop-scoped master-data rows; a new category is
+ * Category / unit names are looked up by exact case-insensitive match
+ * against the workshop-scoped master-data rows; a new category is
  * auto-created with a slug if the operator didn't ship it first.
+ * Brand is a free-text field — it is persisted verbatim.
  */
 class ProductImportService
 {
-    public const REQUIRED_HEADERS = ['sku', 'name', 'cost_price', 'sale_price'];
+    public const REQUIRED_HEADERS = ['sku', 'name', 'cost_price'];
 
     public const OPTIONAL_HEADERS = [
         'oem_part_number', 'barcode', 'description',
@@ -114,14 +113,14 @@ class ProductImportService
         $rows = WorkshopScope::disabled(function () use ($workshopId) {
             return Part::query()
                 ->where('workshop_id', $workshopId)
-                ->with(['category:id,name', 'brand:id,name', 'unit:id,short_code'])
+                ->with(['category:id,name', 'unit:id,short_code'])
                 ->orderBy('name')
                 ->get();
         });
 
         $buf = fopen('php://temp', 'r+');
         $headers = ['sku', 'name', 'oem_part_number', 'barcode', 'description',
-            'category', 'brand', 'unit', 'cost_price', 'sale_price',
+            'category', 'brand', 'unit', 'cost_price',
             'reorder_threshold', 'reorder_quantity', 'is_active'];
         fputcsv($buf, $headers);
 
@@ -133,10 +132,9 @@ class ProductImportService
                 $p->barcode,
                 $p->description,
                 $p->category?->name,
-                $p->brand?->name,
+                $p->brand,
                 $p->unit?->short_code,
                 $p->cost_price,
-                $p->sale_price,
                 $p->reorder_threshold,
                 $p->reorder_quantity,
                 $p->is_active ? 1 : 0,
@@ -175,10 +173,9 @@ class ProductImportService
             'barcode' => $this->nullableString($data, 'barcode'),
             'description' => $this->nullableString($data, 'description'),
             'category_id' => $this->resolveCategoryId($data['category'] ?? null, $workshopId),
-            'brand_id' => $this->resolveBrandId($data['brand'] ?? null, $workshopId),
+            'brand' => $this->nullableString($data, 'brand'),
             'unit_id' => $this->resolveUnitId($data['unit'] ?? null),
             'cost_price' => (float) ($data['cost_price'] ?? 0),
-            'sale_price' => (float) ($data['sale_price'] ?? 0),
             'reorder_threshold' => (int) ($data['reorder_threshold'] ?? 0),
             'reorder_quantity' => (int) ($data['reorder_quantity'] ?? 0),
             'is_active' => ! in_array(strtolower((string) ($data['is_active'] ?? '1')), ['0', 'false', 'no'], true),
@@ -226,32 +223,6 @@ class ProductImportService
         ]);
 
         return $cat->id;
-    }
-
-    protected function resolveBrandId(mixed $value, int $workshopId): ?int
-    {
-        $value = trim((string) $value);
-        if ($value === '') {
-            return null;
-        }
-
-        $brand = WorkshopScope::disabled(function () use ($workshopId, $value) {
-            return Brand::query()
-                ->where('workshop_id', $workshopId)
-                ->whereRaw('LOWER(name) = ?', [Str::lower($value)])
-                ->first();
-        });
-        if ($brand) {
-            return $brand->id;
-        }
-
-        $brand = Brand::create([
-            'workshop_id' => $workshopId,
-            'name' => $value,
-            'slug' => Str::slug($value),
-        ]);
-
-        return $brand->id;
     }
 
     protected function resolveUnitId(mixed $value): ?int

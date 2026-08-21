@@ -8,11 +8,28 @@
 
     <x-admin.page-header title="Supplier categories" subtitle="Group vendors by category (OEM, Aftermarket, etc).">
         <x-slot:actions>
-            <a href="{{ route('admin.supplier-categories.create') }}" class="btn btn-warning">
+            <a href="{{ route('admin.supplier-categories.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i> New category
             </a>
         </x-slot:actions>
     </x-admin.page-header>
+
+    <x-admin.filter-bar>
+        {{-- Live-search wiring stub. The supplier-categories index has no
+             filters today; this empty form exists so the live-search JS
+             attaches cleanly and future filter inputs can be added here
+             without any further plumbing. --}}
+        <form method="GET" action="{{ route('admin.supplier-categories.index') }}"
+              class="row g-2 flex-grow-1"
+              data-live-search
+              data-search-url="{{ route('admin.supplier-categories.search') }}">
+            <x-admin.clear-filters :route="route('admin.supplier-categories.index')" />
+        </form>
+    </x-admin.filter-bar>
+
+    <x-admin.live-search-status singular="supplierCategory">
+        {{ $supplierCategories->total() }} {{ \Illuminate\Support\Str::plural('supplierCategory', $supplierCategories->total()) }}
+    </x-admin.live-search-status>
 
     <div class="admin-table">
         <table class="table align-middle mb-0">
@@ -25,34 +42,13 @@
                     <th class="text-end" style="width: 180px;">Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($categories as $cat)
-                    <tr>
-                        <td>{{ $cat->name }}</td>
-                        <td class="text-muted">{{ $cat->code }}</td>
-                        <td class="text-end">{{ number_format($cat->suppliers_count) }}</td>
-                        <td><x-admin.status-badge :on="$cat->is_active" /></td>
-                        <td class="text-end">
-                            <a href="{{ route('admin.supplier-categories.edit', $cat) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
-                            <form method="POST" action="{{ route('admin.supplier-categories.destroy', $cat) }}" class="d-inline" data-confirm-form data-confirm="Delete this category?">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5"><x-admin.empty-state icon="bi-tags" title="No supplier categories yet" /></td>
-                    </tr>
-                @endforelse
+            <tbody data-live-search-target>
+                @include('admin.supplier-categories._row-template', ['supplierCategories' => $supplierCategories])
             </tbody>
         </table>
     </div>
 
-    <div class="mt-3">{{ $categories->links('vendor.pagination.bootstrap-5') }}</div>
+    <div class="mt-3" data-live-search-pagination>
+        {{ $supplierCategories->links('vendor.pagination.bootstrap-5') }}
+    </div>
 @endsection

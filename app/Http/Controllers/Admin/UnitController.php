@@ -2,30 +2,27 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreUnitRequest;
 use App\Http\Requests\Admin\UpdateUnitRequest;
 use App\Models\AuditLog;
 use App\Models\Unit;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UnitController extends Controller
 {
+    use HasLiveSearch;
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
         $active = $request->query('active');
 
-        $units = Unit::query()
-            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
-                $w->where('name', 'like', "%{$q}%")
-                    ->orWhere('short_code', 'like', "%{$q}%");
-            }))
-            ->when($active === 'yes', fn ($qb) => $qb->where('is_active', true))
-            ->when($active === 'no', fn ($qb) => $qb->where('is_active', false))
-            ->orderBy('name')
+        $units = $this->buildUnitsQuery($q, $active)
             ->paginate(20)
             ->withQueryString();
 
@@ -35,6 +32,46 @@ class UnitController extends Controller
             'q' => $q,
             'active' => $active,
         ]);
+    }
+
+    /**
+     * Live-search JSON endpoint for the units index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        $active = $request->query('active');
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.units._row-template',
+            singular: 'unit',
+            builder: fn () => $this->buildUnitsQuery($q, $active),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly.
+     */
+    private function buildUnitsQuery(string $q, ?string $active)
+    {
+        return Unit::query()
+            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
+                $w->where('name', 'like', "%{$q}%")
+                    ->orWhere('short_code', 'like', "%{$q}%");
+            }))
+            ->when($active === 'yes', fn ($qb) => $qb->where('is_active', true))
+            ->when($active === 'no', fn ($qb) => $qb->where('is_active', false))
+            ->orderBy('name');
+    }
+
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$units`.
+     */
+    protected function singularNoun(): string
+    {
+        return 'unit';
     }
 
     public function create(): View

@@ -140,28 +140,5 @@
         </div>
     </div>
 
-    @if($showRoleWorkshop)
-        @push('scripts')
-            <script>
-                (function () {
-                    const role = document.getElementById('role');
-                    const workshop = document.getElementById('workshop_id');
-                    if (!role || !workshop) return;
-
-                    function sync() {
-                        const needsWorkshop = role.value === 'staff';
-                        workshop.required = needsWorkshop;
-                        workshop.disabled = role.value === '';
-
-                        // Visual cue for required state.
-                        workshop.classList.toggle('ring-1', needsWorkshop);
-                        workshop.classList.toggle('ring-amber-400', needsWorkshop);
-                    }
-
-                    role.addEventListener('change', sync);
-                    sync();
-                })();
-            </script>
-        @endpush
-    @endif
+    {{-- Role/workshop conditional requirement is handled in resources/js/app.js --}}
 </x-layouts::auth>

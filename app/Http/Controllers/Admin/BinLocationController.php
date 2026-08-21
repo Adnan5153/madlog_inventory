@@ -2,24 +2,74 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
+use App\Http\Controllers\Admin\Concerns\HasWorkshopPicker;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreBinLocationRequest;
 use App\Http\Requests\Admin\UpdateBinLocationRequest;
 use App\Models\AuditLog;
 use App\Models\BinLocation;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class BinLocationController extends Controller
 {
+    use HasLiveSearch;
+    use HasWorkshopPicker;
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
         $active = $request->query('active');
         $zone = $request->query('zone');
 
-        $bins = BinLocation::query()
+        $hasFilters = collect($request->query())
+            ->filter(fn ($v) => $v !== null && $v !== '')
+            ->isNotEmpty();
+
+        $binLocations = $this->buildBinLocationsQuery($q, $active, $zone)
+            ->paginate(20)
+            ->withQueryString();
+
+        $zones = BinLocation::query()->whereNotNull('zone')->distinct()->orderBy('zone')->pluck('zone');
+
+        return view('admin.bin-locations.index', [
+            'title' => 'Bin locations',
+            'binLocations' => $binLocations,
+            'hasFilters' => $hasFilters,
+            'q' => $q,
+            'active' => $active,
+            'zone' => $zone,
+            'zones' => $zones,
+        ]);
+    }
+
+    /**
+     * Live-search JSON endpoint for the bin locations index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        $active = $request->query('active');
+        $zone = $request->query('zone');
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.bin-locations._row-template',
+            singular: 'binLocation',
+            builder: fn () => $this->buildBinLocationsQuery($q, $active, $zone),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly.
+     */
+    private function buildBinLocationsQuery(string $q, ?string $active, ?string $zone)
+    {
+        return BinLocation::query()
             ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
                 $w->where('code', 'like', "%{$q}%")
                     ->orWhere('zone', 'like', "%{$q}%")
@@ -30,35 +80,29 @@ class BinLocationController extends Controller
             ->when($active === 'no', fn ($qb) => $qb->where('is_active', false))
             ->when($zone, fn ($qb) => $qb->where('zone', $zone))
             ->withSum('inventoryItems as on_hand', 'quantity')
-            ->orderBy('code')
-            ->paginate(20);
-
-        $zones = BinLocation::query()->whereNotNull('zone')->distinct()->orderBy('zone')->pluck('zone');
-
-        return view('admin.bin-locations.index', [
-            'title' => 'Bin locations',
-            'bins' => $bins,
-            'q' => $q,
-            'active' => $active,
-            'zone' => $zone,
-            'zones' => $zones,
-        ]);
+            ->orderBy('code');
     }
 
-    public function create(Request $request): View
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$binLocations`.
+     */
+    protected function singularNoun(): string
     {
-        $workshopId = $request->user()->workshop_id;
+        return 'binLocation';
+    }
 
+    public function create(): View
+    {
         return view('admin.bin-locations.create', [
             'title' => 'New bin location',
-            'workshopId' => $workshopId,
+            'workshops' => $this->workshopsForForm(),
         ]);
     }
 
     public function store(StoreBinLocationRequest $request): RedirectResponse
     {
         $bin = BinLocation::create($request->validated());
-        AuditLog::record('bin_location.created', $bin, $bin->only(['code', 'zone', 'aisle']));
+        AuditLog::record('bin_location.created', $bin, $bin->only(['code', 'zone', 'aisle', 'workshop_id']));
 
         return redirect()->route('admin.bin-locations.index')->with('status', 'Bin location created.');
     }
@@ -68,6 +112,7 @@ class BinLocationController extends Controller
         return view('admin.bin-locations.edit', [
             'title' => 'Edit bin location',
             'bin' => $binLocation,
+            'workshops' => $this->workshopsForForm(),
         ]);
     }
 

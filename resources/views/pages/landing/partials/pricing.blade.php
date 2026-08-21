@@ -37,7 +37,7 @@
             <div class="col-lg-4">
                 <article class="card h-100 border-0 shadow-sm pricing-card pricing-card--featured">
                     <div class="card-body p-4 p-lg-5 d-flex flex-column">
-                        <span class="badge bg-warning text-dark fw-semibold align-self-start mb-3">Most Popular</span>
+                        <span class="badge bg-primary-subtle text-primary-emphasis fw-semibold align-self-start mb-3">Most Popular</span>
                         <h3 class="h4 fw-semibold mb-1">Multi-Bay Store</h3>
                         <p class="text-secondary mb-3">For growing workshops with larger inventories</p>
                         <div class="display-4 fw-bold mb-1">
@@ -54,7 +54,7 @@
                             <li class="d-flex gap-2"><i class="bi-check2 text-success mt-1" aria-hidden="true"></i><span>Priority support</span></li>
                         </ul>
 
-                        <a class="btn btn-warning fw-semibold mt-auto" href="#final-cta">Request Live Demo</a>
+                        <a class="btn btn-primary fw-semibold mt-auto" href="#final-cta">Request Live Demo</a>
                     </div>
                 </article>
             </div>

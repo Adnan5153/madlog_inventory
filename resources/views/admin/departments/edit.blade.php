@@ -10,10 +10,10 @@
 
     <form method="POST" action="{{ route('admin.departments.update', $department) }}">
         @csrf @method('PUT')
-        @include('admin.departments._form', ['department' => $department, 'managers' => $managers])
+        @include('admin.departments._form', ['department' => $department, 'managers' => $managers, 'workshops' => $workshops])
 
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning"><i class="bi bi-check-lg me-1"></i> Save changes</button>
+            <button class="btn btn-primary"><i class="bi bi-check-lg me-1"></i> Save changes</button>
             <a href="{{ route('admin.departments.index') }}" class="btn btn-outline-secondary">Cancel</a>
         </div>
     </form>

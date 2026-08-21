@@ -51,7 +51,7 @@
         <span class="fw-medium">Coolant — 1L Concentrate</span>
         <span class="mockup-stock-row__bin">D-02</span>
         <span class="mockup-stock-row__qty mockup-stock-row__qty--ok">6</span>
-        <span class="mockup-stock-row__status"><span class="badge text-bg-warning-subtle text-warning-emphasis">NEAR MIN</span></span>
+        <span class="mockup-stock-row__status"><span class="badge text-bg-primary-subtle text-primary-emphasis">NEAR MIN</span></span>
     </div>
 
     <div class="mockup-stock-row">

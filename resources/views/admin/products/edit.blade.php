@@ -6,11 +6,11 @@
         ['label' => $product->name],
     ]" />
 
-    <x-admin.page-header title="Edit product" subtitle="Update pricing, reorder policy, or classification." />
+    <x-admin.page-header title="Edit product" subtitle="Update cost, reorder policy, or classification." />
 
     <form method="POST" action="{{ route('admin.products.update', $product) }}">
         @csrf
         @method('PUT')
-        @include('admin.products._form', ['product' => $product])
+        @include('admin.products._form', ['product' => $product, 'workshops' => $workshops])
     </form>
 @endsection

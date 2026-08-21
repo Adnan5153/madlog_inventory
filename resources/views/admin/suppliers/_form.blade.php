@@ -1,7 +1,15 @@
-@props(['supplier' => null])
+@props([
+    'supplier' => null,
+    'workshops' => collect(),
+])
 
 @php
     $isEdit = $supplier !== null;
+    $isGlobalAdmin = auth()->user()?->isGlobalAdmin() ?? false;
+    $selectedWorkshopId = old(
+        'workshop_id',
+        $supplier?->workshop_id ?? auth()->user()?->workshop_id
+    );
 @endphp
 
 <div class="row g-3">
@@ -9,6 +17,26 @@
         <div class="admin-card">
             <h2 class="h6 mb-3">Identification</h2>
             <div class="row g-3">
+                @if ($isGlobalAdmin)
+                    <div class="col-12 col-md-6">
+                        <label for="workshop_id" class="form-label">
+                            Workshop <span class="text-danger">*</span>
+                        </label>
+                        <select id="workshop_id" name="workshop_id" required
+                                class="form-select @error('workshop_id') is-invalid @enderror">
+                            <option value="">— Select a workshop —</option>
+                            @foreach ($workshops as $workshop)
+                                <option value="{{ $workshop->id }}"
+                                        @selected((int) $selectedWorkshopId === (int) $workshop->id)>
+                                    {{ $workshop->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <div class="form-text">The workshop this supplier belongs to.</div>
+                        @error('workshop_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+                @endif
+
                 <div class="col-12 col-md-6">
                     <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
                     <input id="name" type="text" name="name" required maxlength="160"
@@ -85,5 +113,5 @@
 
 <div class="d-flex justify-content-end gap-2 mt-4">
     <a href="{{ route('admin.suppliers.index') }}" class="btn btn-outline-secondary">Cancel</a>
-    <button class="btn btn-warning">{{ $isEdit ? 'Save changes' : 'Create supplier' }}</button>
+    <button class="btn btn-primary">{{ $isEdit ? 'Save changes' : 'Create supplier' }}</button>
 </div>

@@ -83,7 +83,7 @@
         </div>
 
         <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-box-arrow-in-down me-1"></i> Record receipt
             </button>
             <a href="{{ route('admin.purchase-orders.show', $order) }}" class="btn btn-outline-secondary">Cancel</a>

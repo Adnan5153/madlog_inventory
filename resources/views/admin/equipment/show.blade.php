@@ -66,5 +66,9 @@
                 </div>
             </div>
         @endif
+
+        <div class="col-12">
+            @include('admin.equipment._consumables-tab', ['equipment' => $equipment])
+        </div>
     </div>
 @endsection

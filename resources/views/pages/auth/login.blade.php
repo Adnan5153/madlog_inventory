@@ -118,46 +118,5 @@
         </div>
     </div>
 
-    @if(app()->isLocal() && count($demoAccounts) > 0)
-        @push('scripts')
-            <script>
-                (function () {
-                    const picker = document.getElementById('demo-account');
-                    const emailInput = document.getElementById('email');
-                    const passwordInput = document.getElementById('password');
-                    const hint = document.getElementById('demo-hint');
-                    const hintRole = document.getElementById('demo-hint-role');
-                    const hintWorkshop = document.getElementById('demo-hint-workshop');
-                    if (!picker || !emailInput || !passwordInput) return;
-
-                    function applySelection() {
-                        const option = picker.options[picker.selectedIndex];
-                        if (!option || !option.value) {
-                            if (hint) hint.classList.add('hidden');
-                            return;
-                        }
-
-                        emailInput.value = option.value;
-                        emailInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-                        passwordInput.value = option.dataset.password || '';
-                        passwordInput.dispatchEvent(new Event('input', { bubbles: true }));
-
-                        if (hint && hintRole) {
-                            const role = option.dataset.role || '';
-                            const isGlobal = option.dataset.global === '1';
-                            const workshop = option.dataset.workshop || '';
-                            hintRole.textContent = role === 'admin'
-                                ? (isGlobal ? 'Global admin' : 'Workshop admin')
-                                : 'Staff';
-                            hintWorkshop.textContent = workshop ? ' — ' + workshop : '';
-                            hint.classList.remove('hidden');
-                        }
-                    }
-
-                    picker.addEventListener('change', applySelection);
-                })();
-            </script>
-        @endpush
-    @endif
+    {{-- Demo-account picker behaviour lives in resources/js/app.js --}}
 </x-layouts::auth>

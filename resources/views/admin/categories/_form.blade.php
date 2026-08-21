@@ -1,9 +1,43 @@
 @props([
     'category' => null,
+    'workshops' => collect(),
 ])
+
+@php
+    $isGlobalAdmin = auth()->user()?->isGlobalAdmin() ?? false;
+    // Pre-select the existing workshop for global admins on edit, or
+    // the user's own workshop otherwise. The form request will force
+    // the value server-side even if the user is not a global admin.
+    $selectedWorkshopId = old(
+        'workshop_id',
+        $category?->workshop_id ?? auth()->user()?->workshop_id
+    );
+@endphp
 
 <div class="admin-card">
     <div class="row g-3">
+        @if ($isGlobalAdmin)
+            <div class="col-md-6">
+                <label for="workshop_id" class="form-label">
+                    Workshop <span class="text-danger">*</span>
+                </label>
+                <select id="workshop_id" name="workshop_id" required
+                        class="form-select @error('workshop_id') is-invalid @enderror">
+                    <option value="">— Select a workshop —</option>
+                    @foreach ($workshops as $workshop)
+                        <option value="{{ $workshop->id }}"
+                                @selected((int) $selectedWorkshopId === (int) $workshop->id)>
+                            {{ $workshop->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="form-text">
+                    The workshop this category belongs to. Each workshop keeps its own catalog.
+                </div>
+                @error('workshop_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        @endif
+
         <div class="col-md-6">
             <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
             <input id="name" name="name" type="text" required maxlength="120"

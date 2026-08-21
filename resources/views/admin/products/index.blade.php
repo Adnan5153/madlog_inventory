@@ -3,9 +3,9 @@
 @section('content')
     <x-admin.breadcrumb :items="[['label' => 'Products']]" />
 
-    <x-admin.page-header title="Products" subtitle="Parts catalog. Workshop-scoped pricing and reorder policy.">
+    <x-admin.page-header title="Products" subtitle="Parts catalog. Workshop-scoped inventory and reorder policy.">
         <x-slot:actions>
-            <a href="{{ route('admin.products.create') }}" class="btn btn-warning">
+            <a href="{{ route('admin.products.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i> New product
             </a>
             <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#importModal">
@@ -18,14 +18,22 @@
     </x-admin.page-header>
 
     <x-admin.filter-bar>
-        <form method="GET" action="{{ route('admin.products.index') }}" class="row g-2 flex-grow-1">
+        <form method="GET" action="{{ route('admin.products.index') }}"
+              class="row g-2 flex-grow-1"
+              id="products-filter-form"
+              data-live-search
+              data-search-url="{{ route('admin.products.search') }}">
             <div class="col-12 col-md-4 col-lg-3">
                 <label for="q" class="form-label">Search</label>
-                <input type="search" id="q" name="q" value="{{ $q }}" class="form-control" placeholder="Name, SKU, OEM, barcode...">
+                <input type="search" id="q" name="q" value="{{ $q }}"
+                       class="form-control"
+                       placeholder="Name, SKU, OEM, barcode, brand, category…"
+                       autocomplete="off"
+                       data-live-search-input>
             </div>
             <div class="col-6 col-md-3 col-lg-2">
                 <label for="category_id" class="form-label">Category</label>
-                <select id="category_id" name="category_id" class="form-select">
+                <select id="category_id" name="category_id" class="form-select" data-live-search-control>
                     <option value="">All</option>
                     @foreach($categories as $cat)
                         <option value="{{ $cat->id }}" @selected($categoryId == $cat->id)>{{ $cat->name }}</option>
@@ -33,106 +41,77 @@
                 </select>
             </div>
             <div class="col-6 col-md-3 col-lg-2">
-                <label for="brand_id" class="form-label">Brand</label>
-                <select id="brand_id" name="brand_id" class="form-select">
-                    <option value="">All</option>
-                    @foreach($brands as $b)
-                        <option value="{{ $b->id }}" @selected($brandId == $b->id)>{{ $b->name }}</option>
-                    @endforeach
-                </select>
+                <label for="brand" class="form-label">Brand</label>
+                <input type="text" id="brand" name="brand" value="{{ $brand }}"
+                       class="form-control"
+                       placeholder="Any brand"
+                       autocomplete="off"
+                       data-live-search-control>
             </div>
             <div class="col-6 col-md-2 col-lg-2">
                 <label for="active" class="form-label">Status</label>
-                <select id="active" name="active" class="form-select">
+                <select id="active" name="active" class="form-select" data-live-search-control>
                     <option value="">All</option>
                     <option value="yes" @selected($active === 'yes')>Active</option>
                     <option value="no"  @selected($active === 'no')>Inactive</option>
                 </select>
             </div>
-            <div class="col-12 col-md-auto align-self-end">
-                <button class="btn btn-outline-secondary">
-                    <i class="bi bi-search"></i> Apply
-                </button>
+            <div class="col-6 col-md-3 col-lg-2">
+                <label for="sort" class="form-label">Sort by</label>
+                <select id="sort" name="sort" class="form-select" data-live-search-control>
+                    <option value="name_asc"     @selected($sort === 'name_asc')>Name (A → Z)</option>
+                    <option value="name_desc"    @selected($sort === 'name_desc')>Name (Z → A)</option>
+                    <option value="recent"       @selected($sort === 'recent')>Most recent</option>
+                    <option value="oldest"       @selected($sort === 'oldest')>Oldest first</option>
+                    <option value="cost_asc"     @selected($sort === 'cost_asc')>Cost (low → high)</option>
+                    <option value="cost_desc"    @selected($sort === 'cost_desc')>Cost (high → low)</option>
+                    <option value="reorder_asc"  @selected($sort === 'reorder_asc')>Reorder ≤ (low → high)</option>
+                    <option value="reorder_desc" @selected($sort === 'reorder_desc')>Reorder ≤ (high → low)</option>
+                </select>
             </div>
+            <x-admin.clear-filters :route="route('admin.products.index')" />
         </form>
     </x-admin.filter-bar>
 
-    <div class="admin-table">
+    <x-admin.live-search-status>
+        <span data-live-search-count>{{ $parts->total() }} {{ \Illuminate\Support\Str::plural('product', $parts->total()) }}</span>
+    </x-admin.live-search-status>
+
+    <div class="admin-table table-responsive">
         <table class="table align-middle mb-0">
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>SKU / Barcode</th>
+                    <th>SKU</th>
+                    <th>OEM #</th>
+                    <th>Barcode</th>
                     <th>Category</th>
+                    <th>Unit</th>
                     <th>Brand</th>
+                    <th>Location</th>
                     <th class="text-end">Cost</th>
-                    <th class="text-end">Sale</th>
                     <th class="text-end">On hand</th>
                     <th class="text-end">Reorder ≤</th>
+                    <th class="text-end">Reorder qty</th>
                     <th>Status</th>
+                    <th>Entry date</th>
                     <th class="text-end" style="width: 180px;">Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                @forelse($parts as $p)
-                    <tr>
-                        <td>
-                            <a href="{{ route('admin.products.show', $p) }}" class="text-decoration-none">
-                                {{ $p->name }}
-                            </a>
-                            @if($p->oem_part_number)
-                                <div class="small text-muted">OEM {{ $p->oem_part_number }}</div>
-                            @endif
-                        </td>
-                        <td>
-                            <div>{{ $p->sku ?? '—' }}</div>
-                            <div class="small text-muted">{{ $p->barcode ?? '—' }}</div>
-                        </td>
-                        <td>{{ $p->category?->name ?? '—' }}</td>
-                        <td>{{ $p->brand?->name ?? '—' }}</td>
-                        <td class="text-end">{{ number_format((float) $p->cost_price, 2) }}</td>
-                        <td class="text-end">{{ number_format((float) $p->sale_price, 2) }}</td>
-                        <td class="text-end">
-                            @php $oh = (float) ($p->on_hand ?? 0); @endphp
-                            <span class="{{ $oh <= (float) $p->reorder_threshold ? 'text-danger fw-semibold' : '' }}">
-                                {{ number_format($oh, 2) }}
-                            </span>
-                        </td>
-                        <td class="text-end">{{ number_format($p->reorder_threshold) }}</td>
-                        <td>
-                            <x-admin.status-badge :on="$p->is_active" />
-                        </td>
-                        <td class="text-end">
-                            <a href="{{ route('admin.products.show', $p) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{{ route('admin.products.edit', $p) }}" class="btn btn-sm btn-outline-secondary">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <form method="POST" action="{{ route('admin.products.destroy', $p) }}" class="d-inline" data-confirm-form data-confirm="Delete this product?">
-                                @csrf
-                                @method('DELETE')
-                                <button class="btn btn-sm btn-outline-danger">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="10">
-                            <x-admin.empty-state icon="bi-box-seam" title="No products yet">
-                                Add your first part to start tracking inventory.
-                            </x-admin.empty-state>
-                        </td>
-                    </tr>
-                @endforelse
+            <tbody data-live-search-target>
+                {{-- Server-rendered first page; the live-search JS will
+                     replace the contents of this <tbody> on every filter
+                     change. The same row template is reused by the JSON
+                     endpoint (admin.products.search). --}}
+                @include('admin.products._row-template', ['parts' => $parts])
             </tbody>
         </table>
     </div>
 
-    <div class="mt-3">
-        {{ $parts->links('vendor.pagination.bootstrap-5') }}
+    <div class="mt-3 d-flex justify-content-between align-items-center">
+        <div data-live-search-pagination>
+            {{ $parts->links('vendor.pagination.bootstrap-5') }}
+        </div>
     </div>
 
     {{-- Import modal --}}
@@ -146,7 +125,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="text-muted">
-                        Required columns: <code>sku, name, cost_price, sale_price</code>. Optional:
+                        Required columns: <code>sku, name, cost_price</code>. Optional:
                         <code>oem_part_number, barcode, description, category, brand, unit,
                         reorder_threshold, reorder_quantity, is_active</code>.
                     </p>
@@ -156,7 +135,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button class="btn btn-warning">Upload</button>
+                    <button class="btn btn-primary">Upload</button>
                 </div>
             </form>
         </div>

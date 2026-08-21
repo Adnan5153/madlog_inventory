@@ -10,9 +10,9 @@
             <li class="col-md-6 col-lg workflow-step">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body p-4">
-                        <span class="badge bg-warning text-dark workflow-step__number mb-3">01</span>
+                        <span class="badge bg-primary-subtle text-primary-emphasis workflow-step__number mb-3">01</span>
                         <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
-                            <i class="bi-arrow-down-circle text-warning" aria-hidden="true"></i> Receive
+                            <i class="bi-arrow-down-circle text-primary" aria-hidden="true"></i> Receive
                         </h3>
                         <p class="text-secondary mb-0">Record deliveries against a purchase order. Quantities and costs update instantly.</p>
                     </div>
@@ -22,9 +22,9 @@
             <li class="col-md-6 col-lg workflow-step">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body p-4">
-                        <span class="badge bg-warning text-dark workflow-step__number mb-3">02</span>
+                        <span class="badge bg-primary-subtle text-primary-emphasis workflow-step__number mb-3">02</span>
                         <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
-                            <i class="bi-geo-alt text-warning" aria-hidden="true"></i> Store
+                            <i class="bi-geo-alt text-primary" aria-hidden="true"></i> Store
                         </h3>
                         <p class="text-secondary mb-0">Bin locations and quantities are locked in. Search by part number, name, or bin code.</p>
                     </div>
@@ -34,9 +34,9 @@
             <li class="col-md-6 col-lg workflow-step">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body p-4">
-                        <span class="badge bg-warning text-dark workflow-step__number mb-3">03</span>
+                        <span class="badge bg-primary-subtle text-primary-emphasis workflow-step__number mb-3">03</span>
                         <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
-                            <i class="bi-upc-scan text-warning" aria-hidden="true"></i> Issue
+                            <i class="bi-upc-scan text-primary" aria-hidden="true"></i> Issue
                         </h3>
                         <p class="text-secondary mb-0">Issue parts to a job card in two clicks. The job card shows live cost and margin.</p>
                     </div>
@@ -46,9 +46,9 @@
             <li class="col-md-6 col-lg workflow-step">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body p-4">
-                        <span class="badge bg-warning text-dark workflow-step__number mb-3">04</span>
+                        <span class="badge bg-primary-subtle text-primary-emphasis workflow-step__number mb-3">04</span>
                         <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
-                            <i class="bi-tools text-warning" aria-hidden="true"></i> Use
+                            <i class="bi-tools text-primary" aria-hidden="true"></i> Use
                         </h3>
                         <p class="text-secondary mb-0">Mechanics see what was used and what remains. Nothing is silently pulled from stock.</p>
                     </div>
@@ -58,9 +58,9 @@
             <li class="col-md-6 col-lg workflow-step">
                 <div class="card border-0 shadow-sm h-100">
                     <div class="card-body p-4">
-                        <span class="badge bg-warning text-dark workflow-step__number mb-3">05</span>
+                        <span class="badge bg-primary-subtle text-primary-emphasis workflow-step__number mb-3">05</span>
                         <h3 class="h5 fw-semibold mb-2 d-flex align-items-center gap-2">
-                            <i class="bi-cart-check text-warning" aria-hidden="true"></i> Reorder
+                            <i class="bi-cart-check text-primary" aria-hidden="true"></i> Reorder
                         </h3>
                         <p class="text-secondary mb-0">Low-stock alerts trigger suggested POs. Approve, send, done — before the part runs out.</p>
                     </div>

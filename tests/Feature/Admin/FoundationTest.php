@@ -134,11 +134,25 @@ class FoundationTest extends TestCase
 
     public function test_admin_can_create_brand(): void
     {
+        // The Brand CRUD module has been removed; brand is now a free-text
+        // field on products. This test exercises that path instead.
         $this->actingAs($this->admin)
-            ->post('/admin/brands', ['name' => 'Bosch'])
-            ->assertRedirect('/admin/brands');
+            ->post('/admin/products', [
+                'name' => 'Brake Pad',
+                'sku' => 'BP-BRAND',
+                'brand' => 'Bosch',
+                'cost_price' => 1.00,
+                'reorder_threshold' => 1,
+                'reorder_quantity' => 1,
+                'is_active' => true,
+            ])
+            ->assertRedirect('/admin/products');
 
-        $this->assertDatabaseHas('brands', ['slug' => 'bosch']);
+        $this->assertDatabaseHas('parts', [
+            'workshop_id' => $this->admin->workshop_id,
+            'sku' => 'BP-BRAND',
+            'brand' => 'Bosch',
+        ]);
     }
 
     public function test_admin_can_create_unit(): void
@@ -258,7 +272,7 @@ class FoundationTest extends TestCase
         $response = $this->actingAs($this->admin)->get('/admin');
 
         $response->assertSee('Categories', false);
-        $response->assertSee('Brands', false);
+        $response->assertSee('Products / Parts', false);
         $response->assertSee('Units of Measure', false);
         $response->assertSee('Departments', false);
         $response->assertSee('Equipment', false);

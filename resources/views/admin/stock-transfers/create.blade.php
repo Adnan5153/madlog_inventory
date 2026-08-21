@@ -69,7 +69,7 @@
         </div>
 
         <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-save me-1"></i> Save draft
             </button>
             <a href="{{ route('admin.stock-transfers.index') }}" class="btn btn-outline-secondary">Cancel</a>

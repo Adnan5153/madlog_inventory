@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesWorkshopScoping;
 use App\Models\PurchaseOrder;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePurchaseOrderRequest extends FormRequest
 {
+    use HandlesWorkshopScoping;
+
     public function authorize(): bool
     {
         return $this->user()?->can('create', PurchaseOrder::class) ?? false;
@@ -15,6 +18,7 @@ class StorePurchaseOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'workshop_id' => $this->workshopRule(),
             'supplier_id' => ['required', 'integer', 'exists:suppliers,id'],
             'order_date' => ['required', 'date'],
             'expected_date' => ['nullable', 'date', 'after_or_equal:order_date'],
@@ -25,5 +29,10 @@ class StorePurchaseOrderRequest extends FormRequest
             'items.*.quantity_ordered' => ['required', 'numeric', 'min:0.01', 'max:9999999.99'],
             'items.*.unit_cost' => ['required', 'numeric', 'min:0', 'max:9999999.99'],
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $this->prepareForWorkshopScoping();
     }
 }

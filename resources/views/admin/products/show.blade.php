@@ -8,7 +8,7 @@
 
     <x-admin.page-header :title="$product->name" :subtitle="$product->sku ? 'SKU '.$product->sku : 'No SKU'">
         <x-slot:actions>
-            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-warning">
+            <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i> Edit
             </a>
         </x-slot:actions>
@@ -24,26 +24,18 @@
                     <dt class="col-4 text-muted">OEM</dt><dd class="col-8">{{ $product->oem_part_number ?? '—' }}</dd>
                     <dt class="col-4 text-muted">Barcode</dt><dd class="col-8">{{ $product->barcode ?? '—' }}</dd>
                     <dt class="col-4 text-muted">Category</dt><dd class="col-8">{{ $product->category?->name ?? '—' }}</dd>
-                    <dt class="col-4 text-muted">Brand</dt><dd class="col-8">{{ $product->brand?->name ?? '—' }}</dd>
+                    <dt class="col-4 text-muted">Brand</dt><dd class="col-8">{{ $product->brand ?? '—' }}</dd>
                     <dt class="col-4 text-muted">Unit</dt><dd class="col-8">{{ $product->unit?->short_code ?? '—' }}</dd>
+                    <dt class="col-4 text-muted">Supplier</dt><dd class="col-8">{{ $product->supplier?->name ?? '—' }}</dd>
+                    <dt class="col-4 text-muted">Storage</dt><dd class="col-8">@include('admin.products._storage-cell', ['product' => $product])</dd>
                     <dt class="col-4 text-muted">Status</dt><dd class="col-8"><x-admin.status-badge :on="$product->is_active" /></dd>
                 </dl>
             </div>
 
             <div class="admin-card mt-3">
-                <h2 class="h6 mb-3">Pricing & reorder</h2>
+                <h2 class="h6 mb-3">Cost & reorder</h2>
                 <dl class="row mb-0">
                     <dt class="col-4 text-muted">Cost price</dt><dd class="col-8">{{ number_format((float) $product->cost_price, 2) }}</dd>
-                    <dt class="col-4 text-muted">Sale price</dt><dd class="col-8">{{ number_format((float) $product->sale_price, 2) }}</dd>
-                    <dt class="col-4 text-muted">Margin</dt>
-                    <dd class="col-8">
-                        @php
-                            $cost = (float) $product->cost_price;
-                            $sale = (float) $product->sale_price;
-                            $margin = $cost > 0 ? (($sale - $cost) / $cost) * 100 : 0;
-                        @endphp
-                        {{ number_format($margin, 1) }} %
-                    </dd>
                     <dt class="col-4 text-muted">Reorder ≤</dt><dd class="col-8">{{ number_format($product->reorder_threshold) }}</dd>
                     <dt class="col-4 text-muted">Reorder qty</dt><dd class="col-8">{{ number_format($product->reorder_quantity) }}</dd>
                     <dt class="col-4 text-muted">On hand</dt>
@@ -52,6 +44,15 @@
                         <span class="{{ $oh <= (float) $product->reorder_threshold ? 'text-danger fw-semibold' : '' }}">{{ number_format($oh, 2) }}</span>
                     </dd>
                 </dl>
+            </div>
+
+            <div class="admin-card mt-3">
+                <h2 class="h6 mb-3">Equipment compatibility</h2>
+                @if($product->equipment_compatibility)
+                    <p class="mb-0" style="white-space: pre-line;">{{ $product->equipment_compatibility }}</p>
+                @else
+                    <p class="mb-0 text-muted">—</p>
+                @endif
             </div>
         </div>
 

@@ -8,7 +8,7 @@
 
     <x-admin.page-header :title="$role->name" :subtitle="$role->description ?? 'No description.'">
         <x-slot:actions>
-            <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-warning">
+            <a href="{{ route('admin.roles.edit', $role) }}" class="btn btn-primary">
                 <i class="bi bi-pencil me-1"></i> Edit
             </a>
         </x-slot:actions>

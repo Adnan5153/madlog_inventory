@@ -14,4 +14,4 @@
 
 @fonts
 
-@vite(['resources/css/landing/landing.scss', 'resources/js/landing.js'])
+@vite(['resources/css/app.css', 'resources/js/app.js'])

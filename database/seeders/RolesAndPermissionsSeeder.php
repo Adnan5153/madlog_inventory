@@ -71,10 +71,14 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'products.delete',     'group' => 'products',  'description' => 'Delete (archive) products'],
             ['name' => 'products.import',     'group' => 'products',  'description' => 'Import products from CSV'],
 
+            // Batteries
+            ['name' => 'batteries.view',      'group' => 'batteries', 'description' => 'View batteries'],
+            ['name' => 'batteries.create',    'group' => 'batteries', 'description' => 'Create batteries'],
+            ['name' => 'batteries.update',    'group' => 'batteries', 'description' => 'Edit batteries'],
+            ['name' => 'batteries.delete',    'group' => 'batteries', 'description' => 'Delete (archive) batteries'],
+
             ['name' => 'categories.view',     'group' => 'catalog',   'description' => 'View categories'],
             ['name' => 'categories.manage',   'group' => 'catalog',   'description' => 'Create/update/delete categories'],
-            ['name' => 'brands.view',         'group' => 'catalog',   'description' => 'View brands'],
-            ['name' => 'brands.manage',       'group' => 'catalog',   'description' => 'Create/update/delete brands'],
             ['name' => 'units.view',          'group' => 'catalog',   'description' => 'View units'],
             ['name' => 'units.manage',        'group' => 'catalog',   'description' => 'Create/update/delete units'],
 
@@ -141,8 +145,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'is_system' => true,
                 'grants' => [
                     'products.view', 'products.create', 'products.update', 'products.delete', 'products.import',
+                    'batteries.view', 'batteries.create', 'batteries.update', 'batteries.delete',
                     'categories.view', 'categories.manage',
-                    'brands.view', 'brands.manage',
                     'units.view', 'units.manage',
                     'warehouses.view', 'warehouses.manage',
                     'bin-locations.view', 'bin-locations.manage',
@@ -164,7 +168,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'is_system' => true,
                 'grants' => [
                     'products.view',
-                    'categories.view', 'brands.view', 'units.view',
+                    'batteries.view',
+                    'categories.view', 'units.view',
                     'warehouses.view', 'bin-locations.view',
                     'inventory.view', 'inventory.adjust', 'inventory.approve', 'inventory.transfer',
                     'reports.view',
@@ -194,6 +199,7 @@ class RolesAndPermissionsSeeder extends Seeder
                     'bin-locations.view', 'bin-locations.manage',
                     'inventory.view', 'inventory.adjust', 'inventory.transfer',
                     'products.view',
+                    'batteries.view',
                     'reports.view',
                 ],
             ],
@@ -203,7 +209,8 @@ class RolesAndPermissionsSeeder extends Seeder
                 'description' => 'Read-only across the system plus audit log access.',
                 'is_system' => true,
                 'grants' => [
-                    'products.view', 'categories.view', 'brands.view', 'units.view',
+                    'products.view', 'categories.view', 'units.view',
+                    'batteries.view',
                     'warehouses.view', 'bin-locations.view',
                     'inventory.view', 'goods-receipts.view',
                     'purchase-orders.view', 'suppliers.view',

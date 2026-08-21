@@ -86,7 +86,7 @@
         @endif
 
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Save settings
             </button>
         </div>

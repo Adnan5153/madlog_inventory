@@ -50,5 +50,5 @@
 
 <div class="d-flex justify-content-end gap-2 mt-4">
     <a href="{{ route('admin.warehouses.index') }}" class="btn btn-outline-secondary">Cancel</a>
-    <button class="btn btn-warning">{{ $isEdit ? 'Save changes' : 'Create warehouse' }}</button>
+    <button class="btn btn-primary">{{ $isEdit ? 'Save changes' : 'Create warehouse' }}</button>
 </div>

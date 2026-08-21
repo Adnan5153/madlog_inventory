@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Exceptions\DomainException;
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
+use App\Http\Controllers\Admin\Concerns\HasWorkshopPicker;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ReceivePurchaseOrderRequest;
 use App\Http\Requests\Admin\StorePurchaseOrderRequest;
@@ -12,6 +14,7 @@ use App\Models\PurchaseOrder;
 use App\Models\Supplier;
 use App\Services\Inventory\PurchaseOrderService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -19,6 +22,8 @@ use Illuminate\View\View;
 class PurchaseOrderController extends Controller
 {
     use AuthorizesRequests;
+    use HasLiveSearch;
+    use HasWorkshopPicker;
 
     public function __construct(protected PurchaseOrderService $service) {}
 
@@ -28,16 +33,7 @@ class PurchaseOrderController extends Controller
         $status = $request->query('status');
         $supplierId = $request->query('supplier_id');
 
-        $orders = PurchaseOrder::query()
-            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
-                $w->where('po_number', 'like', "%{$q}%")
-                    ->orWhere('notes', 'like', "%{$q}%");
-            }))
-            ->when($status, fn ($qb) => $qb->where('status', $status))
-            ->when($supplierId, fn ($qb) => $qb->where('supplier_id', $supplierId))
-            ->with(['supplier:id,name', 'creator:id,name', 'approver:id,name'])
-            ->withCount('items')
-            ->latest('order_date')
+        $orders = $this->buildPurchaseOrdersQuery($q, $status, $supplierId)
             ->paginate(20)
             ->withQueryString();
 
@@ -59,11 +55,55 @@ class PurchaseOrderController extends Controller
         ]);
     }
 
+    /**
+     * Live-search JSON endpoint for the purchase orders index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        $status = $request->query('status');
+        $supplierId = $request->query('supplier_id');
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.purchase-orders._row-template',
+            singular: 'order',
+            builder: fn () => $this->buildPurchaseOrdersQuery($q, $status, $supplierId),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly.
+     */
+    private function buildPurchaseOrdersQuery(string $q, mixed $status, mixed $supplierId)
+    {
+        return PurchaseOrder::query()
+            ->when($q !== '', fn ($qb) => $qb->where(function ($w) use ($q) {
+                $w->where('po_number', 'like', "%{$q}%")
+                    ->orWhere('notes', 'like', "%{$q}%");
+            }))
+            ->when($status, fn ($qb) => $qb->where('status', $status))
+            ->when($supplierId, fn ($qb) => $qb->where('supplier_id', $supplierId))
+            ->with(['supplier:id,name', 'creator:id,name', 'approver:id,name'])
+            ->withCount('items')
+            ->latest('order_date');
+    }
+
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$orders`.
+     */
+    protected function singularNoun(): string
+    {
+        return 'order';
+    }
+
     public function create(): View
     {
         return view('admin.purchase-orders.create', [
             'title' => 'New purchase order',
             'suppliers' => Supplier::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'workshops' => $this->workshopsForForm(),
         ]);
     }
 
@@ -71,10 +111,11 @@ class PurchaseOrderController extends Controller
     {
         $data = $request->validated();
         $user = $request->user();
+        $workshopId = (int) $data['workshop_id'];
 
         $po = new PurchaseOrder([
-            'po_number' => $this->service->nextPoNumber($user->workshop_id),
-            'workshop_id' => $user->workshop_id,
+            'po_number' => $this->service->nextPoNumber($workshopId),
+            'workshop_id' => $workshopId,
             'supplier_id' => $data['supplier_id'],
             'created_by' => $user->id,
             'status' => PurchaseOrder::STATUS_DRAFT,
@@ -131,6 +172,7 @@ class PurchaseOrderController extends Controller
             'title' => 'Edit purchase order',
             'order' => $purchaseOrder,
             'suppliers' => Supplier::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']),
+            'workshops' => $this->workshopsForForm(),
         ]);
     }
 

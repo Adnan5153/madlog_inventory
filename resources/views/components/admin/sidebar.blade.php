@@ -21,9 +21,10 @@
             'title' => 'Catalog',
             'items' => [
                 ['name' => 'admin.categories.index', 'icon' => 'bi-tags',         'label' => 'Categories'],
-                ['name' => 'admin.brands.index',     'icon' => 'bi-bookmark-star', 'label' => 'Brands'],
                 ['name' => 'admin.units.index',      'icon' => 'bi-rulers',       'label' => 'Units of Measure'],
                 ['name' => 'admin.products.index',   'icon' => 'bi-box-seam',     'label' => 'Products / Parts'],
+                ['name' => 'admin.batteries.index',  'icon' => 'bi-battery-charging', 'label' => 'Batteries'],
+                ['name' => 'admin.lubricants.index', 'icon' => 'bi-droplet',      'label' => 'Lubricants'],
             ],
         ],
         [
@@ -47,6 +48,8 @@
             'items' => [
                 ['name' => 'admin.stock-adjustments.index',   'icon' => 'bi-sliders',     'label' => 'Stock adjustments'],
                 ['name' => 'admin.stock-transfers.index',     'icon' => 'bi-arrow-left-right', 'label' => 'Stock transfers'],
+                ['name' => 'admin.battery-stock-adjustments.index', 'icon' => 'bi-battery', 'label' => 'Battery adjustments'],
+                ['name' => 'admin.lubricant-stock-adjustments.index', 'icon' => 'bi-droplet', 'label' => 'Lubricant adjustments'],
             ],
         ],
         [
@@ -71,6 +74,16 @@
             'items' => [
                 ['name' => 'admin.departments.index', 'icon' => 'bi-diagram-3',  'label' => 'Departments'],
                 ['name' => 'admin.equipment.index',   'icon' => 'bi-tools',      'label' => 'Equipment'],
+                ['name' => 'admin.equipment-consumables.dashboard', 'icon' => 'bi-link-45deg', 'label' => 'Equipment consumables'],
+                ['name' => 'admin.equipment-consumables.index',     'icon' => 'bi-list-ul',   'label' => 'Consumables list'],
+            ],
+        ],
+        [
+            'title' => 'Tooling',
+            'items' => [
+                ['name' => 'admin.tools.dashboard',     'icon' => 'bi-wrench-adjustable', 'label' => 'Tools dashboard'],
+                ['name' => 'admin.tools.index',         'icon' => 'bi-tools',            'label' => 'Tools'],
+                ['name' => 'admin.tool-categories.index','icon' => 'bi-tags',             'label' => 'Tool categories'],
             ],
         ],
         [
@@ -97,7 +110,8 @@
                     <li>
                         <a href="{{ route($item['name']) }}"
                            class="nav-link {{ $isActive($item['name']) ? 'active' : '' }}"
-                           @if($isActive($item['name'])) aria-current="page" @endif>
+                           @if($isActive($item['name'])) aria-current="page" @endif
+                           title="{{ $item['label'] }}">
                             <i class="bi {{ $item['icon'] }}" aria-hidden="true"></i>
                             <span>{{ $item['label'] }}</span>
                         </a>

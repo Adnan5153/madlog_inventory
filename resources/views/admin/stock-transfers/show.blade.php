@@ -11,7 +11,7 @@
             @if($transfer->status === 'draft')
                 <form method="POST" action="{{ route('admin.stock-transfers.dispatch', $transfer) }}" class="d-inline">
                     @csrf
-                    <button class="btn btn-warning">
+                    <button class="btn btn-primary">
                         <i class="bi bi-send me-1"></i> Dispatch
                     </button>
                 </form>
@@ -19,7 +19,7 @@
             @if($transfer->status === 'in_transit')
                 <form method="POST" action="{{ route('admin.stock-transfers.receive', $transfer) }}" class="d-inline">
                     @csrf
-                    <button class="btn btn-warning">
+                    <button class="btn btn-primary">
                         <i class="bi bi-box-arrow-in-down me-1"></i> Receive
                     </button>
                 </form>

@@ -6,12 +6,19 @@
         ['label' => $adjustment->adjustment_number],
     ]" />
 
+    @if (session('status'))
+        <x-admin.alert variant="success">{{ session('status') }}</x-admin.alert>
+    @endif
+    @error('adjustment')
+        <x-admin.alert variant="danger">{{ $message }}</x-admin.alert>
+    @enderror
+
     <x-admin.page-header :title="$adjustment->adjustment_number" :subtitle="ucfirst(str_replace('_', ' ', $adjustment->reason))">
         <x-slot:actions>
             @if($adjustment->status === 'pending')
                 <form method="POST" action="{{ route('admin.stock-adjustments.approve', $adjustment) }}" class="d-inline">
                     @csrf
-                    <button class="btn btn-warning">
+                    <button class="btn btn-primary">
                         <i class="bi bi-check2-circle me-1"></i> Approve &amp; apply
                     </button>
                 </form>
@@ -22,6 +29,8 @@
                         <i class="bi bi-x-circle me-1"></i> Reject
                     </button>
                 </form>
+            @else
+                <span class="badge text-bg-secondary text-uppercase">{{ $adjustment->status }}</span>
             @endif
         </x-slot:actions>
     </x-admin.page-header>

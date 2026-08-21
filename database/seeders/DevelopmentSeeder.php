@@ -4,7 +4,6 @@ namespace Database\Seeders;
 
 use App\Models\AuditLog;
 use App\Models\BinLocation;
-use App\Models\Brand;
 use App\Models\InventoryItem;
 use App\Models\JobCard;
 use App\Models\JobCardPart;
@@ -27,7 +26,7 @@ use Illuminate\Support\Facades\Hash;
  *   - 2 workshops
  *   - 1 global admin (sees everything)
  *   - per workshop: 1 workshop admin + 3 staff (1 storekeeper + 2 mechanics)
- *   - per workshop: 8 categories, 12 brands, 30+ parts, 20 bins,
+ *   - per workshop: 8 categories, 30+ parts, 20 bins,
  *                   inventory items (some low stock), recent movements,
  *                   a few purchase orders (mixed status), open job cards,
  *                   tools + checkouts, and a handful of audit log rows.
@@ -100,17 +99,11 @@ class DevelopmentSeeder extends Seeder
             ->state(fn () => ['workshop_id' => $workshop->id])
             ->create();
 
-        $brands = Brand::factory()
-            ->count(12)
-            ->state(fn () => ['workshop_id' => $workshop->id])
-            ->create();
-
         $parts = Part::factory()
             ->count(35)
             ->state(fn () => ['workshop_id' => $workshop->id])
             ->create([
                 'category_id' => $categories->random()->id,
-                'brand_id' => $brands->random()->id,
             ]);
 
         // Mark a few parts as low stock by giving their inventory items small quantities

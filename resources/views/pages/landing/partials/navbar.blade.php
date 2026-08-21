@@ -1,9 +1,9 @@
 <nav class="navbar navbar-expand-lg sticky-top bg-dark" data-bs-theme="dark" aria-label="Primary">
     <div class="container">
         <a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="#top">
-            <i class="bi-tools text-warning" aria-hidden="true"></i>
+            <i class="bi-tools text-primary" aria-hidden="true"></i>
             <span>Madlog</span>
-            <span class="text-warning">Store</span>
+            <span class="text-primary">Store</span>
         </a>
 
         <button class="navbar-toggler" type="button"
@@ -39,7 +39,7 @@
                     <a class="btn btn-outline-light fw-semibold w-100" href="#final-cta">Start Free Trial</a>
                 </li>
                 <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-                    <a class="btn btn-warning fw-semibold w-100" href="#final-cta">Request Demo</a>
+                    <a class="btn btn-primary fw-semibold w-100" href="#final-cta">Request Demo</a>
                 </li>
             </ul>
         </div>

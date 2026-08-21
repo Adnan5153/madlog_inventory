@@ -2,17 +2,21 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\User;
 use App\Models\Workshop;
 use App\Scopes\WorkshopScope;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AuditLogController extends Controller
 {
+    use HasLiveSearch;
+
     public function index(Request $request): View
     {
         $q = trim((string) $request->query('q', ''));
@@ -22,15 +26,7 @@ class AuditLogController extends Controller
         $from = $request->query('from');
         $to = $request->query('to');
 
-        $logs = AuditLog::query()
-            ->with('user:id,name,email')
-            ->when($q !== '', fn ($qb) => $qb->where('action', 'like', "%{$q}%"))
-            ->when($userId, fn ($qb) => $qb->where('user_id', $userId))
-            ->when($action, fn ($qb) => $qb->where('action', 'like', "{$action}%"))
-            ->when($subjectType, fn ($qb) => $qb->where('subject_type', $subjectType))
-            ->when($from, fn ($qb) => $qb->where('created_at', '>=', $from.' 00:00:00'))
-            ->when($to, fn ($qb) => $qb->where('created_at', '<=', $to.' 23:59:59'))
-            ->latest('created_at')
+        $logs = $this->buildAuditLogsQuery($q, $userId, $action, $subjectType, $from, $to)
             ->paginate(50)
             ->withQueryString();
 
@@ -50,6 +46,51 @@ class AuditLogController extends Controller
             'subjectTypes' => $subjectTypes,
             'filters' => compact('userId', 'action', 'subjectType', 'from', 'to'),
         ]);
+    }
+
+    /**
+     * Live-search JSON endpoint for the audit-logs index.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $q = trim((string) $request->query('q', ''));
+        $userId = $request->query('user_id');
+        $action = $request->query('action');
+        $subjectType = $request->query('subject_type');
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        return $this->renderLiveSearch(
+            request: $request,
+            view: 'admin.audit-logs._row-template',
+            singular: 'auditLog',
+            builder: fn () => $this->buildAuditLogsQuery($q, $userId, $action, $subjectType, $from, $to),
+        );
+    }
+
+    /**
+     * Shared filtered query used by both index() and search(). Mirrors the
+     * original index() filter exactly (user, action, subject_type, date range).
+     */
+    private function buildAuditLogsQuery(string $q, mixed $userId = null, mixed $action = null, mixed $subjectType = null, mixed $from = null, mixed $to = null)
+    {
+        return AuditLog::query()
+            ->with('user:id,name,email')
+            ->when($q !== '', fn ($qb) => $qb->where('action', 'like', "%{$q}%"))
+            ->when($userId, fn ($qb) => $qb->where('user_id', $userId))
+            ->when($action, fn ($qb) => $qb->where('action', 'like', "{$action}%"))
+            ->when($subjectType, fn ($qb) => $qb->where('subject_type', $subjectType))
+            ->when($from, fn ($qb) => $qb->where('created_at', '>=', $from.' 00:00:00'))
+            ->when($to, fn ($qb) => $qb->where('created_at', '<=', $to.' 23:59:59'))
+            ->latest('created_at');
+    }
+
+    /**
+     * The row template (`_row-template.blade.php`) loops over `$logs`.
+     */
+    protected function singularNoun(): string
+    {
+        return 'log';
     }
 
     public function show(int $log): View

@@ -1,9 +1,41 @@
-@props(['category' => null])
+@props([
+    'category' => null,
+    'workshops' => collect(),
+])
 
-@php $isEdit = $category !== null; @endphp
+@php
+    $isEdit = $category !== null;
+    $isGlobalAdmin = auth()->user()?->isGlobalAdmin() ?? false;
+    $selectedWorkshopId = old(
+        'workshop_id',
+        $category?->workshop_id ?? auth()->user()?->workshop_id
+    );
+@endphp
 
 <div class="admin-card">
     <div class="row g-3">
+        @if ($isGlobalAdmin)
+            <div class="col-md-6">
+                <label for="workshop_id" class="form-label">
+                    Workshop <span class="text-danger">*</span>
+                </label>
+                <select id="workshop_id" name="workshop_id" required
+                        class="form-select @error('workshop_id') is-invalid @enderror">
+                    <option value="">— Select a workshop —</option>
+                    @foreach ($workshops as $workshop)
+                        <option value="{{ $workshop->id }}"
+                                @selected((int) $selectedWorkshopId === (int) $workshop->id)>
+                            {{ $workshop->name }}
+                        </option>
+                    @endforeach
+                </select>
+                <div class="form-text">
+                    The workshop this supplier category belongs to.
+                </div>
+                @error('workshop_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+        @endif
+
         <div class="col-12 col-md-6">
             <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
             <input id="name" type="text" name="name" required maxlength="120"
@@ -37,5 +69,5 @@
 
 <div class="d-flex justify-content-end gap-2 mt-4">
     <a href="{{ route('admin.supplier-categories.index') }}" class="btn btn-outline-secondary">Cancel</a>
-    <button class="btn btn-warning">{{ $isEdit ? 'Save changes' : 'Create category' }}</button>
+    <button class="btn btn-primary">{{ $isEdit ? 'Save changes' : 'Create category' }}</button>
 </div>

@@ -1,5 +1,154 @@
+/* =====================================================
+   MADLOG APPLICATION STYLES
+   =====================================================
+   Single application stylesheet. All custom Madlog CSS lives here.
+
+   Design language: "Clean Utility Minimalist" — calm, dense,
+   indigo-tinted, inspired by Linear / Stripe / Vercel.
+
+   IMPORTANT — vendor CSS imports:
+     Tailwind v4 + Flux are imported here. Bootstrap 5.3 + Icons are
+     imported from `resources/js/app.js` instead. Importing them via
+     `@import` in this file interacts badly with `@tailwindcss/vite`'s
+     lightningcss preprocessor, which can silently drop non-Tailwind
+     `@import`s after its own directives in dev mode.
+
+   Section order:
+     1. Vendor CSS imports (Tailwind, Flux)
+     2. CSS custom properties (design tokens)
+     3. Tailwind + Flux configuration
+     4. Base / global styles
+     5. Typography
+     6. Layout helpers
+     7. Public landing page
+     8. Admin shell (sidebar, topbar, grid)
+     9. Admin components (cards, tables, badges, pagination, drawer,
+        command bar, density toggle, toasts)
+    10. Inventory UI
+    11. Staff
+    12. Forms
+    13. Buttons
+    14. Modals and overlays
+    15. Responsive
+    16. Accessibility / focus / reduced-motion
+    17. Utility classes
+   ===================================================== */
+
+
+/* =====================================================
+   1. VENDOR CSS IMPORTS
+   =====================================================
+   Tailwind v4 + Flux only. Bootstrap 5.3 + Icons live in app.js. */
+
+/* Tailwind v4 + Flux (auth flow only). */
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
+
+
+/* =====================================================
+   2. CSS CUSTOM PROPERTIES (design tokens)
+   =====================================================
+   Single source of truth for the visual language. Every component
+   references these tokens — never raw hex values. Bootstrap variables
+   are remapped so every `.btn-primary`, `.badge`, `.alert-primary`
+   etc. inherits the new palette for free. */
+
+:root {
+    /* Surface */
+    --madlog-bg:            #f8fafc;
+    --madlog-surface:       #ffffff;
+    --madlog-surface-2:     #f1f5f9;
+    --madlog-surface-3:     #e2e8f0;
+    --madlog-border:        #e2e8f0;
+    --madlog-border-strong: #cbd5e1;
+
+    /* Text */
+    --madlog-text:          #0f172a;
+    --madlog-text-muted:    #64748b;
+    --madlog-text-subtle:   #94a3b8;
+    --madlog-text-inverse:  #ffffff;
+
+    /* Brand — indigo */
+    --madlog-primary:       #4f46e5;
+    --madlog-primary-hover: #4338ca;
+    --madlog-primary-active:#3730a3;
+    --madlog-primary-soft:  #eef2ff;
+    --madlog-primary-fg:    #ffffff;
+
+    /* Status — muted semantic palette */
+    --madlog-success:       #047857;
+    --madlog-success-bg:    #d1fae5;
+    --madlog-warning:       #b45309;
+    --madlog-warning-bg:    #fef3c7;
+    --madlog-danger:        #b91c1c;
+    --madlog-danger-bg:     #fee2e2;
+    --madlog-info:          #1d4ed8;
+    --madlog-info-bg:       #dbeafe;
+    --madlog-neutral:       #475569;
+    --madlog-neutral-bg:    #f1f5f9;
+
+    /* Sidebar — deep navy */
+    --madlog-sidebar-bg:        #102b46;
+    --madlog-sidebar-border:    #1e3a5f;
+    --madlog-sidebar-text:      #cbd5e1;
+    --madlog-sidebar-text-muted:#94a3b8;
+    --madlog-sidebar-hover:     #1e3a5f;
+    --madlog-sidebar-active-bg: #1e3a5f;
+    --madlog-sidebar-active-fg: #ffffff;
+
+    /* Geometry */
+    --madlog-radius-sm:    .375rem;
+    --madlog-radius:       .5rem;
+    --madlog-radius-lg:    .75rem;
+    --madlog-radius-xl:    1rem;
+    --madlog-radius-pill:  999px;
+
+    /* Elevation */
+    --madlog-shadow-sm:    0 1px 2px rgba(15, 23, 42, .04);
+    --madlog-shadow:       0 1px 3px rgba(15, 23, 42, .06), 0 1px 2px rgba(15, 23, 42, .04);
+    --madlog-shadow-md:    0 4px 12px -2px rgba(15, 23, 42, .08), 0 2px 4px -2px rgba(15, 23, 42, .04);
+    --madlog-shadow-lg:    0 10px 30px -10px rgba(15, 23, 42, .18), 0 2px 6px rgba(15, 23, 42, .04);
+    --madlog-shadow-xl:    0 24px 48px -16px rgba(15, 23, 42, .22);
+
+    /* Motion */
+    --madlog-transition:    150ms cubic-bezier(.4, 0, .2, 1);
+    --madlog-transition-slow: 220ms cubic-bezier(.4, 0, .2, 1);
+
+    /* Focus */
+    --madlog-focus-ring:    0 0 0 3px rgba(79, 70, 229, .25);
+
+    /* Layout */
+    --sidebar-width:           240px;
+    --sidebar-width-collapsed: 64px;
+    --topbar-height:           56px;
+    --drawer-width:            480px;
+    --cmd-bar-width:           640px;
+
+    /* Bootstrap variable mappings — bind existing Bootstrap classes
+       to the new tokens so .btn-primary, .badge, .alert-* all inherit. */
+    --bs-primary:        var(--madlog-primary);
+    --bs-success:        var(--madlog-success);
+    --bs-warning:        var(--madlog-warning);
+    --bs-danger:         var(--madlog-danger);
+    --bs-info:           var(--madlog-info);
+    --bs-body-bg:        var(--madlog-bg);
+    --bs-body-color:     var(--madlog-text);
+    --bs-border-color:   var(--madlog-border);
+    --bs-border-radius:    var(--madlog-radius);
+    --bs-border-radius-sm: var(--madlog-radius-sm);
+    --bs-border-radius-lg: var(--madlog-radius-lg);
+    --bs-font-sans-serif: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --bs-headings-font-weight: 600;
+    --bs-link-color:       var(--madlog-primary);
+    --bs-link-hover-color: var(--madlog-primary-hover);
+}
+
+
+/* =====================================================
+   3. TAILWIND + FLUX CONFIGURATION
+   =====================================================
+   These directives must live AFTER the @import block above. They are
+   only consumed by the auth flow's Flux components. */
 
 @source '../views';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
@@ -37,7 +186,6 @@
 }
 
 @layer base {
-
     *,
     ::after,
     ::before,
@@ -52,7 +200,7 @@
 }
 
 [data-flux-label] {
-    @apply  !mb-0 !leading-tight;
+    @apply !mb-0 !leading-tight;
 }
 
 input:focus[data-flux-control],
@@ -61,6 +209,2521 @@ select:focus[data-flux-control] {
     @apply outline-hidden ring-2 ring-accent ring-offset-2 ring-offset-accent-foreground;
 }
 
-/* \[:where(&)\]:size-4 {
-    @apply size-4;
-} */
+
+/* =====================================================
+   4. BASE / GLOBAL
+   ===================================================== */
+
+html,
+body {
+    overflow-x: hidden;
+}
+
+body {
+    background: var(--madlog-bg);
+    color: var(--madlog-text);
+    font-family: var(--bs-font-sans-serif);
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* Tabular numerals everywhere we render inventory data. */
+.num,
+.tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+}
+
+/* Smoother focus ring — single token, used everywhere. */
+[data-madlog-focus] :focus-visible,
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 2px solid var(--madlog-primary);
+    outline-offset: 2px;
+    border-radius: var(--madlog-radius-sm);
+}
+
+
+/* =====================================================
+   5. TYPOGRAPHY
+   ===================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--bs-headings-font-weight);
+    color: var(--madlog-text);
+    letter-spacing: -.01em;
+}
+
+h1 { font-size: 1.5rem; }
+h2 { font-size: 1.25rem; }
+h3 { font-size: 1.125rem; }
+h4 { font-size: 1rem; }
+
+.text-balance {
+    text-wrap: balance;
+}
+
+.text-muted { color: var(--madlog-text-muted) !important; }
+.text-subtle { color: var(--madlog-text-subtle) !important; }
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--madlog-text-muted);
+}
+
+small,
+.small {
+    font-size: .8125rem;
+}
+
+
+/* =====================================================
+   6. LAYOUT HELPERS
+   ===================================================== */
+
+.section {
+    padding-block: clamp(3rem, 6vw, 5.5rem);
+}
+
+.section-tight {
+    padding-block: clamp(2rem, 4vw, 3.5rem);
+}
+
+.divider-soft {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--madlog-border), transparent);
+}
+
+
+/* =====================================================
+   7. PUBLIC LANDING PAGE
+   ===================================================== */
+
+/* Skip link — off-screen until focused */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 1rem;
+    background: var(--madlog-text);
+    color: #fff;
+    padding: .65rem 1rem;
+    border-radius: var(--bs-border-radius);
+    z-index: 1080; /* above sticky navbar */
+    text-decoration: none;
+    font-weight: 600;
+    transition: top .15s ease-in;
+}
+
+.skip-link:focus,
+.skip-link:focus-visible {
+    top: 1rem;
+    outline: 3px solid var(--madlog-primary);
+    outline-offset: 2px;
+    color: #fff;
+}
+
+/* Hero */
+.hero {
+    background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(79, 70, 229, .35), transparent 60%),
+        radial-gradient(800px 500px at -10% 80%, rgba(99, 102, 241, .15), transparent 60%),
+        linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: #fff;
+    overflow: hidden;
+}
+
+.hero h1 {
+    letter-spacing: -.025em;
+}
+
+.hero__eyebrow {
+    color: #a5b4fc;
+}
+
+.hero__cta-row {
+    gap: .75rem;
+}
+
+.hero__lead {
+    color: rgba(255, 255, 255, .78);
+    max-width: 36rem;
+}
+
+/* Dashboard mockup — browser-chrome frame with sample inventory table */
+.mockup-frame {
+    background: #fff;
+    color: var(--madlog-text);
+    border-radius: var(--bs-border-radius-lg);
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .55), 0 0 0 1px rgba(255, 255, 255, .08);
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, .08);
+}
+
+.mockup-frame__bar {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .65rem .9rem;
+    background: #f1f5f9;
+    border-bottom: 1px solid var(--madlog-border);
+}
+
+.mockup-frame__bar .dot {
+    width: .65rem;
+    height: .65rem;
+    border-radius: 50%;
+    background: #cbd5e1;
+}
+
+.mockup-frame__bar .dot.r { background: #f87171; }
+.mockup-frame__bar .dot.y { background: #fbbf24; }
+.mockup-frame__bar .dot.g { background: #34d399; }
+
+.mockup-frame__bar .mockup-url {
+    margin-left: .5rem;
+    font-size: .8rem;
+    color: var(--madlog-text-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.mockup-table-head {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: .5rem;
+    padding: .55rem .9rem;
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--madlog-text-muted);
+    background: #f8fafc;
+    border-bottom: 1px solid var(--madlog-border);
+}
+
+.mockup-table-head span:last-child {
+    text-align: right;
+}
+
+.mockup-stock-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr auto;
+    gap: .5rem;
+    align-items: center;
+    padding: .65rem .9rem;
+    border-top: 1px solid var(--madlog-border);
+    font-variant-numeric: tabular-nums;
+    font-size: .9rem;
+}
+
+.mockup-stock-row:first-of-type {
+    border-top: 0;
+}
+
+.mockup-stock-row__bin {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .8rem;
+    color: var(--madlog-text-muted);
+}
+
+.mockup-stock-row__qty {
+    font-weight: 600;
+}
+
+.mockup-stock-row__qty--low { color: var(--madlog-danger); }
+.mockup-stock-row__qty--ok  { color: var(--madlog-success); }
+
+.mockup-stock-row__status {
+    text-align: right;
+}
+
+.mockup-footer {
+    padding: .55rem .9rem .75rem;
+    border-top: 1px solid var(--madlog-border);
+    background: #f8fafc;
+    text-align: center;
+    font-size: .75rem;
+    color: var(--madlog-text-muted);
+}
+
+.mockup-stat-tile {
+    background: rgba(255, 255, 255, .05);
+    border: 1px solid rgba(255, 255, 255, .12);
+    border-radius: var(--bs-border-radius);
+    padding: 1rem 1.25rem;
+}
+
+.mockup-stat-tile__label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: rgba(255, 255, 255, .6);
+}
+
+.mockup-stat-tile__icon {
+    font-size: 1.25rem;
+    color: #a5b4fc;
+}
+
+/* Sections — Problem/Solution, Features, Workflow, Pricing, FAQ */
+.ps-card {
+    border-radius: var(--bs-border-radius-lg);
+}
+
+.ps-card--highlight {
+    border: 2px solid var(--madlog-primary);
+}
+
+.ps-list li {
+    line-height: 1.45;
+}
+
+.feature-card {
+    transition: transform var(--madlog-transition), box-shadow var(--madlog-transition);
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1.25rem rgba(15, 23, 42, .08) !important;
+}
+
+.workflow-step {
+    position: relative;
+}
+
+.workflow-step__number {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: .95rem;
+    padding: .35rem .75rem;
+    border-radius: var(--bs-border-radius);
+    background: var(--madlog-primary-soft);
+    color: var(--madlog-primary);
+}
+
+.pricing-card {
+    transition: transform var(--madlog-transition), box-shadow var(--madlog-transition);
+}
+
+.pricing-card--featured {
+    border: 2px solid var(--madlog-primary);
+    box-shadow: 0 .75rem 2rem rgba(15, 23, 42, .12) !important;
+    transform: scale(1.02);
+}
+
+@media (max-width: 991.98px) {
+    .pricing-card--featured {
+        transform: none;
+    }
+}
+
+.accordion-button {
+    font-weight: 600;
+}
+
+.accordion-button:not(.collapsed) {
+    color: var(--madlog-primary);
+    background: var(--madlog-primary-soft);
+}
+
+.accordion-button:focus {
+    box-shadow: var(--madlog-focus-ring);
+}
+
+.accordion-item {
+    border-color: var(--madlog-border);
+}
+
+/* Footer */
+.footer-col__heading {
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #a5b4fc;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.footer-link {
+    color: rgba(255, 255, 255, .75);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .92rem;
+    transition: color .12s ease;
+}
+
+.footer-link:hover,
+.footer-link:focus-visible {
+    color: #fff;
+}
+
+/* Icon tile utility */
+.icon-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--bs-border-radius);
+    background: var(--madlog-primary-soft);
+    color: var(--madlog-primary);
+}
+
+/* Animations gated by prefers-reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+    .fade-up {
+        animation: fadeUp .55s ease-out both;
+    }
+
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: none;
+        }
+    }
+}
+
+
+/* =====================================================
+   8. ADMIN SHELL (sidebar + topbar + main grid)
+   ===================================================== */
+
+/*
+ * The sidebar is collapsible on every breakpoint:
+ *   - Desktop (>= 992px): sidebar collapses from --sidebar-width
+ *     down to --sidebar-width-collapsed (icon-only).
+ *   - Mobile  (<  992px): sidebar slides off-canvas.
+ * The collapsed/expanded state is persisted in localStorage by app.js
+ * and applied via the `admin-sidebar-collapsed` class on <body> or <html>.
+ */
+
+.admin-shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    grid-template-rows: var(--topbar-height) 1fr;
+    grid-template-areas:
+        "sidebar topbar"
+        "sidebar main";
+    min-height: 100vh;
+    background: var(--madlog-bg);
+    transition: grid-template-columns var(--madlog-transition-slow);
+}
+
+@media (min-width: 992px) {
+    html.admin-sidebar-collapsed .admin-shell,
+    body.admin-sidebar-collapsed .admin-shell {
+        grid-template-columns: var(--sidebar-width-collapsed) 1fr;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .admin-shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: var(--topbar-height) 1fr;
+        grid-template-areas:
+            "topbar"
+            "main";
+    }
+
+    .admin-sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        width: var(--sidebar-width);
+        max-width: 85vw;
+        z-index: 1040;
+        transform: translateX(-100%);
+        transition: transform var(--madlog-transition-slow);
+        box-shadow: var(--madlog-shadow-lg);
+    }
+
+    .admin-sidebar.is-open {
+        transform: translateX(0);
+    }
+
+    /* Lock page scroll while the off-canvas sidebar is open so the
+       backdrop fully covers the viewport and the user can't
+       accidentally scroll the body underneath. */
+    body.admin-sidebar-open {
+        overflow: hidden;
+    }
+
+    /* Backdrop fade. The element is shown/hidden by app.js via inline
+       `display`; we add a subtle opacity fade so the dim looks calm. */
+    [data-sidebar-backdrop] {
+        opacity: 0;
+        transition: opacity var(--madlog-transition-slow);
+    }
+
+    body.admin-sidebar-open [data-sidebar-backdrop] {
+        opacity: 1;
+    }
+}
+
+.admin-sidebar {
+    grid-area: sidebar;
+    background: var(--madlog-sidebar-bg);
+    color: var(--madlog-sidebar-text);
+    border-right: 1px solid var(--madlog-sidebar-border);
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: width var(--madlog-transition-slow);
+}
+
+.admin-sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    height: var(--topbar-height);
+    padding: 0 1.25rem;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--madlog-sidebar-border);
+    white-space: nowrap;
+    overflow: hidden;
+    letter-spacing: -.01em;
+}
+
+.admin-sidebar .brand .bi {
+    font-size: 1.25rem;
+    color: #a5b4fc;
+    flex-shrink: 0;
+    transition: transform var(--madlog-transition);
+}
+
+.admin-sidebar .brand:hover .bi {
+    transform: rotate(-12deg);
+}
+
+.admin-sidebar .brand:hover {
+    background: var(--madlog-sidebar-hover);
+}
+
+/* Brand label & section titles collapse cleanly when the sidebar is narrow. */
+.admin-sidebar .brand > span,
+.admin-sidebar .nav-section-title,
+.admin-sidebar .nav-link > span,
+.admin-sidebar .nav-link-group .bi-chevron-down,
+.admin-sidebar .sub-nav .nav-link {
+    transition: opacity .15s ease-out, max-width var(--madlog-transition-slow);
+}
+
+@media (min-width: 992px) {
+    html.admin-sidebar-collapsed .admin-sidebar .brand > span,
+    html.admin-sidebar-collapsed .admin-sidebar .nav-section-title,
+    html.admin-sidebar-collapsed .admin-sidebar .nav-link > span,
+    html.admin-sidebar-collapsed .admin-sidebar .nav-link-group .bi-chevron-down,
+    body.admin-sidebar-collapsed .admin-sidebar .brand > span,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-section-title,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-link > span,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-link-group .bi-chevron-down {
+        opacity: 0;
+        max-width: 0;
+        pointer-events: none;
+    }
+
+    html.admin-sidebar-collapsed .admin-sidebar .nav-link,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-link {
+        justify-content: center;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    html.admin-sidebar-collapsed .admin-sidebar .sub-nav,
+    body.admin-sidebar-collapsed .admin-sidebar .sub-nav {
+        display: none;
+    }
+}
+
+.admin-sidebar .nav-section {
+    padding: .75rem 0 .25rem;
+}
+
+.admin-sidebar .nav-section-title {
+    font-size: .6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: rgba(255, 255, 255, .5);
+    padding: .25rem 1.25rem;
+    margin-bottom: .25rem;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.admin-sidebar .nav-link {
+    color: var(--madlog-sidebar-text);
+    border-radius: 0;
+    padding: .5rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    border-left: 2px solid transparent;
+    font-weight: 500;
+    font-size: .9rem;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: background var(--madlog-transition), color var(--madlog-transition);
+}
+
+.admin-sidebar .nav-link:hover {
+    color: #ffffff;
+    background: var(--madlog-sidebar-hover);
+}
+
+.admin-sidebar .nav-link.active {
+    color: var(--madlog-sidebar-active-fg);
+    background: var(--madlog-sidebar-active-bg);
+    border-left-color: #a5b4fc;
+    font-weight: 600;
+}
+
+.admin-sidebar .nav-link .bi {
+    font-size: 1.05rem;
+    width: 1.25rem;
+    text-align: center;
+    color: rgba(255, 255, 255, .55);
+    flex-shrink: 0;
+    transition: color var(--madlog-transition);
+}
+
+.admin-sidebar .nav-link:hover .bi {
+    color: #ffffff;
+}
+
+.admin-sidebar .nav-link.active .bi {
+    color: #a5b4fc;
+}
+
+.admin-sidebar .nav-link-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-sidebar .nav-link-group .bi-chevron-down {
+    transition: transform .15s ease-out, opacity .15s ease-out;
+    font-size: .85rem;
+}
+
+.admin-sidebar .nav-link-group[aria-expanded="true"] .bi-chevron-down {
+    transform: rotate(-180deg);
+}
+
+.admin-sidebar .sub-nav {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+    background: rgba(0, 0, 0, .25);
+}
+
+.admin-sidebar .sub-nav .nav-link {
+    padding-left: 3rem;
+    font-size: .85rem;
+}
+
+/* Sidebar footer (workshop name) */
+.admin-sidebar .sidebar-footer {
+    color: var(--madlog-sidebar-text);
+    overflow: hidden;
+    white-space: nowrap;
+    border-top: 1px solid var(--madlog-sidebar-border);
+}
+
+.admin-sidebar .sidebar-footer-label {
+    font-size: .65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: rgba(255, 255, 255, .5);
+}
+
+.admin-sidebar .sidebar-footer-name {
+    color: #ffffff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+}
+
+@media (min-width: 992px) {
+    html.admin-sidebar-collapsed .admin-sidebar .sidebar-footer-label,
+    html.admin-sidebar-collapsed .admin-sidebar .sidebar-footer-name,
+    body.admin-sidebar-collapsed .admin-sidebar .sidebar-footer-label,
+    body.admin-sidebar-collapsed .admin-sidebar .sidebar-footer-name {
+        opacity: 0;
+        max-width: 0;
+        pointer-events: none;
+    }
+
+    html.admin-sidebar-collapsed .admin-sidebar .sidebar-footer,
+    body.admin-sidebar-collapsed .admin-sidebar .sidebar-footer {
+        text-align: center;
+        padding-left: .5rem;
+        padding-right: .5rem;
+    }
+}
+
+/* Topbar */
+.admin-topbar {
+    grid-area: topbar;
+    background: var(--madlog-surface);
+    border-bottom: 1px solid var(--madlog-border);
+    display: flex;
+    align-items: center;
+    padding: 0 1.25rem;
+    gap: .75rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.admin-topbar .topbar-title {
+    font-weight: 600;
+    color: var(--madlog-text);
+    font-size: 1rem;
+    margin: 0;
+    letter-spacing: -.01em;
+}
+
+.admin-topbar .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.admin-topbar .user-chip {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: var(--madlog-text-muted);
+    font-size: .875rem;
+}
+
+.admin-topbar .user-chip .bi {
+    font-size: 1.25rem;
+}
+
+.admin-topbar .sidebar-toggle {
+    background: transparent;
+    border: 0;
+    color: var(--madlog-text-muted);
+    font-size: 1.1rem;
+    padding: .35rem .5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: var(--madlog-radius-sm);
+    transition: background var(--madlog-transition), color var(--madlog-transition);
+    /* Always present so mobile users can open the off-canvas sidebar.
+       Was previously set to inline-flex only inside the <= 991.98px
+       media query, which was fragile against custom topbar children. */
+    flex-shrink: 0;
+    order: 0;
+}
+
+.admin-topbar .sidebar-toggle:hover {
+    background: var(--madlog-surface-2);
+    color: var(--madlog-text);
+}
+
+.admin-topbar .sidebar-toggle:focus-visible {
+    outline: 2px solid var(--madlog-primary);
+    outline-offset: 1px;
+}
+
+.admin-main {
+    grid-area: main;
+    padding: 1.5rem;
+    overflow-x: auto;
+    transition: padding var(--madlog-transition-slow);
+}
+
+@media (max-width: 575.98px) {
+    .admin-main {
+        padding: 1rem;
+    }
+}
+
+
+/* =====================================================
+   9. ADMIN COMPONENTS
+   =====================================================
+   Cards, tables, badges, pagination, drawer, command bar, density
+   toggle, toasts. Every component pulls from the tokens defined
+   in section 2 — no raw hex values here. */
+
+/* ---- Cards ---- */
+.admin-card {
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius-lg);
+    padding: 1.25rem;
+    box-shadow: var(--madlog-shadow-sm);
+    transition: box-shadow var(--madlog-transition), border-color var(--madlog-transition);
+}
+
+.admin-card:hover {
+    box-shadow: var(--madlog-shadow);
+}
+
+.admin-card--inset {
+    background: var(--madlog-surface-2);
+    border-color: transparent;
+}
+
+.admin-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -1.25rem -1.25rem 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--madlog-border);
+}
+
+.admin-card-title {
+    font-size: .95rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--madlog-text);
+    letter-spacing: -.01em;
+}
+
+/* ---- Page header ---- */
+.admin-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.admin-page-header h1 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--madlog-text);
+    letter-spacing: -.02em;
+}
+
+.admin-page-header .subtitle {
+    color: var(--madlog-text-muted);
+    margin: .25rem 0 0;
+    font-size: .875rem;
+}
+
+/* ---- Stat cards ---- */
+.admin-stat-card {
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius-lg);
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--madlog-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+    transition: box-shadow var(--madlog-transition);
+}
+
+.admin-stat-card:hover {
+    box-shadow: var(--madlog-shadow);
+}
+
+.admin-stat-card .stat-label {
+    color: var(--madlog-text-muted);
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 600;
+}
+
+.admin-stat-card .stat-value {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--madlog-text);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+}
+
+.admin-stat-card .stat-meta {
+    font-size: .8rem;
+    color: var(--madlog-text-muted);
+}
+
+.admin-stat-card .stat-icon {
+    align-self: flex-end;
+    margin-top: -2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--madlog-radius);
+    font-size: 1.15rem;
+    color: var(--madlog-primary);
+    background: var(--madlog-primary-soft);
+}
+
+.admin-stat-card .stat-icon.is-success { color: var(--madlog-success); background: var(--madlog-success-bg); }
+.admin-stat-card .stat-icon.is-danger  { color: var(--madlog-danger);  background: var(--madlog-danger-bg); }
+.admin-stat-card .stat-icon.is-warning { color: var(--madlog-warning); background: var(--madlog-warning-bg); }
+.admin-stat-card .stat-icon.is-info    { color: var(--madlog-info);    background: var(--madlog-info-bg); }
+
+/* ---- Status badges & pills ---- */
+.admin-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .75rem;
+    font-weight: 600;
+    padding: .2rem .55rem;
+    border-radius: var(--madlog-radius-pill);
+    background: var(--madlog-neutral-bg);
+    color: var(--madlog-neutral);
+    line-height: 1.4;
+}
+
+.admin-status-badge.is-success { background: var(--madlog-success-bg); color: var(--madlog-success); }
+.admin-status-badge.is-warning { background: var(--madlog-warning-bg); color: var(--madlog-warning); }
+.admin-status-badge.is-danger  { background: var(--madlog-danger-bg);  color: var(--madlog-danger); }
+.admin-status-badge.is-info    { background: var(--madlog-info-bg);    color: var(--madlog-info); }
+.admin-status-badge.is-primary { background: var(--madlog-primary-soft); color: var(--madlog-primary); }
+
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--madlog-text-muted);
+    flex-shrink: 0;
+}
+
+.status-dot.is-success { background: var(--madlog-success); }
+.status-dot.is-warning { background: var(--madlog-warning); }
+.status-dot.is-danger  { background: var(--madlog-danger); }
+.status-dot.is-info    { background: var(--madlog-info); }
+.status-dot.is-primary { background: var(--madlog-primary); }
+
+/* ---- Empty states ---- */
+.admin-empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--madlog-text-muted);
+}
+
+.admin-empty-state .bi {
+    font-size: 2.25rem;
+    color: var(--madlog-text-subtle);
+    margin-bottom: .65rem;
+    display: block;
+}
+
+/* ---- Filter bar ---- */
+.admin-filter-bar {
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius-lg);
+    padding: .85rem 1rem;
+    margin-bottom: 1.25rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .65rem;
+    align-items: flex-end;
+}
+
+.admin-filter-bar .form-label {
+    font-size: .75rem;
+    margin-bottom: .25rem;
+    color: var(--madlog-text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+/* ---- Tables ----
+ * `.admin-table` wraps a Bootstrap `.table` and gives it a clean
+ * borderless look. Body rows honor `data-density` on the document
+ * via the `.table-density--compact` modifier. */
+
+.admin-table {
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--madlog-shadow-sm);
+}
+
+.admin-table > .table,
+.admin-table table {
+    margin-bottom: 0;
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--madlog-text);
+}
+
+.admin-table thead th {
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--madlog-text-muted);
+    background: var(--madlog-surface-2);
+    border-bottom: 1px solid var(--madlog-border);
+    font-weight: 600;
+    padding: .65rem 1rem;
+    white-space: nowrap;
+}
+
+/* First-column header gets the slightly heavier treatment to mirror
+   the body-row emphasis — keeps the table grid tight and consistent. */
+.admin-table thead th:first-child {
+    color: var(--madlog-text);
+}
+
+/* Apply the same first-column rule to plain `.table` blocks inside
+   admin cards (e.g. dashboard recent activity) so the row identity
+   reads as dark + bold regardless of wrapper class. */
+.table tbody td:first-child,
+.table tbody td:first-child a,
+.table tbody td:first-child a:hover {
+    color: var(--madlog-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-table tbody td {
+    padding: .85rem 1rem;
+    border-color: var(--madlog-border);
+    vertical-align: middle;
+    font-size: .875rem;
+}
+
+.admin-table tbody tr:hover td {
+    background: var(--madlog-surface-2);
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* First column: always dark, bold, and link-text-dark — even when the
+   primary identifier is wrapped in an <a>. Keeps the row identity
+   readable against the muted body text in subsequent columns. */
+.admin-table tbody td:first-child,
+.admin-table tbody td:first-child a,
+.admin-table tbody td:first-child a:hover {
+    color: var(--madlog-text);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.admin-table .num,
+.admin-table td.num,
+.admin-table th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+}
+
+/* Comfortable density (default) — current spec */
+.admin-table tbody td {
+    padding-block: .85rem;
+}
+
+/* Compact density override — kicked in by app.js reading localStorage */
+body[data-density="compact"] .admin-table thead th {
+    padding: .4rem .75rem;
+    font-size: .6875rem;
+}
+
+body[data-density="compact"] .admin-table tbody td {
+    padding: .4rem .75rem;
+    font-size: .8125rem;
+}
+
+/* ---- Breadcrumb ---- */
+.admin-breadcrumb {
+    font-size: .8rem;
+    color: var(--madlog-text-muted);
+    margin-bottom: .35rem;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+}
+
+.admin-breadcrumb a {
+    color: var(--madlog-text-muted);
+    text-decoration: none;
+}
+
+.admin-breadcrumb a:hover {
+    color: var(--madlog-primary);
+}
+
+.admin-breadcrumb .bi {
+    font-size: .7rem;
+    margin: 0 .25rem;
+    color: var(--madlog-text-subtle);
+}
+
+/* ---- Pagination ---- */
+.admin-pagination {
+    margin-top: 1rem;
+}
+
+.admin-pagination .pagination {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: .25rem;
+    margin-bottom: 0;
+}
+
+.admin-pagination .page-item {
+    display: inline-flex;
+}
+
+.admin-pagination .page-link {
+    border-radius: var(--madlog-radius-sm);
+    font-size: .8125rem;
+    line-height: 1.4;
+    padding: .3rem .6rem;
+    color: var(--madlog-text);
+    border-color: var(--madlog-border);
+    background: var(--madlog-surface);
+}
+
+.admin-pagination .page-item.active .page-link {
+    background-color: var(--madlog-primary);
+    border-color: var(--madlog-primary);
+    color: var(--madlog-primary-fg);
+}
+
+.admin-pagination .page-item.disabled .page-link {
+    color: var(--madlog-text-subtle);
+    background-color: var(--madlog-surface-2);
+    border-color: var(--madlog-border);
+}
+
+.admin-pagination p,
+.admin-pagination .pagination-summary {
+    margin-bottom: 0;
+    font-size: .8125rem;
+    color: var(--madlog-text-muted);
+}
+
+/* ---- Chart.js ---- */
+.chart-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.chart-wrap canvas {
+    max-width: 100%;
+}
+
+/* ---- Density toggle (segmented control) ---- */
+.density-toggle {
+    display: inline-flex;
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius);
+    overflow: hidden;
+    background: var(--madlog-surface);
+}
+
+.density-toggle button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--madlog-text-muted);
+    font-size: .75rem;
+    padding: .3rem .55rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    cursor: pointer;
+    transition: background var(--madlog-transition), color var(--madlog-transition);
+}
+
+.density-toggle button + button {
+    border-left: 1px solid var(--madlog-border);
+}
+
+.density-toggle button:hover {
+    background: var(--madlog-surface-2);
+    color: var(--madlog-text);
+}
+
+.density-toggle button[aria-pressed="true"] {
+    background: var(--madlog-primary-soft);
+    color: var(--madlog-primary);
+}
+
+/* ---- Search trigger (Command Bar button) ---- */
+.cmd-bar-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .35rem .65rem;
+    background: var(--madlog-surface-2);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius);
+    color: var(--madlog-text-muted);
+    font-size: .8125rem;
+    cursor: pointer;
+    min-width: 220px;
+    transition: background var(--madlog-transition), border-color var(--madlog-transition);
+}
+
+.cmd-bar-trigger:hover {
+    background: var(--madlog-surface);
+    border-color: var(--madlog-border-strong);
+    color: var(--madlog-text);
+}
+
+.cmd-bar-trigger .bi {
+    color: var(--madlog-text-subtle);
+    font-size: .9rem;
+}
+
+.cmd-bar-trigger .kbd-hint {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: .15rem;
+    font-size: .6875rem;
+    color: var(--madlog-text-subtle);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    font-weight: 600;
+}
+
+/* ---- Global Command Bar (modal overlay) ---- */
+.cmd-bar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .35);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 1060;
+    animation: cmd-bar-fade .15s ease-out;
+}
+
+.cmd-bar {
+    position: fixed;
+    top: 18vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(var(--cmd-bar-width), calc(100vw - 2rem));
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius-lg);
+    box-shadow: var(--madlog-shadow-xl);
+    z-index: 1061;
+    overflow: hidden;
+    animation: cmd-bar-rise .18s cubic-bezier(.16, 1, .3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+.cmd-bar__input {
+    appearance: none;
+    border: 0;
+    border-bottom: 1px solid var(--madlog-border);
+    padding: .9rem 1rem;
+    width: 100%;
+    font-size: .95rem;
+    color: var(--madlog-text);
+    background: transparent;
+    outline: none;
+}
+
+.cmd-bar__input::placeholder {
+    color: var(--madlog-text-subtle);
+}
+
+.cmd-bar__hint {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    color: var(--madlog-text-muted);
+    padding: .35rem 1rem .15rem;
+    font-size: .6875rem;
+}
+
+.cmd-bar__hint kbd {
+    font-family: inherit;
+    background: var(--madlog-surface-2);
+    border: 1px solid var(--madlog-border);
+    border-radius: .25rem;
+    padding: 0 .35rem;
+    font-size: .6875rem;
+    color: var(--madlog-text-muted);
+}
+
+.cmd-bar__list {
+    max-height: 320px;
+    overflow-y: auto;
+    padding: .35rem;
+}
+
+.cmd-bar__group-title {
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--madlog-text-muted);
+    padding: .5rem .65rem .25rem;
+    font-weight: 600;
+}
+
+.cmd-bar__item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .65rem;
+    border-radius: var(--madlog-radius-sm);
+    color: var(--madlog-text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--madlog-transition);
+}
+
+.cmd-bar__item .bi {
+    font-size: 1rem;
+    color: var(--madlog-text-subtle);
+    width: 1rem;
+    text-align: center;
+}
+
+.cmd-bar__item-title {
+    flex: 1;
+    font-size: .875rem;
+}
+
+.cmd-bar__item-hint {
+    font-size: .75rem;
+    color: var(--madlog-text-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.cmd-bar__item[aria-selected="true"] {
+    background: var(--madlog-primary-soft);
+    color: var(--madlog-primary);
+}
+
+.cmd-bar__item[aria-selected="true"] .bi {
+    color: var(--madlog-primary);
+}
+
+.cmd-bar__empty {
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: var(--madlog-text-muted);
+    font-size: .875rem;
+}
+
+.cmd-bar__footer {
+    border-top: 1px solid var(--madlog-border);
+    color: var(--madlog-text-muted);
+    padding: .4rem 1rem;
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    display: flex;
+    justify-content: space-between;
+}
+
+@keyframes cmd-bar-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes cmd-bar-rise {
+    from { opacity: 0; transform: translate(-50%, -8px); }
+    to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* ---- Slide-over drawer ----
+ * Bootstrap `.offcanvas` is used underneath; we just polish it. */
+.madlog-drawer.offcanvas {
+    width: var(--drawer-width);
+    border-left: 1px solid var(--madlog-border);
+    background: var(--madlog-surface);
+    box-shadow: var(--madlog-shadow-lg);
+}
+
+.madlog-drawer .offcanvas-header {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--madlog-border);
+}
+
+.madlog-drawer .offcanvas-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--madlog-text);
+}
+
+.madlog-drawer .offcanvas-body {
+    padding: 0;
+}
+
+.madlog-drawer__section {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--madlog-border);
+}
+
+.madlog-drawer__section:last-child {
+    border-bottom: 0;
+}
+
+.madlog-drawer__label {
+    font-size: .6875rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--madlog-text-muted);
+    font-weight: 600;
+    margin-bottom: .25rem;
+}
+
+.madlog-drawer__value {
+    font-size: .875rem;
+    color: var(--madlog-text);
+    font-variant-numeric: tabular-nums;
+}
+
+.madlog-drawer__dl {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: .65rem 1rem;
+    margin: 0;
+}
+
+.madlog-drawer__dl dt {
+    font-size: .75rem;
+    color: var(--madlog-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-weight: 600;
+}
+
+.madlog-drawer__dl dd {
+    margin: 0;
+    font-size: .875rem;
+    color: var(--madlog-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ---- Toast container ---- */
+.toast-stack {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 1080;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: .5rem;
+    pointer-events: none;
+}
+
+.toast-stack > .toast-item {
+    pointer-events: auto;
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-left: 3px solid var(--madlog-primary);
+    border-radius: var(--madlog-radius);
+    box-shadow: var(--madlog-shadow-md);
+    padding: .65rem .85rem;
+    min-width: 240px;
+    max-width: 360px;
+    font-size: .8125rem;
+    color: var(--madlog-text);
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    animation: toast-in .2s cubic-bezier(.16, 1, .3, 1);
+}
+
+.toast-stack > .toast-item.is-success { border-left-color: var(--madlog-success); }
+.toast-stack > .toast-item.is-warning { border-left-color: var(--madlog-warning); }
+.toast-stack > .toast-item.is-danger  { border-left-color: var(--madlog-danger); }
+.toast-stack > .toast-item.is-info    { border-left-color: var(--madlog-info); }
+
+.toast-stack > .toast-item .bi {
+    color: var(--madlog-primary);
+    font-size: 1rem;
+    margin-top: .1rem;
+}
+
+.toast-stack > .toast-item.is-success .bi { color: var(--madlog-success); }
+.toast-stack > .toast-item.is-warning .bi { color: var(--madlog-warning); }
+.toast-stack > .toast-item.is-danger  .bi { color: var(--madlog-danger); }
+.toast-stack > .toast-item.is-info    .bi { color: var(--madlog-info); }
+
+@keyframes toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---- Buttons (custom variants) ---- */
+.btn-ghost {
+    background: transparent;
+    color: var(--madlog-text-muted);
+    border: 1px solid transparent;
+    border-radius: var(--madlog-radius-sm);
+    padding: .25rem .5rem;
+    transition: background var(--madlog-transition), color var(--madlog-transition);
+}
+
+.btn-ghost:hover {
+    background: var(--madlog-surface-2);
+    color: var(--madlog-text);
+}
+
+.btn-soft {
+    background: var(--madlog-primary-soft);
+    color: var(--madlog-primary);
+    border: 1px solid transparent;
+    border-radius: var(--madlog-radius);
+    padding: .35rem .7rem;
+    font-weight: 500;
+    font-size: .8125rem;
+    transition: background var(--madlog-transition);
+}
+
+.btn-soft:hover {
+    background: #e0e7ff;
+    color: var(--madlog-primary-hover);
+}
+
+/* ---- Inspector button (slide-over trigger) ---- */
+.btn-inspect {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: var(--madlog-text-muted);
+    padding: .25rem .35rem;
+    border-radius: var(--madlog-radius-sm);
+    cursor: pointer;
+    font-size: .875rem;
+    transition: background var(--madlog-transition), color var(--madlog-transition);
+}
+
+.btn-inspect:hover {
+    background: var(--madlog-surface-2);
+    color: var(--madlog-primary);
+}
+
+
+/* =====================================================
+   10. INVENTORY UI
+   ===================================================== */
+
+[data-sidebar-backdrop] {
+    transition: opacity .2s ease-out;
+}
+
+/* Reusable chart palette — driven by tokens so admin charts pick up
+   the new indigo brand without touching app.js chart initialisers. */
+:root {
+    --chart-1: var(--madlog-primary);
+    --chart-2: #10b981;
+    --chart-3: #f59e0b;
+    --chart-4: #ef4444;
+    --chart-5: #8b5cf6;
+    --chart-6: #06b6d4;
+    --chart-7: #f97316;
+    --chart-8: #84cc16;
+}
+
+
+/* =====================================================
+   11. STAFF
+   ===================================================== */
+
+/* Staff dashboard is a minimal placeholder styled with Bootstrap utility
+   classes. No additional rules needed beyond the Bootstrap defaults. */
+
+
+/* =====================================================
+   12. FORMS
+   ===================================================== */
+
+.form-label {
+    font-weight: 500;
+    color: var(--madlog-text);
+    font-size: .8125rem;
+    margin-bottom: .25rem;
+}
+
+.form-control,
+.form-select {
+    border-color: var(--madlog-border);
+    border-radius: var(--madlog-radius);
+    font-size: .875rem;
+    color: var(--madlog-text);
+    background-color: var(--madlog-surface);
+    transition: border-color var(--madlog-transition), box-shadow var(--madlog-transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--madlog-primary);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, .15);
+    outline: 0;
+}
+
+.form-control::placeholder {
+    color: var(--madlog-text-subtle);
+}
+
+.form-text {
+    color: var(--madlog-text-muted);
+    font-size: .75rem;
+}
+
+.form-check-input:checked {
+    background-color: var(--madlog-primary);
+    border-color: var(--madlog-primary);
+}
+
+.input-group-text {
+    background: var(--madlog-surface-2);
+    border-color: var(--madlog-border);
+    color: var(--madlog-text-muted);
+    font-size: .8125rem;
+}
+
+
+/* =====================================================
+   13. MODALS AND OVERLAWS
+   ===================================================== */
+
+/* Bootstrap modal styling is intentionally left at defaults. */
+
+
+/* =====================================================
+   14. RESPONSIVE
+   ===================================================== */
+
+@media (max-width: 991.98px) {
+    /* On mobile the topbar must stay slim: hide the wide command-bar
+       trigger, the user chip text, and the density toggle button
+       labels. The sidebar toggle button stays visible. */
+    .admin-topbar .cmd-bar-trigger {
+        display: none;
+    }
+
+    /* Make sure the desktop-only "collapsed" state (which sets nav-link
+       children to max-width: 0) does NOT leak onto the mobile off-canvas
+       sidebar — labels must stay readable there. */
+    html.admin-sidebar-collapsed .admin-sidebar .brand > span,
+    html.admin-sidebar-collapsed .admin-sidebar .nav-section-title,
+    html.admin-sidebar-collapsed .admin-sidebar .nav-link > span,
+    html.admin-sidebar-collapsed .admin-sidebar .nav-link-group .bi-chevron-down,
+    body.admin-sidebar-collapsed .admin-sidebar .brand > span,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-section-title,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-link > span,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-link-group .bi-chevron-down {
+        opacity: 1;
+        max-width: none;
+        pointer-events: auto;
+    }
+
+    html.admin-sidebar-collapsed .admin-sidebar .nav-link,
+    body.admin-sidebar-collapsed .admin-sidebar .nav-link {
+        justify-content: flex-start;
+        padding-left: 1.25rem;
+        padding-right: 1.25rem;
+    }
+
+    html.admin-sidebar-collapsed .admin-sidebar .sub-nav,
+    body.admin-sidebar-collapsed .admin-sidebar .sub-nav {
+        display: block;
+    }
+}
+
+@media (max-width: 575.98px) {
+    /* Small phones — drop the density toggle entirely; the toggle's
+       sidebar button takes priority and there isn't room for both. */
+    .admin-topbar .density-toggle {
+        display: none;
+    }
+}
+
+
+/* =====================================================
+   15. ACCESSIBILITY / FOCUS / REDUCED MOTION
+   ===================================================== */
+
+/* Universal focus ring */
+:focus-visible {
+    outline: 2px solid var(--madlog-primary);
+    outline-offset: 2px;
+    border-radius: var(--madlog-radius-sm);
+}
+
+/* Buttons get their own native focus — keep Bootstrap visible focus on .btn */
+.btn:focus-visible {
+    outline: 2px solid var(--madlog-primary);
+    outline-offset: 2px;
+    box-shadow: var(--madlog-focus-ring);
+}
+
+/* Reduced motion — flatten everything */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Navbar scroll-spy active state */
+[data-nav-link].active {
+    color: var(--madlog-primary) !important;
+    font-weight: 600;
+}
+
+
+/* =====================================================
+   16. TOOLS DASHBOARD
+   =====================================================
+   Operational command center for /admin/tools/dashboard. Six themed
+   surfaces (kpi cards, attention items, status distribution, activity
+   feed, maintenance schedule, quick actions) plus shared rules for
+   density, compact mode, and mobile stack. All values pull from
+   --madlog-* tokens — no raw hex. */
+
+.admin-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ---- KPI cards ---- */
+.kpi-card {
+    --accent: var(--madlog-primary);
+    --accent-soft: var(--madlog-primary-soft);
+
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    align-items: center;
+    padding: 1.1rem 1.25rem;
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius-lg);
+    box-shadow: var(--madlog-shadow-sm);
+    text-decoration: none;
+    color: inherit;
+    overflow: hidden;
+    transition: box-shadow var(--madlog-transition), transform var(--madlog-transition), border-color var(--madlog-transition);
+}
+
+a.kpi-card:hover,
+a.kpi-card:focus-visible {
+    box-shadow: var(--madlog-shadow-md);
+    transform: translateY(-1px);
+    border-color: var(--madlog-border-strong);
+    color: inherit;
+}
+
+.kpi-card--success { --accent: var(--madlog-success); --accent-soft: var(--madlog-success-bg); }
+.kpi-card--warning { --accent: var(--madlog-warning); --accent-soft: var(--madlog-warning-bg); }
+.kpi-card--danger  { --accent: var(--madlog-danger);  --accent-soft: var(--madlog-danger-bg);  }
+.kpi-card--info    { --accent: var(--madlog-info);    --accent-soft: var(--madlog-info-bg);    }
+.kpi-card--primary { --accent: var(--madlog-primary); --accent-soft: var(--madlog-primary-soft); }
+.kpi-card--neutral { --accent: var(--madlog-neutral); --accent-soft: var(--madlog-neutral-bg); }
+
+.kpi-card__accent {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--accent);
+    border-radius: var(--madlog-radius-lg) 0 0 var(--madlog-radius-lg);
+}
+
+.kpi-card__icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--madlog-radius);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+
+.kpi-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    min-width: 0;
+}
+
+.kpi-card__title {
+    font-size: .6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--madlog-text-muted);
+}
+
+.kpi-card__value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--madlog-text);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+}
+
+.kpi-card__meta {
+    font-size: .8125rem;
+    color: var(--madlog-text-muted);
+}
+
+body[data-density="compact"] .kpi-card {
+    padding: .75rem .9rem;
+    gap: .65rem;
+}
+
+body[data-density="compact"] .kpi-card__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+}
+
+body[data-density="compact"] .kpi-card__value {
+    font-size: 1.4rem;
+}
+
+/* ---- Attention center ---- */
+.attention-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.attention-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: .65rem;
+    align-items: center;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--madlog-border);
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--madlog-transition);
+}
+
+.attention-item:first-child {
+    border-top: 1px solid var(--madlog-border);
+}
+
+.attention-item:hover,
+.attention-item:focus-visible {
+    background: var(--madlog-surface-2);
+    color: inherit;
+}
+
+.attention-item__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.attention-item__dot--critical { background: var(--madlog-danger); }
+.attention-item__dot--high     { background: var(--madlog-warning); }
+.attention-item__dot--medium   { background: var(--madlog-info); }
+
+.attention-item__body {
+    display: flex;
+    flex-direction: column;
+    gap: .1rem;
+    min-width: 0;
+}
+
+.attention-item__label {
+    font-weight: 600;
+    color: var(--madlog-text);
+    font-size: .875rem;
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.attention-item__priority {
+    font-size: .625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: .1rem .4rem;
+    border-radius: var(--madlog-radius-pill);
+}
+
+.attention-item__priority--critical { background: var(--madlog-danger-bg); color: var(--madlog-danger); }
+.attention-item__priority--high     { background: var(--madlog-warning-bg); color: var(--madlog-warning); }
+.attention-item__priority--medium   { background: var(--madlog-info-bg); color: var(--madlog-info); }
+
+.attention-item__description {
+    font-size: .8125rem;
+    color: var(--madlog-text-muted);
+    line-height: 1.35;
+}
+
+.attention-item__count {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    font-weight: 700;
+    font-size: .95rem;
+    color: var(--madlog-text);
+    background: var(--madlog-surface-2);
+    border-radius: var(--madlog-radius-pill);
+    padding: .15rem .55rem;
+    min-width: 2rem;
+    text-align: center;
+}
+
+.attention-item__chevron {
+    color: var(--madlog-text-subtle);
+    font-size: .85rem;
+}
+
+/* ---- Status segmented bar ---- */
+.status-segmented-bar {
+    display: flex;
+    height: 10px;
+    border-radius: var(--madlog-radius-pill);
+    overflow: hidden;
+    background: var(--madlog-surface-2);
+    gap: 2px;
+}
+
+.status-segmented-bar__seg {
+    flex: 0 0 0%;
+    background: var(--madlog-neutral);
+    transition: flex-basis .25s ease-out;
+    min-width: 0;
+}
+
+.status-segmented-bar__seg--is-success   { background: var(--madlog-success); }
+.status-segmented-bar__seg--is-primary  { background: var(--madlog-primary); }
+.status-segmented-bar__seg--is-warning  { background: var(--madlog-warning); }
+.status-segmented-bar__seg--is-danger   { background: var(--madlog-danger); }
+.status-segmented-bar__seg--is-info     { background: var(--madlog-info); }
+.status-segmented-bar__seg--is-secondary { background: var(--madlog-neutral); }
+.status-segmented-bar__seg--is-neutral  { background: var(--madlog-neutral); }
+
+.status-segmented-bar__legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: .65rem 1rem;
+    margin-top: .85rem;
+}
+
+.status-segmented-bar__legend-row {
+    display: grid;
+    grid-template-columns: 10px 1fr auto auto;
+    gap: .5rem;
+    align-items: center;
+    font-size: .8125rem;
+}
+
+.status-segmented-bar__legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--madlog-neutral);
+    flex-shrink: 0;
+}
+
+.status-segmented-bar__legend-label {
+    color: var(--madlog-text);
+    font-weight: 500;
+    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+a.status-segmented-bar__legend-label:hover {
+    color: var(--madlog-primary);
+    text-decoration: underline;
+}
+
+.status-segmented-bar__legend-count {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    font-weight: 600;
+    color: var(--madlog-text);
+}
+
+.status-segmented-bar__legend-percent {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    color: var(--madlog-text-muted);
+    min-width: 2.75rem;
+    text-align: right;
+}
+
+/* ---- Activity feed ---- */
+.activity-feed {
+    display: flex;
+    flex-direction: column;
+}
+
+.activity-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: .85rem;
+    padding: .75rem 0;
+    border-bottom: 1px solid var(--madlog-border);
+    align-items: flex-start;
+}
+
+.activity-item:first-child {
+    border-top: 1px solid var(--madlog-border);
+}
+
+.activity-item__icon {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .95rem;
+    flex-shrink: 0;
+    background: var(--madlog-neutral-bg);
+    color: var(--madlog-neutral);
+}
+
+.activity-item__icon--success { background: var(--madlog-success-bg); color: var(--madlog-success); }
+.activity-item__icon--warning { background: var(--madlog-warning-bg); color: var(--madlog-warning); }
+.activity-item__icon--danger  { background: var(--madlog-danger-bg);  color: var(--madlog-danger); }
+.activity-item__icon--info    { background: var(--madlog-info-bg);    color: var(--madlog-info); }
+.activity-item__icon--primary { background: var(--madlog-primary-soft); color: var(--madlog-primary); }
+
+.activity-item__body {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    min-width: 0;
+}
+
+.activity-item__event {
+    font-weight: 600;
+    color: var(--madlog-text);
+    font-size: .8125rem;
+    text-transform: none;
+}
+
+.activity-item__description {
+    color: var(--madlog-text-muted);
+    font-size: .8125rem;
+    line-height: 1.4;
+}
+
+.activity-item__subject {
+    color: var(--madlog-text);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+a.activity-item__subject:hover {
+    color: var(--madlog-primary);
+    text-decoration: underline;
+}
+
+.activity-item__actor {
+    color: var(--madlog-text-subtle);
+    font-size: .75rem;
+}
+
+.activity-item__meta {
+    font-size: .75rem;
+    color: var(--madlog-text-muted);
+    white-space: nowrap;
+}
+
+/* ---- Quick actions ---- */
+.quick-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: .5rem;
+}
+
+.quick-actions__item {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+    padding: .55rem .75rem;
+    background: var(--madlog-surface);
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius);
+    color: var(--madlog-text);
+    text-decoration: none;
+    font-size: .875rem;
+    font-weight: 500;
+    transition: background var(--madlog-transition), border-color var(--madlog-transition), color var(--madlog-transition);
+}
+
+.quick-actions__item:hover,
+.quick-actions__item:focus-visible {
+    background: var(--madlog-surface-2);
+    border-color: var(--madlog-border-strong);
+    color: var(--madlog-text);
+}
+
+.quick-actions__item .bi {
+    color: var(--madlog-text-muted);
+    font-size: .95rem;
+    width: 1rem;
+    text-align: center;
+    transition: color var(--madlog-transition);
+}
+
+.quick-actions__item:hover .bi {
+    color: var(--madlog-primary);
+}
+
+/* ---- Section card title row ---- */
+.dashboard-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: -1.25rem -1.25rem 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--madlog-border);
+}
+
+.dashboard-section-title h2 {
+    font-size: .95rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--madlog-text);
+    letter-spacing: -.01em;
+}
+
+.dashboard-section-title .dashboard-section-subtitle {
+    color: var(--madlog-text-muted);
+    font-size: .75rem;
+    font-weight: 400;
+    margin: .15rem 0 0;
+}
+
+.dashboard-section-title .dashboard-section-actions {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+/* ---- Maintenance schedule subscripts ---- */
+.maintenance-group {
+    border-bottom: 1px solid var(--madlog-border);
+    padding: .85rem 0;
+}
+
+.maintenance-group:last-child {
+    border-bottom: 0;
+}
+
+.maintenance-group__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: .5rem;
+}
+
+.maintenance-group__title {
+    font-size: .8125rem;
+    font-weight: 600;
+    color: var(--madlog-text);
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.maintenance-group__count {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    font-weight: 600;
+    background: var(--madlog-surface-2);
+    color: var(--madlog-text-muted);
+    padding: .1rem .5rem;
+    border-radius: var(--madlog-radius-pill);
+    font-size: .75rem;
+}
+
+.maintenance-group--overdue .maintenance-group__count { background: var(--madlog-danger-bg); color: var(--madlog-danger); }
+.maintenance-group--due     .maintenance-group__count { background: var(--madlog-warning-bg); color: var(--madlog-warning); }
+.maintenance-group--upcoming .maintenance-group__count { background: var(--madlog-info-bg); color: var(--madlog-info); }
+
+/* ---- Inspection / calibration buckets ---- */
+.inspection-buckets {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: .75rem;
+}
+
+.inspection-bucket {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .75rem .9rem;
+    border: 1px solid var(--madlog-border);
+    border-radius: var(--madlog-radius);
+    background: var(--madlog-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: background var(--madlog-transition), border-color var(--madlog-transition);
+}
+
+a.inspection-bucket:hover,
+a.inspection-bucket:focus-visible {
+    background: var(--madlog-surface-2);
+    border-color: var(--madlog-border-strong);
+    color: inherit;
+}
+
+.inspection-bucket__label {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 600;
+    color: var(--madlog-text-muted);
+}
+
+.inspection-bucket__value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+    color: var(--madlog-text);
+}
+
+.inspection-bucket--danger  .inspection-bucket__value { color: var(--madlog-danger); }
+.inspection-bucket--warning .inspection-bucket__value { color: var(--madlog-warning); }
+.inspection-bucket--success .inspection-bucket__value { color: var(--madlog-success); }
+.inspection-bucket--info    .inspection-bucket__value { color: var(--madlog-info); }
+
+/* ---- Numeric values inside dashboard tables ---- */
+.admin-dashboard .table td.num,
+.admin-dashboard .table th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+}
+
+/* ---- Dashboard grid responsive rules ---- */
+.dashboard-grid {
+    --bs-gutter-x: 1rem;
+    --bs-gutter-y: 1rem;
+}
+
+@media (max-width: 767.98px) {
+    .kpi-card {
+        padding: .9rem 1rem;
+    }
+
+    .kpi-card__value {
+        font-size: 1.4rem;
+    }
+
+    .kpi-card__icon {
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+
+    .status-segmented-bar__legend {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .inspection-buckets {
+        grid-template-columns: 1fr;
+    }
+
+    .activity-item {
+        grid-template-columns: auto 1fr;
+    }
+
+    .activity-item__meta {
+        grid-column: 2;
+        margin-top: .15rem;
+    }
+}
+
+/* ==========================================================================
+   17. EQUIPMENT CONSUMABLES
+   --------------------------------------------------------------------------
+   Styles for the equipment-consumables module — pills, timeline, cards,
+   resource-type picker. Sits on top of the existing card / kpi framework.
+   ========================================================================== */
+
+/* ---- Resource type pill (Part / Battery / Lubricant) ---- */
+.eq-resource-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    background: var(--madlog-bg-subtle, #eef0f4);
+    color: var(--madlog-text, #2a2f3a);
+    border: 1px solid var(--madlog-border, #d8dce4);
+    white-space: nowrap;
+}
+
+.eq-resource-pill--Part {
+    background: var(--madlog-primary-soft, #e8eafc);
+    color: var(--madlog-primary, #3b4cca);
+    border-color: var(--madlog-primary-soft, #c4cafb);
+}
+
+.eq-resource-pill--Battery {
+    background: var(--madlog-warning-soft, #fff5d9);
+    color: #8a6900;
+    border-color: #fbe28a;
+}
+
+.eq-resource-pill--Lubricant {
+    background: var(--madlog-info-soft, #e3f3fb);
+    color: #0a5d80;
+    border-color: #b6e1f1;
+}
+
+/* ---- Consumable card (used on the equipment-tab listing) ---- */
+.eq-consumable-card {
+    display: block;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.eq-consumable-card:hover {
+    border-color: var(--madlog-primary, #3b4cca);
+    transform: translateY(-1px);
+}
+
+/* ---- Inline KPI card (used inside the equipment-resources tab) ---- */
+.kpi-card--inline {
+    padding: 0.65rem 0.85rem;
+    gap: 0.65rem;
+}
+
+.kpi-card--inline .kpi-card__icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.kpi-card--inline .kpi-card__title {
+    font-size: 0.72rem;
+}
+
+.kpi-card--inline .kpi-card__value {
+    font-size: 1.1rem;
+}
+
+/* ---- Assignment timeline ---- */
+.eq-consumable-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+
+.eq-consumable-step {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 0.9rem;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid var(--madlog-border, #e1e4ea);
+    border-radius: 10px;
+    background: var(--madlog-card-bg, #fff);
+}
+
+.eq-consumable-step__icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--madlog-bg-subtle, #eef0f4);
+    color: var(--madlog-text, #2a2f3a);
+    font-size: 1.05rem;
+}
+
+.eq-consumable-step__icon.is-success {
+    background: var(--madlog-success-soft, #d6f4dd);
+    color: var(--madlog-success, #1b7a3c);
+}
+
+.eq-consumable-step__icon.is-warning {
+    background: var(--madlog-warning-soft, #fff5d9);
+    color: #8a6900;
+}
+
+.eq-consumable-step__icon.is-danger {
+    background: var(--madlog-danger-soft, #fce0e0);
+    color: var(--madlog-danger, #b3322a);
+}
+
+.eq-consumable-step__icon.is-info,
+.eq-consumable-step__icon.is-primary {
+    background: var(--madlog-primary-soft, #e8eafc);
+    color: var(--madlog-primary, #3b4cca);
+}
+
+.eq-consumable-step__icon.is-secondary {
+    background: var(--madlog-bg-subtle, #eef0f4);
+    color: var(--madlog-text-muted, #6a7180);
+}
+
+.eq-consumable-step__head {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.eq-consumable-step__title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.eq-consumable-step__time {
+    margin-left: auto;
+    font-size: 0.8rem;
+}
+
+.eq-consumable-step__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    color: var(--madlog-text-muted, #6a7180);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.eq-consumable-step__footer {
+    color: var(--madlog-text-muted, #6a7180);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.eq-consumable-step__notes {
+    margin-top: 0.4rem;
+    padding: 0.4rem 0.55rem;
+    background: var(--madlog-bg-subtle, #f6f7fa);
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--madlog-text, #2a2f3a);
+    border-left: 3px solid var(--madlog-border, #d8dce4);
+}
+
+/* ---- Resource-type picker (radio + dependent select) ---- */
+.resource-type-radios .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+
+.resource-type-radios .btn {
+    border-radius: 6px;
+}
+
+.resource-pickers {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.resource-picker {
+    display: none;
+}
+
+.resource-picker:not(:disabled) {
+    display: block;
+}
+
+/* Visible affordance: render only the currently-selected type's select. */
+.resource-pickers .resource-picker:disabled {
+    display: none;
+}
+
+/* ---- Number column helper (used in tables) ---- */
+.num,
+td.num,
+th.num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+/* ---- Attention list (reuses existing component, but ensure spacing) ---- */
+.attention-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* ---- Mobile rules ---- */
+@media (max-width: 767.98px) {
+    .eq-consumable-step {
+        grid-template-columns: 36px 1fr;
+        gap: 0.6rem;
+        padding: 0.75rem 0.8rem;
+    }
+
+    .eq-consumable-step__icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+    }
+
+    .eq-consumable-step__time {
+        margin-left: 0;
+    }
+
+    .eq-consumable-step__head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .kpi-card--inline {
+        padding: 0.55rem 0.7rem;
+    }
+}
+
+/* ---- Compact density ---- */
+body[data-density="compact"] .eq-consumable-step {
+    padding: 0.55rem 0.7rem;
+    gap: 0.6rem;
+}
+
+body[data-density="compact"] .eq-consumable-step__icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+}

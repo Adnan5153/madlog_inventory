@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Http\Requests\Concerns\HandlesWorkshopScoping;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class UpdatePartCategoryRequest extends FormRequest
 {
+    use HandlesWorkshopScoping;
+
     public function authorize(): bool
     {
         return $this->user()?->isAdmin() ?? false;
@@ -15,12 +18,21 @@ class UpdatePartCategoryRequest extends FormRequest
 
     public function rules(): array
     {
-        $workshopId = $this->user()->workshop_id ?? 0;
-        $categoryId = $this->route('category')?->getKey();
+        $category = $this->route('category');
+        $categoryId = $category?->getKey();
+        $workshopId = $this->effectiveWorkshopId();
 
         return [
+            'workshop_id' => $this->workshopRule(),
             'name' => ['required', 'string', 'max:120'],
-            'slug' => ['nullable', 'string', 'max:120', Rule::unique('part_categories', 'slug')->where('workshop_id', $workshopId)->ignore($categoryId)],
+            'slug' => [
+                'nullable',
+                'string',
+                'max:120',
+                Rule::unique('part_categories', 'slug')
+                    ->where('workshop_id', $workshopId)
+                    ->ignore($categoryId),
+            ],
             'description' => ['nullable', 'string', 'max:500'],
         ];
     }
@@ -30,5 +42,10 @@ class UpdatePartCategoryRequest extends FormRequest
         if (! $this->filled('slug') && $this->filled('name')) {
             $this->merge(['slug' => Str::slug($this->input('name'))]);
         }
+
+        // The category's existing workshop is authoritative — we never
+        // let a global admin move a category to a different workshop
+        // through an update.
+        $this->lockWorkshopFromRouteModel('category');
     }
 }

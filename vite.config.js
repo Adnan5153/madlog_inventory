@@ -9,19 +9,15 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
+                // Single application CSS + JS bundle. Every page loads
+                // these two entry points — no more per-page scss/js files.
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'resources/js/passkeys.js',
-                'resources/css/landing/landing.scss',
-                'resources/js/landing.js',
-                // Admin bundle: Bootstrap-only, no Tailwind/Flux.
-                'resources/css/admin/admin.scss',
-                'resources/js/admin.js',
             ],
             refresh: true,
             fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
+                bunny('Inter', {
+                    weights: [400, 500, 600, 700],
                 }),
             ],
         }),

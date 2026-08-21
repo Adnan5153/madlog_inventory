@@ -11,10 +11,10 @@
     <form method="POST" action="{{ route('admin.categories.update', $category) }}">
         @csrf
         @method('PUT')
-        @include('admin.categories._form', ['category' => $category])
+        @include('admin.categories._form', ['category' => $category, 'workshops' => $workshops])
 
         <div class="d-flex gap-2 mt-3">
-            <button class="btn btn-warning">
+            <button class="btn btn-primary">
                 <i class="bi bi-check-lg me-1"></i> Save changes
             </button>
             <a href="{{ route('admin.categories.index') }}" class="btn btn-outline-secondary">Cancel</a>
