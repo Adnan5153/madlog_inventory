@@ -23,13 +23,17 @@ return new class extends Migration
 
         // 2. Backfill from the existing brands join (only when the brands
         //    table is still present, e.g. on a fresh migrate this is skipped).
+        //    Use the query builder so the SQL is portable across drivers
+        //    (MySQL, PostgreSQL, SQLite). Raw MySQL-style `UPDATE ... JOIN`
+        //    syntax would fail on SQLite which the CI uses.
         if (Schema::hasTable('brands')) {
-            DB::statement(
-                'UPDATE parts p '
-                .'JOIN brands b ON b.id = p.brand_id '
-                .'SET p.brand = b.name '
-                .'WHERE p.brand_id IS NOT NULL'
-            );
+            $brandRows = DB::table('brands')->select('id', 'name')->get();
+            foreach ($brandRows as $brand) {
+                DB::table('parts')
+                    ->where('brand_id', $brand->id)
+                    ->whereNotNull('brand_id')
+                    ->update(['brand' => $brand->name]);
+            }
         }
 
         // 3. Drop the foreign key + column on `parts`.
