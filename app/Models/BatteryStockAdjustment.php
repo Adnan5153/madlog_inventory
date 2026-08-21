@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
 class BatteryStockAdjustment extends Model
 {
     use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<BatteryStockAdjustmentFactory> */
     use HasFactory;
 

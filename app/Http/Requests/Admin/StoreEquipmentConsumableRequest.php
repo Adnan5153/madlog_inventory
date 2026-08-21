@@ -3,7 +3,10 @@
 namespace App\Http\Requests\Admin;
 
 use App\Http\Requests\Concerns\HandlesWorkshopScoping;
+use App\Models\Battery;
 use App\Models\EquipmentConsumable;
+use App\Models\Lubricant;
+use App\Models\Part;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -63,13 +66,14 @@ class StoreEquipmentConsumableRequest extends FormRequest
             $allowed = EquipmentConsumable::allowedResourceTypes();
             if (! in_array($type, $allowed, true)) {
                 $v->errors()->add('resource_type', 'Invalid resource type.');
+
                 return;
             }
 
             $table = match ($type) {
-                \App\Models\Part::class => 'parts',
-                \App\Models\Battery::class => 'batteries',
-                \App\Models\Lubricant::class => 'lubricants',
+                Part::class => 'parts',
+                Battery::class => 'batteries',
+                Lubricant::class => 'lubricants',
             };
 
             $exists = \DB::table($table)

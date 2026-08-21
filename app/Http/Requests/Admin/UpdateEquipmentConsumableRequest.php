@@ -5,7 +5,6 @@ namespace App\Http\Requests\Admin;
 use App\Http\Requests\Concerns\HandlesWorkshopScoping;
 use App\Models\EquipmentConsumable;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class UpdateEquipmentConsumableRequest extends FormRequest
 {

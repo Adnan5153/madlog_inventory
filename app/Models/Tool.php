@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ToolCondition;
 use App\Enums\ToolStatus;
+use Carbon\CarbonImmutable;
 use Database\Factories\ToolFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,7 +14,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
 
 /**
@@ -71,6 +71,7 @@ use Illuminate\Support\Carbon;
 class Tool extends Model
 {
     use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<ToolFactory> */
     use HasFactory;
 

@@ -19,7 +19,7 @@ use App\Models\LubricantStockMovement;
 use App\Models\Part;
 use App\Models\StockMovement;
 use App\Models\User;
-use App\Services\Inventory\StockMovementService;
+use App\Scopes\WorkshopScope;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -44,8 +44,7 @@ class EquipmentConsumableService
 {
     public function __construct(
         private readonly StockMovementService $stockMovements,
-    ) {
-    }
+    ) {}
 
     /**
      * Register a resource as tracked against an equipment.
@@ -582,7 +581,7 @@ class EquipmentConsumableService
     private function resolveInventoryItem(Part $part, ?int $binId, int $workshopId): InventoryItem
     {
         $query = InventoryItem::query()
-            ->withoutGlobalScope(\App\Scopes\WorkshopScope::class)
+            ->withoutGlobalScope(WorkshopScope::class)
             ->where('workshop_id', $workshopId)
             ->where('part_id', $part->getKey());
 
@@ -613,7 +612,7 @@ class EquipmentConsumableService
     private function resolveBatteryInventoryItem(Battery $battery, ?int $binId, int $workshopId): BatteryInventoryItem
     {
         $query = BatteryInventoryItem::query()
-            ->withoutGlobalScope(\App\Scopes\WorkshopScope::class)
+            ->withoutGlobalScope(WorkshopScope::class)
             ->where('workshop_id', $workshopId)
             ->where('battery_id', $battery->getKey());
 
@@ -644,7 +643,7 @@ class EquipmentConsumableService
     private function resolveLubricantInventoryItem(Lubricant $lubricant, ?int $binId, int $workshopId): LubricantInventoryItem
     {
         $query = LubricantInventoryItem::query()
-            ->withoutGlobalScope(\App\Scopes\WorkshopScope::class)
+            ->withoutGlobalScope(WorkshopScope::class)
             ->where('workshop_id', $workshopId)
             ->where('lubricant_id', $lubricant->getKey());
 

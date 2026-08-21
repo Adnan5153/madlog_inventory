@@ -89,6 +89,7 @@ use Illuminate\Support\Carbon;
 class Battery extends Model
 {
     use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<BatteryFactory> */
     use HasFactory;
 

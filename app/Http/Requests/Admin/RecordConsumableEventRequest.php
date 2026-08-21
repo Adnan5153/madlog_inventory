@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Enums\EquipmentConsumableType;
 use App\Models\EquipmentConsumable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;

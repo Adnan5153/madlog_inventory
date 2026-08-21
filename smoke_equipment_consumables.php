@@ -12,30 +12,39 @@
  * Run:  php smoke_equipment_consumables.php
  */
 
-require __DIR__ . '/vendor/autoload.php';
-$app = require __DIR__ . '/bootstrap/app.php';
-$app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap();
-
+use App\Exceptions\DomainException;
 use App\Models\Battery;
 use App\Models\BatteryInventoryItem;
+use App\Models\BatteryStockMovement;
 use App\Models\Equipment;
 use App\Models\EquipmentConsumable;
 use App\Models\EquipmentConsumableAssignment;
+use App\Models\InventoryItem;
 use App\Models\Lubricant;
 use App\Models\LubricantInventoryItem;
-use App\Models\Part;
-use App\Models\InventoryItem;
-use App\Models\StockMovement;
-use App\Models\BatteryStockMovement;
 use App\Models\LubricantStockMovement;
+use App\Models\Part;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\Workshop;
 use App\Services\Inventory\EquipmentConsumableService;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\DB;
 
-function pass(string $msg): void { echo "[ OK ] $msg\n"; }
-function fail(string $msg): never { echo "[FAIL] $msg\n"; exit(1); }
+require __DIR__.'/vendor/autoload.php';
+$app = require __DIR__.'/bootstrap/app.php';
+$app->make(Kernel::class)->bootstrap();
+
+function pass(string $msg): void
+{
+    echo "[ OK ] $msg\n";
+}
+function fail(string $msg): never
+{
+    echo "[FAIL] $msg\n";
+    exit(1);
+}
 
 // Pick a workshop and an admin user
 $workshop = Workshop::query()->first();
@@ -54,8 +63,8 @@ echo "Admin: {$admin->name}\n";
 $equipment = Equipment::withoutWorkshopScope(function () use ($workshop) {
     return Equipment::query()->create([
         'workshop_id' => $workshop->id,
-        'name' => 'Smoke test equipment ' . now()->timestamp,
-        'asset_number' => 'SMK-' . now()->timestamp,
+        'name' => 'Smoke test equipment '.now()->timestamp,
+        'asset_number' => 'SMK-'.now()->timestamp,
         'status' => 'active',
         'is_active' => true,
     ]);
@@ -108,10 +117,16 @@ $consumable = $service->assign(
 $consumable->refresh();
 $consumable->setRelations([]);
 $assignCount = EquipmentConsumableAssignment::withoutWorkshopScope(fn () => $consumable->assignments()->count());
-if ($assignCount !== 1) fail('assign: expected 1 assignment, got '.$assignCount);
+if ($assignCount !== 1) {
+    fail('assign: expected 1 assignment, got '.$assignCount);
+}
 $current = EquipmentConsumableAssignment::withoutWorkshopScope(fn () => $consumable->currentAssignment);
-if ($current === null) fail('assign: expected currentAssignment');
-if ((float) $current->total_cost !== 25.0) fail('assign: expected total_cost 25.0');
+if ($current === null) {
+    fail('assign: expected currentAssignment');
+}
+if ((float) $current->total_cost !== 25.0) {
+    fail('assign: expected total_cost 25.0');
+}
 pass('assign() created consumable + assigned assignment');
 
 // 2. INSTALL
@@ -126,7 +141,9 @@ $consumable->refresh();
 $installedCount = EquipmentConsumableAssignment::withoutWorkshopScope(
     fn () => $consumable->assignments()->where('type', 'installed')->count()
 );
-if ($installedCount !== 1) fail('install: expected 1 installed assignment, got '.$installedCount);
+if ($installedCount !== 1) {
+    fail('install: expected 1 installed assignment, got '.$installedCount);
+}
 pass('install() created installed assignment');
 
 // 3. CONSUME
@@ -147,13 +164,21 @@ $inv->refresh();
 $currentAfterConsume = EquipmentConsumableAssignment::withoutWorkshopScope(
     fn () => $consumable->currentAssignment()->first()
 );
-if ($currentAfterConsume !== null) fail('consume: expected currentAssignment to be null after terminal consume, got id='.$currentAfterConsume->id.' status='.$currentAfterConsume->status->value);
+if ($currentAfterConsume !== null) {
+    fail('consume: expected currentAssignment to be null after terminal consume, got id='.$currentAfterConsume->id.' status='.$currentAfterConsume->status->value);
+}
 $consumedCount = EquipmentConsumableAssignment::withoutWorkshopScope(
     fn () => $consumable->assignments()->where('type', 'consumed')->count()
 );
-if ($consumedCount !== 1) fail('consume: expected 1 consumed assignment, got '.$consumedCount);
-if ($consumeAssignment->stock_movement_type !== 'part') fail('consume: expected stock_movement_type=part, got '.$consumeAssignment->stock_movement_type);
-if ($consumeAssignment->stock_movement_id === null) fail('consume: expected stock_movement_id');
+if ($consumedCount !== 1) {
+    fail('consume: expected 1 consumed assignment, got '.$consumedCount);
+}
+if ($consumeAssignment->stock_movement_type !== 'part') {
+    fail('consume: expected stock_movement_type=part, got '.$consumeAssignment->stock_movement_type);
+}
+if ($consumeAssignment->stock_movement_id === null) {
+    fail('consume: expected stock_movement_id');
+}
 $invQty = InventoryItem::withoutWorkshopScope(fn () => (float) InventoryItem::find($inv->id)->quantity);
 if (abs($invQty - ($beforePartQty - 1.0)) > 0.0001) {
     fail('consume: expected inventory qty '.($beforePartQty - 1.0).', got '.$invQty);
@@ -161,8 +186,12 @@ if (abs($invQty - ($beforePartQty - 1.0)) > 0.0001) {
 $movement = StockMovement::withoutWorkshopScope(
     fn () => StockMovement::find($consumeAssignment->stock_movement_id)
 );
-if ($movement === null) fail('consume: stock movement row not found');
-if ((float) $movement->quantity !== -1.0) fail('consume: stock movement quantity expected -1.0');
+if ($movement === null) {
+    fail('consume: stock movement row not found');
+}
+if ((float) $movement->quantity !== -1.0) {
+    fail('consume: stock movement quantity expected -1.0');
+}
 pass('consume() deducted part stock and wrote ledger row');
 
 // 4. REPLACE — needs an OPEN consumable. consume() closed $consumable,
@@ -192,25 +221,37 @@ $replace = $service->replace(
     actor: $admin,
     notes: 'replaced',
 );
-if ($replace === null) fail('replace: returned null');
-if ($replace->id === $replaceSource->id) fail('replace: returned same consumable');
+if ($replace === null) {
+    fail('replace: returned null');
+}
+if ($replace->id === $replaceSource->id) {
+    fail('replace: returned same consumable');
+}
 $replaceSource->refresh();
 $replaceSource->unsetRelation('currentAssignment');
 $replaceSource->unsetRelation('assignments');
 $currentAfterReplace = EquipmentConsumableAssignment::withoutWorkshopScope(
     fn () => $replaceSource->currentAssignment()->first()
 );
-if ($currentAfterReplace !== null) fail('replace: source consumable should have been closed');
+if ($currentAfterReplace !== null) {
+    fail('replace: source consumable should have been closed');
+}
 
 $replacedAssignment = EquipmentConsumableAssignment::withoutWorkshopScope(
     fn () => $replaceSource->assignments()->where('type', 'replaced')->first()
 );
-if ($replacedAssignment === null) fail('replace: source consumable missing replaced assignment');
-if ($replacedAssignment->previous_assignment_id === null) fail('replace: missing previous_assignment_id chain');
+if ($replacedAssignment === null) {
+    fail('replace: source consumable missing replaced assignment');
+}
+if ($replacedAssignment->previous_assignment_id === null) {
+    fail('replace: missing previous_assignment_id chain');
+}
 $replacementFirst = EquipmentConsumableAssignment::withoutWorkshopScope(
     fn () => $replace->assignments()->where('type', 'assigned')->first()
 );
-if ($replacementFirst === null) fail('replace: new consumable missing assigned assignment');
+if ($replacementFirst === null) {
+    fail('replace: new consumable missing assigned assignment');
+}
 pass('replace() chained previous_assignment_id and created new consumable');
 
 // 5. REMOVE the new consumable, return-to-stock 0.5
@@ -224,8 +265,12 @@ $removeAssignment = $service->remove(
 );
 $replace->refresh();
 $currentAfterRemove = EquipmentConsumableAssignment::withoutWorkshopScope(fn () => $replace->currentAssignment);
-if ($currentAfterRemove !== null) fail('remove: currentAssignment should be null after remove');
-if ($removeAssignment->stock_movement_id !== null) fail('remove: no return was requested, expected no stock movement id');
+if ($currentAfterRemove !== null) {
+    fail('remove: currentAssignment should be null after remove');
+}
+if ($removeAssignment->stock_movement_id !== null) {
+    fail('remove: no return was requested, expected no stock movement id');
+}
 pass('remove() closed consumable without writing a stock movement');
 
 // 6. BATTERY verb (if seeded)
@@ -251,8 +296,12 @@ if ($battery && $batInv) {
     $batMovement = BatteryStockMovement::withoutWorkshopScope(
         fn () => BatteryStockMovement::find($batAssignment->stock_movement_id)
     );
-    if ($batMovement === null) fail('consume(battery): stock movement row not found');
-    if ($batAssignment->stock_movement_type !== 'battery') fail('consume(battery): wrong stock_movement_type');
+    if ($batMovement === null) {
+        fail('consume(battery): stock movement row not found');
+    }
+    if ($batAssignment->stock_movement_type !== 'battery') {
+        fail('consume(battery): wrong stock_movement_type');
+    }
     if (abs($batQty - ($before - 1.0)) > 0.0001) {
         fail('consume(battery): expected qty '.($before - 1.0).', got '.$batQty);
     }
@@ -284,8 +333,12 @@ if ($lubricant && $lubInv) {
     $lubMovement = LubricantStockMovement::withoutWorkshopScope(
         fn () => LubricantStockMovement::find($lubAssignment->stock_movement_id)
     );
-    if ($lubMovement === null) fail('consume(lubricant): stock movement row not found');
-    if ($lubAssignment->stock_movement_type !== 'lubricant') fail('consume(lubricant): wrong stock_movement_type');
+    if ($lubMovement === null) {
+        fail('consume(lubricant): stock movement row not found');
+    }
+    if ($lubAssignment->stock_movement_type !== 'lubricant') {
+        fail('consume(lubricant): wrong stock_movement_type');
+    }
     if (abs($lubQty - ($before - 1.0)) > 0.0001) {
         fail('consume(lubricant): expected qty '.($before - 1.0).', got '.$lubQty);
     }
@@ -306,9 +359,9 @@ try {
         );
         fail('Expected DomainException for over-consumption, got none');
     }
-} catch (\App\Exceptions\DomainException $e) {
+} catch (DomainException $e) {
     pass('over-consumption correctly throws DomainException');
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     fail('Wrong exception type for over-consumption: '.get_class($e).' — '.$e->getMessage());
 }
 
@@ -323,7 +376,7 @@ try {
         $equipment->delete();
     });
     DB::commit();
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     DB::rollBack();
     fail('Cleanup failed: '.$e->getMessage());
 }

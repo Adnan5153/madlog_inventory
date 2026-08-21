@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\Concerns\HasWorkshopPicker;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Tool;
+use App\Models\ToolCategory;
 use App\Models\ToolCheckout;
 use App\Models\ToolMaintenanceRecord;
 use App\Models\User;
@@ -255,7 +256,7 @@ class ToolDashboardController extends Controller
             ->where(function (Builder $q) {
                 $q->where('subject_type', Tool::class)
                     ->orWhere('subject_type', ToolMaintenanceRecord::class)
-                    ->orWhere('subject_type', \App\Models\ToolCategory::class)
+                    ->orWhere('subject_type', ToolCategory::class)
                     ->orWhere('subject_type', ToolCheckout::class)
                     ->orWhere('action', 'like', 'tool.%')
                     ->orWhere('action', 'like', 'tool_%');

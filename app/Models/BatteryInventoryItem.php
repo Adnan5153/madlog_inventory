@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
 class BatteryInventoryItem extends Model
 {
     use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<BatteryInventoryItemFactory> */
     use HasFactory;
 

@@ -32,6 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class ToolCategory extends Model
 {
     use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<ToolCategoryFactory> */
     use HasFactory;
 

@@ -40,6 +40,7 @@ use Illuminate\Support\Carbon;
 class ToolMaintenanceRecord extends Model
 {
     use Concerns\BelongsToWorkshop;
+
     /** @use HasFactory<ToolMaintenanceRecordFactory> */
     use HasFactory;
 

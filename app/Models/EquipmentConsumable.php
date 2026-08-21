@@ -8,6 +8,7 @@ use Carbon\CarbonImmutable;
 use Database\Factories\EquipmentConsumableFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -15,7 +16,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\DB;
 
 /**
  * One consumable resource (Part | Battery | Lubricant) tracked against
@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\DB;
  * @property int|null $updated_by
  * @property-read Equipment $equipment
  * @property-read Model $resource
- * @property-read \Illuminate\Database\Eloquent\Collection<int, EquipmentConsumableAssignment> $assignments
+ * @property-read Collection<int, EquipmentConsumableAssignment> $assignments
  * @property-read EquipmentConsumableAssignment|null $latestAssignment
  * @property-read EquipmentConsumableAssignment|null $currentAssignment
  */
@@ -198,9 +198,9 @@ class EquipmentConsumable extends Model
     public static function allowedResourceTypes(): array
     {
         return [
-            \App\Models\Part::class,
-            \App\Models\Battery::class,
-            \App\Models\Lubricant::class,
+            Part::class,
+            Battery::class,
+            Lubricant::class,
         ];
     }
 
@@ -211,8 +211,8 @@ class EquipmentConsumable extends Model
     public static function resourceIcon(string $resourceType): string
     {
         return match ($resourceType) {
-            \App\Models\Battery::class => 'bi-battery-charging',
-            \App\Models\Lubricant::class => 'bi-droplet-fill',
+            Battery::class => 'bi-battery-charging',
+            Lubricant::class => 'bi-droplet-fill',
             default => 'bi-nut',
         };
     }
@@ -223,8 +223,8 @@ class EquipmentConsumable extends Model
     public static function resourceLabel(string $resourceType): string
     {
         return match ($resourceType) {
-            \App\Models\Battery::class => 'Battery',
-            \App\Models\Lubricant::class => 'Lubricant',
+            Battery::class => 'Battery',
+            Lubricant::class => 'Lubricant',
             default => 'Part',
         };
     }

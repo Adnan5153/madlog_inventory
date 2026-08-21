@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\EquipmentConsumableStatus;
 use App\Enums\EquipmentConsumableType;
-use App\Enums\StockMovementType;
 use App\Http\Controllers\Admin\Concerns\HasLiveSearch;
 use App\Http\Controllers\Admin\Concerns\HasWorkshopPicker;
 use App\Http\Controllers\Controller;
@@ -20,11 +19,12 @@ use App\Models\EquipmentConsumableAssignment;
 use App\Models\Lubricant;
 use App\Models\Part;
 use App\Models\Unit;
-use App\Models\User;
 use App\Services\Inventory\EquipmentConsumableService;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -38,8 +38,7 @@ class EquipmentConsumableController extends Controller
 
     public function __construct(
         private readonly EquipmentConsumableService $service,
-    ) {
-    }
+    ) {}
 
     // ----------------------------------------------------------------
     // Dashboard
@@ -224,6 +223,7 @@ class EquipmentConsumableController extends Controller
             ->get()
             ->map(function ($row) {
                 $resource = $this->resolveResourceInstance($row->resource_type, $row->resource_id);
+
                 return [
                     'name' => $resource ? ($resource->name ?? $resource->battery_code ?? $resource->lubricant_code ?? 'Resource #'.$row->resource_id) : 'Resource #'.$row->resource_id,
                     'type' => $row->resource_type,
@@ -244,6 +244,7 @@ class EquipmentConsumableController extends Controller
             ->get()
             ->map(function (EquipmentConsumableAssignment $row) {
                 $equipment = $row->equipmentConsumable?->equipment;
+
                 return [
                     'event' => $row->type?->label() ?? 'Event',
                     'description' => $equipment ? ($equipment->name.' ('.($equipment->asset_number ?? '#'.$equipment->getKey()).')') : 'Equipment consumable',
@@ -708,6 +709,7 @@ class EquipmentConsumableController extends Controller
         if ($user->isGlobalAdmin()) {
             return $this->selectedWorkshopId($request) ?? $user->workshop_id;
         }
+
         return $user->workshop_id;
     }
 
@@ -724,7 +726,7 @@ class EquipmentConsumableController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Equipment>
+     * @return Collection<int, Equipment>
      */
     private function equipmentList()
     {
@@ -735,7 +737,7 @@ class EquipmentConsumableController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Part>
+     * @return Collection<int, Part>
      */
     private function partList()
     {
@@ -747,7 +749,7 @@ class EquipmentConsumableController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Battery>
+     * @return Collection<int, Battery>
      */
     private function batteryList()
     {
@@ -759,7 +761,7 @@ class EquipmentConsumableController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, Lubricant>
+     * @return Collection<int, Lubricant>
      */
     private function lubricantList()
     {
@@ -771,7 +773,7 @@ class EquipmentConsumableController extends Controller
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Collection<int, BinLocation>
+     * @return Collection<int, BinLocation>
      */
     private function binList()
     {
@@ -790,12 +792,13 @@ class EquipmentConsumableController extends Controller
      * Returns null if the resource type isn't one of the known
      * inventory models (Part | Battery | Lubricant).
      */
-    private function resolveResourceInstance(string $resourceType, int $resourceId): ?\Illuminate\Database\Eloquent\Model
+    private function resolveResourceInstance(string $resourceType, int $resourceId): ?Model
     {
-        if (! in_array($resourceType, \App\Models\EquipmentConsumable::allowedResourceTypes(), true)) {
+        if (! in_array($resourceType, EquipmentConsumable::allowedResourceTypes(), true)) {
             return null;
         }
-        /** @var class-string<\Illuminate\Database\Eloquent\Model> $resourceType */
+
+        /** @var class-string<Model> $resourceType */
         return $resourceType::query()->find($resourceId);
     }
 }
