@@ -58,18 +58,30 @@ APP_ENV="${APP_ENV:-production}"
 APP_DEBUG="${APP_DEBUG:-false}"
 APP_KEY="${APP_KEY:-}"
 
-# Render's `fromService: { property: host }` only returns the hostname,
-# not the scheme. If we forward that as APP_URL (e.g. "madlog_inventory.onrender.com"),
-# browsers see absolute http:// asset URLs while the page is served over
-# https:// and silently block every CSS/JS as mixed content. Normalize any
-# schemeless APP_URL to https:// — Render's edge terminates TLS for us,
-# so the scheme is always https in production. Local docker runs override
-# APP_URL via -e and won't hit this path (their value already has a scheme).
-case "$APP_URL" in
-    http://*|https://*) ;;                   # already has a scheme, trust it
-    '')             APP_URL="http://localhost:${PORT_VALUE}" ;;
-    *)              APP_URL="https://${APP_URL}" ;;
-esac
+# Render's edge (and any HTTPS-terminating proxy) terminates TLS for us,
+# so the public scheme is always https even though the container speaks
+# http internally. Force https:// in production so absolute asset URLs
+# don't get blocked as mixed content. We detect "production" by the
+# presence of Render's `RENDER` env var (always set on Render, never set
+# in local docker) rather than APP_ENV, because APP_ENV defaults to
+# production in this entrypoint and would misfire for local devs.
+#
+#   schemeless host (Render's fromService:host) → "https://<host>"
+#   http://... (legacy dashboard override)      → re-scheme to https
+#   https://...                                  ← unchanged
+#   unset                                       → "https://localhost"
+if [ -n "${RENDER:-}" ]; then
+    case "$APP_URL" in
+        '')       APP_URL="https://localhost" ;;
+        http://*) APP_URL="https://${APP_URL#http://}" ;;
+        https://*) ;;
+        *)        APP_URL="https://${APP_URL}" ;;
+    esac
+else
+    case "$APP_URL" in
+        '') APP_URL="http://localhost:${PORT_VALUE}" ;;
+    esac
+fi
 
 DB_CONNECTION="pgsql"
 # Prefer Render's `DATABASE_URL` (the psql service's connectionString)
