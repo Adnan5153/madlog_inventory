@@ -1,14 +1,19 @@
 services:
   # ----- Postgres database ------------------------------------------------
+  # Note: the service name below must match the name Render shows in the
+  # dashboard for the existing psql instance. Render matches `fromService`
+  # bindings by name; if these don't match, env vars are silently not
+  # injected and the app boots with empty DB_* values.
   - type: psql
-    name: madlog-store-db
+    name: dpg-da036lht0dsc738pcb50-a
     plan: free
     region: singapore
     ipAllowList: []  # only allow internal Render connections
 
   # ----- Web service (Laravel) -------------------------------------------
+  # Same caveat as above — `name` must match the live web service name.
   - type: web
-    name: madlog-store
+    name: madlog_inventory
     runtime: docker
     plan: free
     region: singapore
@@ -27,7 +32,7 @@ services:
       - key: APP_NAME
         value: Madlog Store
       - key: APP_URL
-        fromService: { type: web, name: madlog-store, property: host }
+        fromService: { type: web, name: madlog_inventory, property: host }
       - key: APP_KEY
         generateValue: true
 
@@ -39,17 +44,17 @@ services:
       - key: DB_CONNECTION
         value: pgsql
       - key: DATABASE_URL
-        fromService: { type: psql, name: madlog-store-db, property: connectionString }
+        fromService: { type: psql, name: dpg-da036lht0dsc738pcb50-a, property: connectionString }
       - key: DB_HOST
-        fromService: { type: psql, name: madlog-store-db, property: host }
+        fromService: { type: psql, name: dpg-da036lht0dsc738pcb50-a, property: host }
       - key: DB_PORT
-        fromService: { type: psql, name: madlog-store-db, property: port }
+        fromService: { type: psql, name: dpg-da036lht0dsc738pcb50-a, property: port }
       - key: DB_DATABASE
-        fromService: { type: psql, name: madlog-store-db, property: database }
+        fromService: { type: psql, name: dpg-da036lht0dsc738pcb50-a, property: database }
       - key: DB_USERNAME
-        fromService: { type: psql, name: madlog-store-db, property: user }
+        fromService: { type: psql, name: dpg-da036lht0dsc738pcb50-a, property: user }
       - key: DB_PASSWORD
-        fromService: { type: psql, name: madlog-store-db, property: password }
+        fromService: { type: psql, name: dpg-da036lht0dsc738pcb50-a, property: password }
       # Render Postgres requires SSL; the pgsql block in config/database.php
       # already defaults sslmode to 'prefer', which is fine for the free tier.
       - key: DB_SSLMODE

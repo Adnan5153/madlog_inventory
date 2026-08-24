@@ -85,8 +85,8 @@ if [ -z "$DB_URL" ] && [ "$DB_HOST" = "127.0.0.1" ]; then
         say_fatal <<'EOF'
 no Postgres service is wired up.
   DB_URL is empty and DB_HOST is the loopback default.
-  In the Render dashboard for madlog-store, check:
-    - The madlog-store-db psql service exists.
+  In the Render dashboard for madlog_inventory, check:
+    - The dpg-da036lht0dsc738pcb50-a psql service exists.
     - DATABASE_URL is injected via render.yaml (re-apply yaml).
     - No stale DB_HOST/DB_PORT/DB_PASSWORD env vars are set.
   Set REQUIRE_DB=0 to bypass this check (not recommended).
@@ -96,8 +96,8 @@ EOF
 no Postgres service appears to be wired up.
   DB_URL is empty and DB_HOST is the loopback default.
   Either:
-    1. Apply render.yaml from your Render dashboard to create
-       the madlog-store-db Postgres service, OR
+    1. Apply render.yaml from your Render dashboard to wire
+       the dpg-da036lht0dsc738pcb50-a Postgres service, OR
     2. Set DATABASE_URL (or DB_HOST/DB_PORT/DB_DATABASE/...)
        in the web service's Environment tab to point at your
        own Postgres/MySQL server.
