@@ -41,6 +41,17 @@ services:
       # `url` fields, which is the cleanest way to wire Laravel to a
       # managed Postgres. The individual DB_* vars are still injected as
       # fallbacks (and so the entrypoint can log them in the .env preview).
+      #
+      # IMPORTANT: the `fromService` reference below is only honored by
+      # Render when (a) the service name matches a live psql instance AND
+      # (b) you click "Apply render.yaml" from the Blueprint page. A
+      # push-to-main redeploy does NOT re-sync env vars. If you see the
+      # entrypoint's "no Postgres service is wired up" FATAL after a
+      # deploy, the fix is: open the madlog_inventory web service →
+      # Environment tab → add `DATABASE_URL` manually with the internal
+      # connection string (`postgresql://root:<pwd>@dpg-da036lht0dsc738pcb50-a/madlog`).
+      # The fromService line below documents the correct wiring — just
+      # not the one Render auto-applies for existing services.
       - key: DB_CONNECTION
         value: pgsql
       - key: DATABASE_URL

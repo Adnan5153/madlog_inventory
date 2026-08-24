@@ -220,6 +220,61 @@ php artisan storage:link
 
 - Trigger a redeploy.
 
+### "Page loads but renders unstyled (HTML works, no CSS/JS)"
+
+Browser DevTools → Network tab shows asset requests failing or returning
+the HTML page itself. The most common cause is **mixed content**: the
+page is served over HTTPS but Laravel is emitting absolute `http://...`
+URLs for CSS/JS bundles. Look for asset URLs like:
+
+```
+<link rel="stylesheet" href="http://madlog_inventory.onrender.com/build/assets/app-xxx.css">
+```
+
+Three things can cause this, in order of likelihood:
+
+1. **`APP_URL` has no scheme in the dashboard.** Render's `fromService:
+   { property: host }` only returns the hostname, not `https://...`. The
+   entrypoint's APP_URL normalizer (see `docker/entrypoint.sh` lines
+   61–72) fixes this by prefixing `https://` to any schemeless value —
+   but if you manually overrode `APP_URL` in the Render dashboard to
+   e.g. `http://...`, that wins. Fix: in the dashboard, set `APP_URL`
+   to `https://madlog_inventory.onrender.com` (or just delete the
+   override and let `render.yaml`'s `fromService` re-apply).
+2. **`SESSION_SECURE_COOKIE` mismatch** — if the cookie isn't marked
+   secure but the page is HTTPS, browsers drop the session. Less likely
+   to cause this exact symptom; more likely to cause login loops.
+3. **Browser is caching an old HTML response** with `http://` URLs.
+   Hard-reload (Ctrl+Shift+R) or open in a private window.
+
+`TrustProxies::at('*')` in `AppServiceProvider::configureProxies()`
+makes Laravel honor `X-Forwarded-Proto` from Render's edge, which is
+the second piece of the fix; the entrypoint is the first.
+
+### "[entrypoint] no Postgres service is wired up" on boot
+
+The entrypoint's `DATABASE_URL` is empty. Most common cause: `render.yaml`
+declares `DATABASE_URL` via `fromService: { type: psql, name: ...,
+property: connectionString }`, but Render only honors the reference when
+you click **Apply render.yaml** from the Blueprint page — *not* on
+push-to-main redeploys. For an existing service whose name already
+diverges from the yaml, the reference silently does nothing.
+
+Fix: in the `madlog_inventory` web service → **Environment** tab:
+
+1. **Delete** any stale `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`,
+   `DB_DATABASE`, `DB_SSLMODE` entries that have wrong values (e.g. a
+   leftover `DB_PORT=3306` from an earlier MySQL attempt will leak through
+   the entrypoint's hard-pinning, but it's still cleaner to remove them).
+2. **Add** `DATABASE_URL` with value
+   `postgresql://root:<password>@dpg-da036lht0dsc738pcb50-a/madlog`
+   (use the *internal* hostname — same network as the web service).
+3. **Save** → Render auto-redeploys. The new entrypoint will read it and
+   the app will boot normally.
+
+After the first successful boot, this env var will persist across
+deploys, so you only need to do this once per database password rotation.
+
 ## Local sanity check before pushing
 
 ```bash

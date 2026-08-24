@@ -57,7 +57,19 @@ APP_NAME="${APP_NAME:-Madlog Store}"
 APP_ENV="${APP_ENV:-production}"
 APP_DEBUG="${APP_DEBUG:-false}"
 APP_KEY="${APP_KEY:-}"
-APP_URL="${APP_URL:-http://localhost:${PORT_VALUE}}"
+
+# Render's `fromService: { property: host }` only returns the hostname,
+# not the scheme. If we forward that as APP_URL (e.g. "madlog_inventory.onrender.com"),
+# browsers see absolute http:// asset URLs while the page is served over
+# https:// and silently block every CSS/JS as mixed content. Normalize any
+# schemeless APP_URL to https:// — Render's edge terminates TLS for us,
+# so the scheme is always https in production. Local docker runs override
+# APP_URL via -e and won't hit this path (their value already has a scheme).
+case "$APP_URL" in
+    http://*|https://*) ;;                   # already has a scheme, trust it
+    '')             APP_URL="http://localhost:${PORT_VALUE}" ;;
+    *)              APP_URL="https://${APP_URL}" ;;
+esac
 
 DB_CONNECTION="pgsql"
 # Prefer Render's `DATABASE_URL` (the psql service's connectionString)
