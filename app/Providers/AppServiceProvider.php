@@ -25,7 +25,6 @@ use App\Observers\AuditObserver;
 use App\Observers\PartObserver;
 use App\Services\SettingService;
 use Carbon\CarbonImmutable;
-use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
@@ -49,23 +48,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
-        $this->configureProxies();
         $this->registerSettingHelper();
         $this->registerAuditObservers();
-    }
-
-    /**
-     * Trust Render's edge proxy in production so scheme/host reflect
-     * the public request and url()/asset() helpers generate correct
-     * absolute URLs. Widen to specific CIDRs if the container is ever
-     * internet-facing. Must run from boot() (not bootstrap/app.php) —
-     * the env() helper isn't bound until after LoadEnvironmentVariables.
-     */
-    protected function configureProxies(): void
-    {
-        if (app()->isProduction()) {
-            TrustProxies::at('*');
-        }
     }
 
     /**

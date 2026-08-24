@@ -33,6 +33,15 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureUserHasRole::class,
             'permission' => EnsureUserHasPermission::class,
         ]);
+
+        // Trust Render's edge proxy so scheme/host reflect the public
+        // request and url()/asset() helpers generate correct absolute
+        // URLs (otherwise the scheme defaults to whatever nginx sent
+        // PHP-FPM, which is http://). Registered unconditionally —
+        // TrustProxies is a no-op when no forwarded headers arrive,
+        // so local docker without a proxy is unaffected. Widen to
+        // specific CIDRs if the container is ever internet-facing.
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
