@@ -309,9 +309,14 @@ class ReportService
 
         return WorkshopScope::disabled(function () use ($workshopId, $months, $start) {
             $driver = DB::connection()->getDriverName();
-            $expr = $driver === 'sqlite'
-                ? "strftime('%Y-%m', occurred_at)"
-                : "DATE_FORMAT(occurred_at, '%Y-%m')";
+            $expr = match ($driver) {
+                'sqlite'    => "strftime('%Y-%m', occurred_at)",
+                'mysql'     => "DATE_FORMAT(occurred_at, '%Y-%m')",
+                'pgsql'     => "TO_CHAR(occurred_at, 'YYYY-MM')",
+                // MSSQL is the only other driver we might see; add a clause
+                // when we actually deploy to it.
+                default     => "TO_CHAR(occurred_at, 'YYYY-MM')",
+            };
 
             $bindings = [$start->toDateTimeString()];
             $scopeClause = '';
