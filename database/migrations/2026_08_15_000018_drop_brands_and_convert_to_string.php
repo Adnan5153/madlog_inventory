@@ -65,17 +65,27 @@ return new class extends Migration
         });
 
         // Best-effort reverse copy: we can't fully reconstruct the brand
-        // rows, so this is intentionally lossy.
+        // rows, so this is intentionally lossy. Uses portable query builder
+        // (no MySQL-only NOW() / multi-arg REPLACE chain) so down() works on
+        // SQLite as well as MySQL.
         if (Schema::hasColumn('parts', 'brand')) {
-            DB::statement(
-                'INSERT INTO brands (workshop_id, name, slug, created_at, updated_at) '
-                .'SELECT workshop_id, brand, '
-                ."LOWER(REPLACE(REPLACE(REPLACE(brand, ' ', '-'), '/', '-'), '--', '-')), "
-                .'NOW(), NOW() '
-                .'FROM parts '
-                ."WHERE brand IS NOT NULL AND brand <> '' "
-                .'GROUP BY workshop_id, brand'
-            );
+            $brandsByWorkshop = DB::table('parts')
+                ->select('workshop_id', 'brand')
+                ->whereNotNull('brand')
+                ->where('brand', '<>', '')
+                ->groupBy('workshop_id', 'brand')
+                ->get();
+            $now = now();
+            foreach ($brandsByWorkshop as $row) {
+                $slug = strtolower(str_replace([' ', '/', '--'], '-', $row->brand));
+                DB::table('brands')->insert([
+                    'workshop_id' => $row->workshop_id,
+                    'name' => $row->brand,
+                    'slug' => $slug,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
         }
 
         Schema::table('parts', function (Blueprint $table) {

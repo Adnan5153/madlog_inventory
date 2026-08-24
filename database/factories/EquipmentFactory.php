@@ -37,4 +37,19 @@ class EquipmentFactory extends Factory
     {
         return $this->state(['status' => Equipment::STATUS_MAINTENANCE]);
     }
+
+    public function retired(): static
+    {
+        return $this->state(['status' => Equipment::STATUS_RETIRED]);
+    }
+
+    public function disposed(): static
+    {
+        return $this->state(['status' => Equipment::STATUS_DISPOSED]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(['is_active' => false]);
+    }
 }

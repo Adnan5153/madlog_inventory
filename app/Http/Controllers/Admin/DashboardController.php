@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AuditLog;
-use App\Scopes\WorkshopScope;
 use App\Services\Inventory\ReportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,30 +23,43 @@ class DashboardController extends Controller
 
         $totals = $this->reports->dashboardTotals($workshopId);
 
+        // Total inventory value (Parts bucket table; multi-workshop rollup
+        // for global admins via globalInventoryValue()).
+        $valuation = $workshopId !== null
+            ? $this->reports->inventoryValuation($workshopId)
+            : $this->reports->globalInventoryValue();
+
         $lowStockCount = $workshopId
             ? $this->reports->lowStock($workshopId)->count()
             : 0;
 
-        $recentActivity = WorkshopScope::disabled(function () use ($workshopId) {
-            $q = AuditLog::query()->latest('created_at')->limit(15);
-            if ($workshopId !== null) {
-                $q->where('workshop_id', $workshopId);
-            }
-
-            return $q->get();
-        });
+        // Compute the monthly aggregation ONCE; both the bar chart and
+        // the line chart render the same dataset.
+        $monthly = $this->reports->monthlyStockMovements($workshopId);
 
         $charts = [
+            // Existing — preserved unchanged.
             'topConsumed' => $this->reports->topConsumedForChart($workshopId),
             'inventoryByCat' => $this->reports->inventoryValueByCategory($workshopId),
+            // New keys for the inventory-intelligence section.
+            'monthlyMovements' => $monthly,
+            'movementTrend' => $monthly,
+            'quantityByCategory' => $this->reports->inventoryQuantityByCategory($workshopId),
+            'stockValueByCat' => $this->reports->stockValueByCategory($workshopId),
+            'batteries' => $this->reports->batteryQuantityByType($workshopId),
+            'lubricants' => $this->reports->lubricantQuantityByType($workshopId),
+            'tools' => $this->reports->toolQuantityByCategory($workshopId),
         ];
+
+        $recentMovements = $this->reports->recentStockMovements($workshopId);
 
         return view('admin.dashboard', [
             'title' => 'Dashboard',
             'totals' => $totals,
+            'valuation' => $valuation,
             'user' => $user,
             'lowStockCount' => $lowStockCount,
-            'recentActivity' => $recentActivity,
+            'recentMovements' => $recentMovements,
             'charts' => $charts,
         ]);
     }

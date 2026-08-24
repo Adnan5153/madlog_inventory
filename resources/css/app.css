@@ -2727,3 +2727,29 @@ body[data-density="compact"] .eq-consumable-step__icon {
     height: 32px;
     font-size: 0.95rem;
 }
+
+
+/* ============================================================================
+ * 17. Admin dashboard — analytics section
+ * ============================================================================
+ *
+ * The inventory-intelligence dashboard adds three new sections below the
+ * existing KPI tiles: monthly movement (bar + line), category distribution
+ * (pie + horizontal bar), and standalone subsystem charts (Batteries,
+ * Lubricants, Tools). These utility classes provide consistent vertical
+ * spacing between sections and direction-coloured quantity cells in the
+ * recent-stock-movements table.
+ */
+
+.dashboard-analytics-section { margin-top: 1.5rem; }
+.dashboard-analytics-section + .dashboard-analytics-section { margin-top: 1rem; }
+
+.recent-movements-table .num {
+    font-variant-numeric: tabular-nums;
+}
+.recent-movements-table .num.is-in {
+    color: var(--madlog-success);
+}
+.recent-movements-table .num.is-out {
+    color: var(--madlog-danger);
+}

@@ -16,6 +16,23 @@ set -eu
 
 cd /var/www
 
+# Print each stdin line with the [entrypoint] prefix. Reads from stdin
+# so callers can use a heredoc and keep their message bodies readable.
+say_warn() {
+    while IFS= read -r line; do
+        printf '[entrypoint] %s\n' "$line"
+    done
+}
+
+# Like say_warn, but to stderr, then abort the boot. Used for hard
+# configuration errors that would otherwise surface as silent 500s.
+say_fatal() {
+    while IFS= read -r line; do
+        printf '[entrypoint] %s\n' "$line" >&2
+    done
+    exit 1
+}
+
 PORT_VALUE="${PORT:-10000}"
 
 # ---- 1. nginx listen port -------------------------------------------------
@@ -49,7 +66,8 @@ DB_CONNECTION="pgsql"
 # database config reads `DB_URL` (not `DATABASE_URL`), so we map it.
 DB_URL="${DATABASE_URL:-${DB_URL:-}}"
 DB_HOST="${DB_HOST:-127.0.0.1}"
-DB_PORT="${DB_PORT:-5432}"
+# Same hard-pin rationale as DB_CONNECTION above — see file header.
+DB_PORT="5432"
 DB_DATABASE="${DB_DATABASE:-laravel}"
 DB_USERNAME="${DB_USERNAME:-root}"
 DB_PASSWORD="${DB_PASSWORD:-}"
@@ -57,19 +75,33 @@ DB_SSLMODE="${DB_SSLMODE:-prefer}"
 
 # Heuristic: if there's no DATABASE_URL (no psql service wired) AND the
 # DB_HOST is still the default 127.0.0.1 we know we can't possibly reach
-# a Postgres server, so warn loudly and let the boot continue so we still
-# get logs. Set FAIL_ON_MISSING_DB=1 to abort boot instead.
+# a Postgres server. Fail fast with an actionable error so the broken
+# state shows up immediately in Render's log explorer instead of as
+# silent HTTP 500s for every request. Set REQUIRE_DB=0 to fall back to
+# the warn-only behavior (useful for local docker runs without a
+# Postgres service). Default of `=1` matches RUN_MIGRATIONS above.
 if [ -z "$DB_URL" ] && [ "$DB_HOST" = "127.0.0.1" ]; then
-    echo "[entrypoint] WARNING: no Postgres service appears to be wired up."
-    echo "[entrypoint]   DB_URL is empty and DB_HOST is the loopback default."
-    echo "[entrypoint]   Either:"
-    echo "[entrypoint]     1. Apply render.yaml from your Render dashboard to create"
-    echo "[entrypoint]        the madlog-store-db Postgres service, OR"
-    echo "[entrypoint]     2. Set DATABASE_URL (or DB_HOST/DB_PORT/DB_DATABASE/...)"
-    echo "[entrypoint]        in the web service's Environment tab to point at your"
-    echo "[entrypoint]        own Postgres/MySQL server."
-    if [ "${FAIL_ON_MISSING_DB:-0}" = "1" ]; then
-        exit 1
+    if [ "${REQUIRE_DB:-1}" = "1" ]; then
+        say_fatal <<'EOF'
+no Postgres service is wired up.
+  DB_URL is empty and DB_HOST is the loopback default.
+  In the Render dashboard for madlog-store, check:
+    - The madlog-store-db psql service exists.
+    - DATABASE_URL is injected via render.yaml (re-apply yaml).
+    - No stale DB_HOST/DB_PORT/DB_PASSWORD env vars are set.
+  Set REQUIRE_DB=0 to bypass this check (not recommended).
+EOF
+    else
+        say_warn <<'EOF'
+no Postgres service appears to be wired up.
+  DB_URL is empty and DB_HOST is the loopback default.
+  Either:
+    1. Apply render.yaml from your Render dashboard to create
+       the madlog-store-db Postgres service, OR
+    2. Set DATABASE_URL (or DB_HOST/DB_PORT/DB_DATABASE/...)
+       in the web service's Environment tab to point at your
+       own Postgres/MySQL server.
+EOF
     fi
 fi
 

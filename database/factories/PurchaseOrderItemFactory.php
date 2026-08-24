@@ -27,4 +27,26 @@ class PurchaseOrderItemFactory extends Factory
             'line_total' => round($ordered * $cost, 2),
         ];
     }
+
+    public function fullyReceived(): static
+    {
+        return $this->state(function (array $attrs) {
+            $ordered = (float) $attrs['quantity_ordered'];
+
+            return [
+                'quantity_received' => $ordered,
+            ];
+        });
+    }
+
+    public function partiallyReceived(): static
+    {
+        return $this->state(function (array $attrs) {
+            $ordered = (float) $attrs['quantity_ordered'];
+
+            return [
+                'quantity_received' => round($ordered / 2, 2),
+            ];
+        });
+    }
 }

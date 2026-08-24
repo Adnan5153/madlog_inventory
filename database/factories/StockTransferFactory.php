@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\BinLocation;
 use App\Models\StockTransfer;
 use App\Models\User;
 use App\Models\Workshop;
@@ -19,8 +20,8 @@ class StockTransferFactory extends Factory
             'workshop_id' => Workshop::factory(),
             'transfer_number' => 'TRF-'.date('Y').'-'.strtoupper(Str::random(6)),
             'status' => StockTransfer::STATUS_DRAFT,
-            'source_bin_id' => null,
-            'destination_bin_id' => null,
+            'source_bin_id' => null,            // source is nullable (draft can be set later)
+            'destination_bin_id' => BinLocation::factory(),
             'transferred_by' => User::factory(),
             'received_by' => null,
             'dispatched_at' => null,

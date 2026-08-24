@@ -29,10 +29,10 @@ class PartFactory extends Factory
         return [
             'workshop_id' => Workshop::factory(),
             'category_id' => PartCategory::factory(),
-            'sku' => Str::upper(Str::random(3)).'-'.fake()->numberBetween(1000, 9999),
+            'sku' => Str::upper(Str::random(3)).'-'.fake()->unique()->numberBetween(1000, 9999),
             'oem_part_number' => 'OEM-'.Str::upper(Str::random(8)),
             'brand' => fake()->randomElement(['Bosch', 'NGK', 'Denso', 'ACDelco', 'Mahle', 'Continental', 'Valeo', 'Brembo']),
-            'barcode' => (string) fake()->numberBetween(1000000000000, 9999999999999),
+            'barcode' => (string) fake()->unique()->numberBetween(1000000000000, 9999999999999),
             'name' => $name,
             'description' => fake()->sentence(),
             'reorder_threshold' => fake()->numberBetween(2, 10),
@@ -40,5 +40,18 @@ class PartFactory extends Factory
             'cost_price' => fake()->randomFloat(2, 1, 80),
             'is_active' => true,
         ];
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn () => ['is_active' => false]);
+    }
+
+    public function forCategory(PartCategory $category): static
+    {
+        return $this->state(fn () => [
+            'workshop_id' => $category->workshop_id,
+            'category_id' => $category->id,
+        ]);
     }
 }

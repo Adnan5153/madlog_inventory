@@ -30,4 +30,30 @@ class JobCardFactory extends Factory
             'closed_at' => null,
         ];
     }
+
+    public function open(): static
+    {
+        return $this->state(fn () => [
+            'status' => 'open',
+            'closed_at' => null,
+        ]);
+    }
+
+    public function inProgress(): static
+    {
+        return $this->state(fn () => ['status' => 'in_progress']);
+    }
+
+    public function completed(): static
+    {
+        return $this->state(fn () => [
+            'status' => 'completed',
+            'closed_at' => now(),
+        ]);
+    }
+
+    public function cancelled(): static
+    {
+        return $this->state(fn () => ['status' => 'cancelled']);
+    }
 }

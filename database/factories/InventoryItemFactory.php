@@ -35,4 +35,25 @@ class InventoryItemFactory extends Factory
             'quantity' => fake()->randomFloat(2, 0, 3),
         ]);
     }
+
+    public function outOfStock(): static
+    {
+        return $this->state(fn () => ['quantity' => 0]);
+    }
+
+    public function forBin(BinLocation $bin): static
+    {
+        return $this->state(fn () => [
+            'workshop_id' => $bin->workshop_id,
+            'bin_id' => $bin->id,
+        ]);
+    }
+
+    public function forPart(Part $part): static
+    {
+        return $this->state(fn () => [
+            'workshop_id' => $part->workshop_id,
+            'part_id' => $part->id,
+        ]);
+    }
 }

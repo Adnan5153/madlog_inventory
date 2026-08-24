@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Database\Factories\PermissionFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -23,6 +25,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 #[Fillable(['name', 'group', 'description'])]
 class Permission extends Model
 {
+    /** @use HasFactory<PermissionFactory> */
+    use HasFactory;
+
     /**
      * Permissions that belong to a "super-admin" effectively grant
      * every ability in the system. Mirrors Laravel's Gate::before()

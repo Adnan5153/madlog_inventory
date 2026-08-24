@@ -59,13 +59,17 @@ import 'bootstrap-icons/font/bootstrap-icons.css';
 import * as bootstrap from 'bootstrap';
 
 // Chart.js — register only the controllers + elements used on the admin
-// dashboard (bar + doughnut) so the bundle stays tree-shaken.
+// dashboard (bar + doughnut + line) so the bundle stays tree-shaken.
 import {
     Chart,
     BarController,
     BarElement,
     DoughnutController,
     ArcElement,
+    LineController,
+    LineElement,
+    PointElement,
+    Filler,
     CategoryScale,
     LinearScale,
     Tooltip,
@@ -73,8 +77,11 @@ import {
 } from 'chart.js';
 
 Chart.register(
-    BarController, BarElement, DoughnutController, ArcElement,
-    CategoryScale, LinearScale, Tooltip, Legend,
+    BarController, BarElement,
+    DoughnutController, ArcElement,
+    LineController, LineElement, PointElement, Filler,
+    CategoryScale, LinearScale,
+    Tooltip, Legend,
 );
 
 // Passkeys — exposes `window.Passkeys` for the Livewire/Flux auth flow
@@ -1045,12 +1052,306 @@ function renderInventoryByCategory() {
     });
 }
 
+// Bar chart (`#chart-monthly-movements`) — stock-in vs stock-out totals
+// per month over the last 12 months. Two datasets sharing the same label
+// axis so the bars group by month.
+function renderMonthlyMovements() {
+    const canvas = document.getElementById('chart-monthly-movements');
+    if (!canvas || !window.Chart) return;
+    const data = window.__dashboardCharts?.monthlyMovements;
+    if (!data || !data.labels?.length) return;
+
+    const root = getComputedStyle(document.documentElement);
+    const stockInColor = root.getPropertyValue('--chart-2').trim() || '#10b981';
+    const stockOutColor = root.getPropertyValue('--chart-4').trim() || '#ef4444';
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Stock-In',
+                    data: data.stockIn,
+                    backgroundColor: stockInColor,
+                    borderRadius: 4,
+                    maxBarThickness: 24,
+                },
+                {
+                    label: 'Stock-Out',
+                    data: data.stockOut,
+                    backgroundColor: stockOutColor,
+                    borderRadius: 4,
+                    maxBarThickness: 24,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 8 },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} units`,
+                    },
+                },
+            },
+            scales: {
+                x: { ticks: { autoSkip: true, maxRotation: 0 } },
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+            },
+        },
+    });
+}
+
+// Line chart (`#chart-movement-trend`) — same monthly dataset as the
+// bar chart, rendered as a smooth line so operators can read the
+// trajectory at a glance.
+function renderMovementTrend() {
+    const canvas = document.getElementById('chart-movement-trend');
+    if (!canvas || !window.Chart) return;
+    const data = window.__dashboardCharts?.movementTrend;
+    if (!data || !data.labels?.length) return;
+
+    const root = getComputedStyle(document.documentElement);
+    const stockInColor = root.getPropertyValue('--chart-2').trim() || '#10b981';
+    const stockOutColor = root.getPropertyValue('--chart-4').trim() || '#ef4444';
+
+    new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels: data.labels,
+            datasets: [
+                {
+                    label: 'Stock-In',
+                    data: data.stockIn,
+                    borderColor: stockInColor,
+                    backgroundColor: stockInColor,
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
+                },
+                {
+                    label: 'Stock-Out',
+                    data: data.stockOut,
+                    borderColor: stockOutColor,
+                    backgroundColor: stockOutColor,
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 2,
+                    pointHoverRadius: 4,
+                    borderWidth: 2,
+                },
+            ],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 8 },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} units`,
+                    },
+                },
+            },
+            scales: {
+                x: { ticks: { autoSkip: true, maxRotation: 0 } },
+                y: { beginAtZero: true, ticks: { precision: 0 } },
+            },
+        },
+    });
+}
+
+// Doughnut chart (`#chart-quantity-by-category`) — current on-hand
+// quantity (not value) grouped by PartCategory. Reuses the existing
+// palette cycle so slices read consistently across the page.
+function renderQuantityByCategory() {
+    const canvas = document.getElementById('chart-quantity-by-category');
+    if (!canvas || !window.Chart) return;
+    const data = window.__dashboardCharts?.quantityByCategory;
+    if (!data || !data.labels?.length) return;
+
+    const root = getComputedStyle(document.documentElement);
+    const palette = [
+        root.getPropertyValue('--madlog-primary').trim() || '#4f46e5',
+        root.getPropertyValue('--chart-2').trim() || '#10b981',
+        root.getPropertyValue('--chart-3').trim() || '#f59e0b',
+        root.getPropertyValue('--chart-4').trim() || '#ef4444',
+        root.getPropertyValue('--chart-5').trim() || '#8b5cf6',
+        root.getPropertyValue('--chart-6').trim() || '#06b6d4',
+        root.getPropertyValue('--chart-7').trim() || '#f97316',
+        root.getPropertyValue('--chart-8').trim() || '#84cc16',
+    ];
+    const colors = data.labels.map((_, i) => palette[i % palette.length]);
+    const total = data.values.reduce((acc, n) => acc + Number(n || 0), 0);
+
+    new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: colors,
+                borderColor: '#fff',
+                borderWidth: 2,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 8 },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const value = Number(ctx.parsed) || 0;
+                            const pct = total > 0
+                                ? ((value / total) * 100).toFixed(1)
+                                : '0.0';
+                            return `${ctx.label}: ${value.toFixed(2)} units (${pct}%)`;
+                        },
+                    },
+                },
+            },
+            cutout: '55%',
+        },
+    });
+}
+
+// Horizontal bar chart (`#chart-stock-value-by-category`) — top 10
+// buckets ranked by monetary value, summed across Parts/Batteries/
+// Lubricants so the operator sees where money is tied up.
+function renderStockValueByCategory() {
+    const canvas = document.getElementById('chart-stock-value-by-category');
+    if (!canvas || !window.Chart) return;
+    const data = window.__dashboardCharts?.stockValueByCat;
+    if (!data || !data.labels?.length) return;
+
+    const root = getComputedStyle(document.documentElement);
+    const primary = root.getPropertyValue('--madlog-primary').trim() || '#4f46e5';
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Value',
+                data: data.values,
+                backgroundColor: primary,
+                borderRadius: 4,
+                maxBarThickness: 18,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => `$${Number(ctx.parsed.x).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                    },
+                },
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: (v) => `$${Number(v).toLocaleString()}`,
+                    },
+                },
+            },
+        },
+    });
+}
+
+// Generic doughnut initialiser for the standalone subsystem charts
+// (Batteries, Lubricants, Tools). The payload is keyed by `datasetKey`
+// in `window.__dashboardCharts` and may be null when the subsystem is
+// not in use — we simply skip rendering in that case.
+function renderSubsystemDoughnut(canvasId, datasetKey) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !window.Chart) return;
+    const data = window.__dashboardCharts?.[datasetKey];
+    if (!data || !data.labels?.length) return;
+
+    const root = getComputedStyle(document.documentElement);
+    const palette = [
+        root.getPropertyValue('--madlog-primary').trim() || '#4f46e5',
+        root.getPropertyValue('--chart-2').trim() || '#10b981',
+        root.getPropertyValue('--chart-3').trim() || '#f59e0b',
+        root.getPropertyValue('--chart-4').trim() || '#ef4444',
+        root.getPropertyValue('--chart-5').trim() || '#8b5cf6',
+        root.getPropertyValue('--chart-6').trim() || '#06b6d4',
+        root.getPropertyValue('--chart-7').trim() || '#f97316',
+        root.getPropertyValue('--chart-8').trim() || '#84cc16',
+    ];
+    const colors = data.labels.map((_, i) => palette[i % palette.length]);
+    const total = data.values.reduce((acc, n) => acc + Number(n || 0), 0);
+
+    new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                data: data.values,
+                backgroundColor: colors,
+                borderColor: '#fff',
+                borderWidth: 2,
+            }],
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 8 },
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const value = Number(ctx.parsed) || 0;
+                            const pct = total > 0
+                                ? ((value / total) * 100).toFixed(1)
+                                : '0.0';
+                            return `${ctx.label}: ${value.toFixed(2)} (${pct}%)`;
+                        },
+                    },
+                },
+            },
+            cutout: '55%',
+        },
+    });
+}
+
 // Defer to next paint so the container has its final size before Chart.js
 // measures it (prevents the "tall canvas" flash on first render).
 if (!prefersReducedMotion) {
     requestAnimationFrame(() => {
         renderTopConsumed();
         renderInventoryByCategory();
+        renderMonthlyMovements();
+        renderMovementTrend();
+        renderQuantityByCategory();
+        renderStockValueByCategory();
+        renderSubsystemDoughnut('chart-batteries', 'batteries');
+        renderSubsystemDoughnut('chart-lubricants', 'lubricants');
+        renderSubsystemDoughnut('chart-tools', 'tools');
     });
 }
 
